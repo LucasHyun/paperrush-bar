@@ -26,21 +26,68 @@ jobs:
           test -x build/PaperRushBar.app/Contents/MacOS/PaperRushBar
           test -f build/PaperRushBar.app/Contents/Info.plist
           test -f build/PaperRushBar.app/Contents/Resources/conferences.json
+          test -f build/PaperRushBar.app/Contents/Resources/extras.json
           codesign -dv build/PaperRushBar.app 2>&1 | head -3
 
-      - name: Snapshot parses and covers the deadline shapes
+      - name: Validate datasets
         run: |
           python3 - <<'PY'
           import json, re, sys
-          d = json.load(open('build/PaperRushBar.app/Contents/Resources/conferences.json'))
-          confs = d['conferences']
-          assert confs, 'snapshot is empty'
-          iso = re.compile(r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2}))?$')
-          bad = [(c['id'], dl['date']) for c in confs for dl in c['deadlines'] if not iso.match(dl['date'])]
-          if bad:
-              print('unparseable dates:', bad[:10]); sys.exit(1)
-          n = sum(len(c['deadlines']) for c in confs)
-          print(f'{len(confs)} conferences, {n} deadlines OK')
+          root = 'build/PaperRushBar.app/Contents/Resources'
+          up = json.load(open(f'{root}/conferences.json'))['conferences']
+          ex = json.load(open(f'{root}/extras.json'))['conferences']
+          assert up, 'upstream snapshot is empty'
+          assert ex, 'extras is empty'
+
+          errors = []
+          date_re = re.compile(r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2}))?$')
+          types = {'abstract','paper','supplementary','rebuttal','notification',
+                   'camera','conference','workshop','tutorial','event'}
+          cats = {'cv','ml','nlp','speech','robotics','other'}
+
+          for label, confs in (('upstream', up), ('extras', ex)):
+              for c in confs:
+                  if c['category'] not in cats:
+                      errors.append(f"{label} {c['id']}: category {c['category']}")
+                  for d in c['deadlines']:
+                      if not date_re.match(d['date']):
+                          errors.append(f"{label} {c['id']}: date {d['date']}")
+                      if d.get('endDate') and not date_re.match(d['endDate']):
+                          errors.append(f"{label} {c['id']}: endDate {d['endDate']}")
+                      if d['type'] not in types:
+                          errors.append(f"{label} {c['id']}: type {d['type']}")
+
+          # An overlay entry upstream already covers is dead weight.
+          clash = {c['id'] for c in up} & {c['id'] for c in ex}
+          if clash:
+              errors.append(f'extras shadowed by upstream, remove them: {sorted(clash)}')
+
+          # Colors are how rows are told apart at a glance. Upstream reuses a color across
+          # years of the same conference, which is fine; ours just must not borrow another
+          # conference's color.
+          by_color = {}
+          for c in up:
+              by_color.setdefault(c['brandColor'].upper(), set()).add(c['name'])
+          for c in ex:
+              key = c['brandColor'].upper()
+              others = by_color.get(key, set()) - {c['name']}
+              if others:
+                  errors.append(f"extras {c['id']}: brandColor {key} already used by {sorted(others)}")
+              by_color.setdefault(key, set()).add(c['name'])
+
+          # Ours are hand-written, so they carry their receipts.
+          for c in ex:
+              for d in c['deadlines']:
+                  if not d.get('sourceUrl'):
+                      errors.append(f"extras {c['id']}: '{d['label']}' has no sourceUrl")
+              if any(d.get('estimated') for d in c['deadlines']) and not c.get('isEstimated'):
+                  errors.append(f"extras {c['id']}: has estimated deadlines but isEstimated is false")
+
+          if errors:
+              print('\n'.join(f'  - {e}' for e in errors))
+              sys.exit(1)
+          print(f'{len(up)} upstream + {len(ex)} extra conferences, '
+                f'{sum(len(c["deadlines"]) for c in up + ex)} deadlines OK')
           PY
 
       - name: Upload app

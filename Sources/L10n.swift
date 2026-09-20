@@ -93,6 +93,9 @@ enum L10n {
         "action.openSource": ["en": "Open data source (paperrush)",
                               "ko": "데이터 출처 열기 (paperrush)",
                               "zh": "打开数据来源 (paperrush)"],
+        "action.openExtras": ["en": "Added conferences (%@) - open my extras.json",
+                              "ko": "추가된 학회 (%@개) - 내 extras.json 열기",
+                              "zh": "已补充的会议 (%@) - 打开我的 extras.json"],
 
         "settings.launchAtLogin": ["en": "Launch at login",
                                    "ko": "로그인 시 자동 실행",
@@ -129,6 +132,7 @@ enum L10n {
                        "zh": "没有符合条件的截止日期"],
 
         "badge.estimated": ["en": "Est.", "ko": "예상", "zh": "预估"],
+        "badge.extra": ["en": "Added", "ko": "추가", "zh": "补充"],
         "dday.today": ["en": "D-DAY", "ko": "D-DAY", "zh": "D-DAY"],
 
         "footer.never": ["en": "Not synced yet", "ko": "아직 동기화하지 않았습니다", "zh": "尚未同步"],

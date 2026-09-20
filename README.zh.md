@@ -32,6 +32,7 @@ AI/ML 会议投稿截止还有几天，并在后台自动保持数据最新。
 | **D-7 / D-3 / D-1 提醒** | 当天上午 9:00 发送系统通知 —— 关闭 / 仅收藏 / 全部 |
 | **收藏** | 加 ★ 的会议置顶，也可让菜单栏与通知只关注收藏项 |
 | **点击打开官网** | 点击任意一行即可打开该会议官方网站 |
+| **补充会议** | 内置 12 个上游尚未收录的会议并自动合并，也可在可编辑的文件中添加你自己的会议 |
 | **登录时自动启动** | 通过 `SMAppService` 一键开关 |
 | **三种语言** | English · 한국어 · 中文，齿轮菜单中即时切换（默认跟随系统语言） |
 
@@ -82,9 +83,25 @@ Info.plist                   LSUIElement = true（不显示 Dock 图标）
 
 ## 会议数据
 
-本应用只是展示端。若发现截止日期有误或缺少会议，请到上游
-[awsaf49/paperrush](https://github.com/awsaf49/paperrush) 修正，所有使用该数据集的人都会受益。
-想改用自己的 fork，修改 `Store.sourceURL` 即可。
+截止数据来自上游，并在其之上合并一层补充数据，这样上游缺少的会议不必等到 PR 合并才能看到：
+
+```
+内置 extras.json  <  你的 extras.json  <  上游 paperrush
+```
+
+`id` 相同时永远以上游为准，因此一旦 paperrush 收录了同一个会议，补充条目会自动退场 —— 不留重复，无需清理。
+
+**内置**（`Resources/extras.json`，列表中标记 `补充`）：WWW、WSDM、ICDM、CIKM、ECML PKDD、SIGIR、
+RecSys、COLM、UAI、ACM MM、AAMAS、ECAI。若下一届 CFP 尚未公布，日期由上一轮推断得出并标记 `预估` ——
+绝不会当作已确认的日期展示。
+
+**你的会议**：齿轮菜单 → *已补充的会议*，会创建并在访达中打开
+`~/Library/Application Support/PaperRushBar/extras.json`。schema 完全相同，每次刷新都会重新读取，
+保存后点一下 ↻ 即可生效。
+
+若截止日期有误，或缺少的会议对所有人都有价值，请到上游
+[awsaf49/paperrush](https://github.com/awsaf49/paperrush) 修正。上述 12 个会议的贡献草稿已放在
+[`upstream/`](upstream/)。想改用自己的 fork，修改 `Store.sourceURL` 即可。
 
 ## 许可证
 

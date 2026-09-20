@@ -40,10 +40,25 @@ Keep strings short: the panel is 400 pt wide and the menu bar title has to stay 
 
 ## Conference data
 
-The app does not contain deadlines — it downloads them from
-[awsaf49/paperrush](https://github.com/awsaf49/paperrush). Wrong dates or missing conferences should
-be reported and fixed there; this repository only needs a change if the *format* of `js/data.js`
-changes, or if a deadline type is being displayed badly.
+Deadlines are downloaded from [awsaf49/paperrush](https://github.com/awsaf49/paperrush) and merged
+with an overlay: `Resources/extras.json` (bundled) < the user's own `extras.json` < upstream.
+Upstream wins on a shared `id`, so an overlay entry disappears by itself once paperrush ships it.
+
+**Adding a conference to `Resources/extras.json`** is welcome when upstream doesn't have it yet:
+
+- Every deadline needs a `sourceUrl` pointing at the page you read it from. No source, no entry.
+- If the next edition's CFP isn't published, infer from the previous cycle but set `"estimated": true`
+  on the deadline and `"isEstimated": true` on the conference, and say so in `notes`. Never present an
+  inferred date as confirmed.
+- AoE deadlines use a `-12:00` offset. A date with no announced time is `YYYY-MM-DD` plus
+  `"timeUnknown": true`.
+- Pick a `brandColor` no other conference uses, and run the checks in `.github/workflows/build.yml`.
+- Please also add it to `upstream/` so it can go to paperrush, where it benefits everyone and the
+  scraper keeps it current.
+
+Wrong dates for a conference upstream already covers belong in paperrush's tracker, not here. This
+repository only needs a change if the *format* of `js/data.js` changes, or if a deadline type is being
+displayed badly.
 
 `Resources/conferences.json` is only a first-launch snapshot. Refresh it with:
 

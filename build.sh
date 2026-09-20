@@ -39,9 +39,11 @@ swiftc \
 
 cp Info.plist "${APP}/Contents/Info.plist"
 printf 'APPL????' > "${APP}/Contents/PkgInfo"
-if [ -f "Resources/conferences.json" ]; then
-	cp Resources/conferences.json "${APP}/Contents/Resources/conferences.json"
-fi
+for RESOURCE in conferences.json extras.json; do
+	if [ -f "Resources/${RESOURCE}" ]; then
+		cp "Resources/${RESOURCE}" "${APP}/Contents/Resources/${RESOURCE}"
+	fi
+done
 
 # Ad-hoc signature: notifications and the login item need the bundle to be signed.
 if ! codesign --force --deep --sign - "${APP}" >/dev/null 2>&1; then

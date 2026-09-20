@@ -78,6 +78,9 @@ struct Conference: Identifiable, Hashable {
     let links: [String: String]
     let isEstimated: Bool
 
+    /// True when this entry comes from an overlay file rather than upstream.
+    var isExtra: Bool = false
+
     /// Best URL to open for this conference.
     var url: URL? {
         let candidates = [website,

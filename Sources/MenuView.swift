@@ -116,6 +116,7 @@ struct MenuView: View {
             Toggle(L10n.t("settings.menubarFavorites"), isOn: $store.menuBarFavoritesOnly)
             Toggle(L10n.t("settings.menubarSubmission"), isOn: $store.menuBarSubmissionOnly)
             Divider()
+            Button(L10n.t("action.openExtras", String(store.extrasCount))) { store.openUserExtras() }
             Button(L10n.t("action.openSource")) { store.openSource() }
             Button(L10n.t("action.quit")) { NSApplication.shared.terminate(nil) }
         } label: {
@@ -261,6 +262,15 @@ struct DeadlineRow: View {
     @State private var hovering = false
     let item: DeadlineItem
 
+    private func badge(_ text: String) -> some View {
+        Text(verbatim: text)
+            .font(.system(size: 9))
+            .padding(.horizontal, 4)
+            .padding(.vertical, 1)
+            .background(Color.secondary.opacity(0.15), in: Capsule())
+            .foregroundStyle(.secondary)
+    }
+
     var body: some View {
         HStack(alignment: .center, spacing: 8) {
             Button {
@@ -281,12 +291,10 @@ struct DeadlineRow: View {
                     Text(verbatim: item.conference.displayName)
                         .font(.system(size: 12, weight: .semibold))
                     if item.deadline.estimated || item.conference.isEstimated {
-                        Text(verbatim: L10n.t("badge.estimated"))
-                            .font(.system(size: 9))
-                            .padding(.horizontal, 4)
-                            .padding(.vertical, 1)
-                            .background(Color.secondary.opacity(0.15), in: Capsule())
-                            .foregroundStyle(.secondary)
+                        badge(L10n.t("badge.estimated"))
+                    }
+                    if item.conference.isExtra {
+                        badge(L10n.t("badge.extra"))
                     }
                 }
                 Text(verbatim: "\(item.labelText) · \(item.dateText)")

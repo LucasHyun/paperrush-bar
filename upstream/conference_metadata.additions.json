@@ -1,0 +1,62 @@
+{
+  "www": {
+    "fullName": "The Web Conference",
+    "category": "ml",
+    "brandColor": "#0284C7"
+  },
+  "wsdm": {
+    "fullName": "ACM International Conference on Web Search and Data Mining",
+    "category": "ml",
+    "brandColor": "#BE185D"
+  },
+  "icdm": {
+    "fullName": "IEEE International Conference on Data Mining",
+    "category": "ml",
+    "brandColor": "#15803D"
+  },
+  "cikm": {
+    "fullName": "ACM Conference on Information and Knowledge Management",
+    "category": "ml",
+    "brandColor": "#3730A3"
+  },
+  "ecml-pkdd": {
+    "fullName": "European Conference on Machine Learning and Principles and Practice of Knowledge Discovery in Databases",
+    "category": "ml",
+    "brandColor": "#65A30D"
+  },
+  "sigir": {
+    "fullName": "ACM SIGIR Conference on Research and Development in Information Retrieval",
+    "category": "ml",
+    "brandColor": "#A16207"
+  },
+  "recsys": {
+    "fullName": "ACM Conference on Recommender Systems",
+    "category": "ml",
+    "brandColor": "#9333EA"
+  },
+  "colm": {
+    "fullName": "Conference on Language Modeling",
+    "category": "nlp",
+    "brandColor": "#7C3AED"
+  },
+  "uai": {
+    "fullName": "Conference on Uncertainty in Artificial Intelligence",
+    "category": "ml",
+    "brandColor": "#0EA5E9"
+  },
+  "acm-mm": {
+    "fullName": "ACM International Conference on Multimedia",
+    "category": "cv",
+    "brandColor": "#D946A0"
+  },
+  "aamas": {
+    "fullName": "International Conference on Autonomous Agents and Multiagent Systems",
+    "category": "ml",
+    "brandColor": "#047857"
+  },
+  "ecai": {
+    "fullName": "European Conference on Artificial Intelligence",
+    "category": "ml",
+    "brandColor": "#1E40AF"
+  }
+}

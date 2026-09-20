@@ -12,6 +12,7 @@ final class Store: ObservableObject {
     static let projectURL = URL(string: "https://github.com/awsaf49/paperrush")!
 
     @Published private(set) var conferences: [Conference] = []
+    @Published private(set) var extrasCount = 0
     @Published private(set) var items: [DeadlineItem] = []
     @Published private(set) var feedUpdated: Date?
     @Published private(set) var lastFetch: Date?
@@ -53,6 +54,13 @@ final class Store: ObservableObject {
     private let defaults = UserDefaults.standard
     private var refreshTimer: Timer?
     private var tickTimer: Timer?
+
+    /// Conferences as published by paperrush.
+    private var upstream: [Conference] = []
+    /// Conferences shipped with the app that upstream does not cover yet.
+    private var bundledExtras: [Conference] = []
+    /// Conferences the user added in their own extras.json.
+    private var userExtras: [Conference] = []
 
     private enum Keys {
         static let favorites = "favorites"
@@ -99,18 +107,42 @@ final class Store: ObservableObject {
 
     // MARK: - Data
 
-    private var cacheURL: URL {
+    private var supportDirectory: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("PaperRushBar", isDirectory: true)
         try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
-        return base.appendingPathComponent("conferences.json")
+        return base
     }
 
+    private var cacheURL: URL { supportDirectory.appendingPathComponent("conferences.json") }
+
+    /// The user's own overlay, edited by hand.
+    var userExtrasURL: URL { supportDirectory.appendingPathComponent("extras.json") }
+
     private func loadFromDisk() {
+        loadExtras()
         if let data = try? Data(contentsOf: cacheURL), apply(data) { return }
         if let bundled = Bundle.main.url(forResource: "conferences", withExtension: "json"),
            let data = try? Data(contentsOf: bundled) {
             _ = apply(data)
+        } else {
+            merge()   // extras alone are better than an empty list
+        }
+    }
+
+    private func loadExtras() {
+        bundledExtras = Store.decodeConferences(at: Bundle.main.url(forResource: "extras", withExtension: "json"))
+        userExtras = Store.decodeConferences(at: userExtrasURL)
+    }
+
+    private static func decodeConferences(at url: URL?) -> [Conference] {
+        guard let url,
+              let data = try? Data(contentsOf: url),
+              let feed = try? JSONDecoder().decode(ConferenceFeed.self, from: data) else { return [] }
+        return feed.conferences.map { conf in
+            var copy = conf
+            copy.isExtra = true
+            return copy
         }
     }
 
@@ -118,10 +150,22 @@ final class Store: ObservableObject {
     private func apply(_ data: Data) -> Bool {
         guard let feed = try? JSONDecoder().decode(ConferenceFeed.self, from: data),
               !feed.conferences.isEmpty else { return false }
-        conferences = feed.conferences
+        upstream = feed.conferences
         feedUpdated = feed.lastUpdated.flatMap { DateHelper.parse($0) }
-        rebuild()
+        merge()
         return true
+    }
+
+    /// Overlay order: bundled extras < user extras < upstream. Upstream always wins,
+    /// so an entry disappears from the overlay by itself once paperrush ships it.
+    private func merge() {
+        var byId: [String: Conference] = [:]
+        for conf in bundledExtras { byId[conf.id] = conf }
+        for conf in userExtras { byId[conf.id] = conf }
+        for conf in upstream { byId[conf.id] = conf }
+        conferences = Array(byId.values)
+        extrasCount = conferences.reduce(into: 0) { $0 += $1.isExtra ? 1 : 0 }
+        rebuild()
     }
 
     private func rebuild() {
@@ -136,6 +180,10 @@ final class Store: ObservableObject {
     }
 
     func refresh(force: Bool) async {
+        // Cheap, and it picks up hand edits to the user's extras.json.
+        loadExtras()
+        merge()
+
         if !force, let last = lastFetch, Date().timeIntervalSince(last) < 6 * 3600 { return }
         if isRefreshing { return }
         isRefreshing = true
@@ -260,6 +308,48 @@ final class Store: ObservableObject {
     }
 
     func openSource() { NSWorkspace.shared.open(Store.projectURL) }
+
+    /// Creates the user's overlay file if needed, then reveals it in Finder.
+    func openUserExtras() {
+        let url = userExtrasURL
+        if !FileManager.default.fileExists(atPath: url.path) {
+            try? Store.userExtrasTemplate.data(using: .utf8)?.write(to: url, options: .atomic)
+        }
+        NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+
+    private static let userExtrasTemplate = """
+    {
+      "note": "Your own conferences, merged on top of the paperrush dataset. Same schema as the app's bundled extras.json. An upstream entry with the same id always wins, and the app reloads this file on every refresh.",
+      "conferences": [],
+      "_example_move_this_into_conferences": [
+        {
+          "id": "example-2027",
+          "name": "EXAMPLE",
+          "fullName": "An Example Conference",
+          "year": 2027,
+          "category": "ml",
+          "website": "https://example.org/",
+          "brandColor": "#FF6B6B",
+          "location": { "city": "Seoul", "country": "South Korea", "flag": "🇰🇷", "venue": null },
+          "deadlines": [
+            {
+              "type": "paper",
+              "label": "Paper Submission",
+              "date": "2027-05-20T23:59:00-12:00",
+              "endDate": null,
+              "status": "upcoming",
+              "estimated": false
+            }
+          ],
+          "links": { "official": "https://example.org/" },
+          "isEstimated": false,
+          "datesTBD": false
+        }
+      ]
+    }
+
+    """
 
     // MARK: - Notifications
 

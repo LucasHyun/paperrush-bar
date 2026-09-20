@@ -32,6 +32,7 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 | **D-7 / D-3 / D-1 alerts** | Native notifications at 09:00 — off / favorites / all |
 | **Favorites** | Star a conference to pin it to the top, and optionally limit the menu bar and alerts to starred ones |
 | **Click to open** | Any row opens the conference's official site |
+| **Extra conferences** | 12 venues upstream doesn't cover yet, merged in locally — plus your own, in a file you can edit |
 | **Launch at login** | One toggle, via `SMAppService` |
 | **3 languages** | English · 한국어 · 中文, switchable live from the gear menu (follows system language by default) |
 
@@ -85,9 +86,28 @@ pull requests welcome.
 
 ## Conference data
 
-This app is a viewer. If a deadline is wrong or a conference is missing, the fix belongs upstream in
-[awsaf49/paperrush](https://github.com/awsaf49/paperrush); everyone using that dataset benefits.
-To point the app at your own fork, change `Store.sourceURL`.
+Deadlines come from upstream. On top of that, the app merges an overlay so gaps in the dataset don't
+mean waiting for a PR to land:
+
+```
+bundled extras.json  <  your extras.json  <  upstream paperrush
+```
+
+Upstream always wins on a shared `id`, so an overlay entry retires itself the moment paperrush ships
+the same conference — nothing to clean up, no stale duplicate.
+
+**Bundled** (`Resources/extras.json`, marked `Added` in the list): WWW, WSDM, ICDM, CIKM, ECML PKDD,
+SIGIR, RecSys, COLM, UAI, ACM MM, AAMAS, ECAI. Dates that the next edition's CFP hasn't announced yet
+are inferred from the previous cycle and carry an `Est.` badge — they are never presented as confirmed.
+
+**Yours**: gear menu → *Added conferences* creates and reveals
+`~/Library/Application Support/PaperRushBar/extras.json`. Same schema; it's re-read on every refresh,
+so a save and a click on ↻ is the whole loop.
+
+If a deadline is wrong or a conference is missing for everyone, the fix belongs upstream in
+[awsaf49/paperrush](https://github.com/awsaf49/paperrush). [`upstream/`](upstream/) holds a ready
+draft of that contribution for the twelve above. To point the app at your own fork instead, change
+`Store.sourceURL`.
 
 ## License
 

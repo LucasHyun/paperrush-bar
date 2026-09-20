@@ -32,6 +32,7 @@ Electron도 Python도 없는 약 1MB짜리 네이티브 메뉴바 앱입니다. 
 | **D-7 / D-3 / D-1 알림** | 해당 날짜 오전 9시 네이티브 알림 — 끄기 / 즐겨찾기만 / 전체 |
 | **즐겨찾기** | ★ 표시한 학회는 목록 상단에 고정, 메뉴바·알림도 즐겨찾기만으로 제한 가능 |
 | **클릭 = 사이트 열기** | 행을 누르면 학회 공식 사이트가 열립니다 |
+| **학회 추가** | 원본에 아직 없는 12개 학회를 내장해서 병합, 직접 편집하는 파일로 본인 학회도 추가 가능 |
 | **로그인 시 자동 실행** | `SMAppService` 토글 하나 |
 | **3개 국어** | English · 한국어 · 中文, 톱니바퀴 메뉴에서 즉시 전환 (기본값은 시스템 언어) |
 
@@ -82,8 +83,27 @@ Info.plist                   LSUIElement = true (Dock 아이콘 없음)
 
 ## 학회 데이터
 
-이 앱은 뷰어입니다. 마감이 틀렸거나 학회가 빠졌다면 원본인
-[awsaf49/paperrush](https://github.com/awsaf49/paperrush)에 고치는 편이 모두에게 이득입니다.
+마감 데이터는 원본에서 오고, 그 위에 오버레이를 덮습니다. 원본에 빠진 학회를 PR이 머지될 때까지
+기다리지 않아도 됩니다:
+
+```
+내장 extras.json  <  내 extras.json  <  원본 paperrush
+```
+
+`id`가 같으면 항상 원본이 이깁니다. 즉 paperrush에 같은 학회가 추가되는 순간 오버레이 항목은 스스로
+물러납니다 — 중복이 남거나 따로 정리할 일이 없습니다.
+
+**내장** (`Resources/extras.json`, 목록에 `추가` 배지): WWW, WSDM, ICDM, CIKM, ECML PKDD, SIGIR,
+RecSys, COLM, UAI, ACM MM, AAMAS, ECAI. 다음 회차 CFP가 아직 안 나온 학회는 직전 사이클에서 추정한
+날짜이며 `예상` 배지가 붙습니다 — 확정된 것처럼 표시하지 않습니다.
+
+**내 학회**: 톱니바퀴 메뉴 → *추가된 학회* 를 누르면
+`~/Library/Application Support/PaperRushBar/extras.json` 을 만들어 Finder로 열어줍니다.
+스키마는 동일하고, 새로고침할 때마다 다시 읽으므로 저장 후 ↻ 한 번이면 끝입니다.
+
+마감이 틀렸거나 모두에게 필요한 학회가 빠졌다면 원본인
+[awsaf49/paperrush](https://github.com/awsaf49/paperrush)에 고치는 편이 이득입니다.
+위 12개에 대한 기여 초안은 [`upstream/`](upstream/)에 준비해 뒀습니다.
 본인 포크를 쓰고 싶다면 `Store.sourceURL`만 바꾸세요.
 
 ## 라이선스
