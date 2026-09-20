@@ -1,0 +1,51 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: swiftc build (macOS)
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          sw_vers
+          swiftc --version
+
+      - name: Build
+        run: ./build.sh
+
+      - name: Verify bundle
+        run: |
+          test -x build/PaperRushBar.app/Contents/MacOS/PaperRushBar
+          test -f build/PaperRushBar.app/Contents/Info.plist
+          test -f build/PaperRushBar.app/Contents/Resources/conferences.json
+          codesign -dv build/PaperRushBar.app 2>&1 | head -3
+
+      - name: Snapshot parses and covers the deadline shapes
+        run: |
+          python3 - <<'PY'
+          import json, re, sys
+          d = json.load(open('build/PaperRushBar.app/Contents/Resources/conferences.json'))
+          confs = d['conferences']
+          assert confs, 'snapshot is empty'
+          iso = re.compile(r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2}))?$')
+          bad = [(c['id'], dl['date']) for c in confs for dl in c['deadlines'] if not iso.match(dl['date'])]
+          if bad:
+              print('unparseable dates:', bad[:10]); sys.exit(1)
+          n = sum(len(c['deadlines']) for c in confs)
+          print(f'{len(confs)} conferences, {n} deadlines OK')
+          PY
+
+      - name: Upload app
+        uses: actions/upload-artifact@v4
+        with:
+          name: PaperRushBar-app
+          path: build/PaperRushBar.app
+          if-no-files-found: error

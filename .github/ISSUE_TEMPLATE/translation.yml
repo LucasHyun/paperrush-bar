@@ -1,0 +1,32 @@
+name: Translation
+description: Add a language, or fix wording in an existing one
+labels: [i18n]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        All strings live in a single table in `Sources/L10n.swift` — see
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#adding-or-fixing-a-translation).
+
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: "日本語 (ja) / Deutsch (de) / …"
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: What needs to change
+      description: For a fix, please include the key and the current vs. suggested wording.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Would you like to open the pull request yourself?
+      options:
+        - label: Yes, I can submit the change

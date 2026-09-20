@@ -1,0 +1,9 @@
+build/
+*.app
+*.zip
+.DS_Store
+*.swp
+.vscode/
+.idea/
+xcuserdata/
+*.xcuserstate

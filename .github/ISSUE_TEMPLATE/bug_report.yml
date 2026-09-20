@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in the app misbehaves
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Wrong dates for a specific conference usually belong upstream in
+        [awsaf49/paperrush](https://github.com/awsaf49/paperrush) — this app only displays that data.
+        Report it here if the app shows something different from what the dataset says.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you see, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the menu bar icon
+        2. Switch language to 中文
+        3. …
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "14.5 (Apple silicon)"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App version or commit
+      placeholder: "v1.0.0 / a1b2c3d"
+
+  - type: dropdown
+    id: language
+    attributes:
+      label: App language
+      options: [System, English, 한국어, 中文]
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Console output (optional)
+      description: |
+        Run the binary in a terminal to capture output:
+        `/Applications/PaperRushBar.app/Contents/MacOS/PaperRushBar`
+      render: shell
