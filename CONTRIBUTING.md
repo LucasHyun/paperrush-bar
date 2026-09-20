@@ -42,7 +42,14 @@ Keep strings short: the panel is 400 pt wide and the menu bar title has to stay 
 
 Deadlines are downloaded from [awsaf49/paperrush](https://github.com/awsaf49/paperrush) and merged
 with an overlay: `Resources/extras.json` (bundled) < the user's own `extras.json` < upstream.
-Upstream wins on a shared `id`, so an overlay entry disappears by itself once paperrush ships it.
+
+An overlay entry does one of two things:
+
+- **Gap filler** (no `mode`): used only while upstream has no conference with that `id`, and dropped
+  the moment it does.
+- **Patch** (`"mode": "patch"`, `id` must exist upstream): adds the deadlines upstream is missing to
+  that entry, e.g. KDD's second submission cycle. Each patched deadline is dropped once upstream
+  lists the same type on the same day — or, for one marked estimated, within 45 days of it.
 
 **Adding a conference to `Resources/extras.json`** is welcome when upstream doesn't have it yet:
 

@@ -1,6 +1,6 @@
 {
  "lastUpdated": "2026-09-20T21:19:22Z",
- "note": "Conferences not yet covered by the upstream PaperRush dataset. Merged on top of it at runtime; an upstream entry with the same id always wins.",
+ "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
    "id": "aamas-2027",
@@ -475,6 +475,84 @@
    "notes": [
     "Host city and conference dates are confirmed on the ICDM series site; the 2027 CFP is not out yet.",
     "Deadlines are inferred from the ICDM 2026 cycle (paper 6 Jun 2026, no separate abstract deadline)."
+   ],
+   "isEstimated": true,
+   "datesTBD": false
+  },
+  {
+   "id": "kdd-2027",
+   "name": "KDD",
+   "fullName": "ACM SIGKDD Conference on Knowledge Discovery and Data Mining",
+   "year": 2027,
+   "category": "ml",
+   "mode": "patch",
+   "website": "https://kdd2027.kdd.org",
+   "brandColor": "#0F766E",
+   "location": {
+    "city": "San Jose",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "venue": "San Jose McEnery Convention Center"
+   },
+   "deadlines": [
+    {
+     "type": "abstract",
+     "label": "Abstract Submission (Cycle 2)",
+     "date": "2027-02-01T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://kdd2026.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission (Cycle 2)",
+     "date": "2027-02-08T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://kdd2026.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "rebuttal",
+     "label": "Rebuttal Period (Cycle 2)",
+     "date": "2027-04-04",
+     "endDate": "2027-04-17",
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://kdd2026.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Author Notification (Cycle 2)",
+     "date": "2027-05-16",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://kdd2026.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-Ready Deadline (Cycle 2)",
+     "date": "2027-06-01",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://kdd2026.kdd.org/research-track-call-for-papers/"
+    }
+   ],
+   "links": {
+    "official": "https://kdd2027.kdd.org",
+    "authorGuide": "https://kdd2027.kdd.org/research-track-call-for-papers/",
+    "previousEdition": "https://kdd2026.kdd.org/research-track-call-for-papers/"
+   },
+   "info": {},
+   "notes": [
+    "KDD runs two submission cycles a year; upstream tracks only Cycle 1, so this entry adds Cycle 2 on top of it.",
+    "The KDD 2027 CFP says only \"February 2027\" for Cycle 2, so these dates mirror the KDD 2026 Cycle 2 schedule (abstract Feb 1, paper Feb 8, rebuttal Apr 4-17, notification May 16, camera-ready Jun 1, all AoE)."
    ],
    "isEstimated": true,
    "datesTBD": false

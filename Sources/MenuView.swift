@@ -293,7 +293,7 @@ struct DeadlineRow: View {
                     if item.deadline.estimated || item.conference.isEstimated {
                         badge(L10n.t("badge.estimated"))
                     }
-                    if item.conference.isExtra {
+                    if item.deadline.isExtra {
                         badge(L10n.t("badge.extra"))
                     }
                 }

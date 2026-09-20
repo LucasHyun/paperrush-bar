@@ -95,6 +95,10 @@ Info.plist                   LSUIElement = true（不显示 Dock 图标）
 RecSys、COLM、UAI、ACM MM、AAMAS、ECAI。若下一届 CFP 尚未公布，日期由上一轮推断得出并标记 `预估` ——
 绝不会当作已确认的日期展示。
 
+**补丁**：带 `"mode": "patch"` 且 `id` 与上游相同的条目不会替换该会议，而是**只补上上游缺少的截止**。
+KDD 每年有两轮投稿，而上游只收录了 Cycle 1，因此 `kdd-2027` 被补上了 Cycle 2。一旦上游发布了同一个
+节点，补丁条目会自动退出（按类型 + 日期匹配；若是推断日期，相差 45 天以内即视为同一节点）。
+
 **你的会议**：齿轮菜单 → *已补充的会议*，会创建并在访达中打开
 `~/Library/Application Support/PaperRushBar/extras.json`。schema 完全相同，每次刷新都会重新读取，
 保存后点一下 ↻ 即可生效。

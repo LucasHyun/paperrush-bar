@@ -1,0 +1,56 @@
+{
+ "_target": "js/data.js -> the existing conference with id \"kdd-2027\"",
+ "_action": "append these objects to its \"deadlines\" array (it currently holds Cycle 1 only)",
+ "deadlines": [
+  {
+   "type": "abstract",
+   "label": "Abstract Submission (Cycle 2)",
+   "date": "2027-02-01T23:59:00-12:00",
+   "endDate": null,
+   "status": "upcoming",
+   "estimated": true
+  },
+  {
+   "type": "paper",
+   "label": "Paper Submission (Cycle 2)",
+   "date": "2027-02-08T23:59:00-12:00",
+   "endDate": null,
+   "status": "upcoming",
+   "estimated": true
+  },
+  {
+   "type": "rebuttal",
+   "label": "Rebuttal Period (Cycle 2)",
+   "date": "2027-04-04",
+   "endDate": "2027-04-17",
+   "status": "upcoming",
+   "estimated": true,
+   "timeUnknown": true
+  },
+  {
+   "type": "notification",
+   "label": "Author Notification (Cycle 2)",
+   "date": "2027-05-16",
+   "endDate": null,
+   "status": "upcoming",
+   "estimated": true,
+   "timeUnknown": true
+  },
+  {
+   "type": "camera",
+   "label": "Camera-Ready Deadline (Cycle 2)",
+   "date": "2027-06-01",
+   "endDate": null,
+   "status": "upcoming",
+   "estimated": true,
+   "timeUnknown": true
+  }
+ ],
+ "_sources": [
+  "https://kdd2026.kdd.org/research-track-call-for-papers/"
+ ],
+ "_notes": [
+  "KDD runs two submission cycles a year; upstream tracks only Cycle 1, so this entry adds Cycle 2 on top of it.",
+  "The KDD 2027 CFP says only \"February 2027\" for Cycle 2, so these dates mirror the KDD 2026 Cycle 2 schedule (abstract Feb 1, paper Feb 8, rebuttal Apr 4-17, notification May 16, camera-ready Jun 1, all AoE)."
+ ]
+}

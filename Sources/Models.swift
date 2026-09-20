@@ -30,6 +30,9 @@ struct Deadline: Hashable {
     let status: String
     let estimated: Bool
     let timeUnknown: Bool
+
+    /// True when this deadline came from an overlay file rather than upstream.
+    var isExtra: Bool = false
 }
 
 extension Deadline: Decodable {
@@ -74,12 +77,43 @@ struct Conference: Identifiable, Hashable {
     let city: String
     let country: String
     let flag: String
-    let deadlines: [Deadline]
+    var deadlines: [Deadline]
     let links: [String: String]
     let isEstimated: Bool
 
+    /// `"patch"` in an overlay file means "add these deadlines to the upstream entry"
+    /// instead of the default "use this only until upstream has the conference".
+    let overlayMode: String?
+
     /// True when this entry comes from an overlay file rather than upstream.
     var isExtra: Bool = false
+
+    var isPatch: Bool { overlayMode == "patch" }
+
+    /// Upstream entry + the overlay deadlines it is missing.
+    func patched(with overlay: Conference) -> Conference {
+        let additions = overlay.deadlines.filter { !covers($0) }
+        guard !additions.isEmpty else { return self }
+        var copy = self
+        copy.deadlines = (deadlines + additions).sorted { $0.date < $1.date }
+        return copy
+    }
+
+    /// An overlay deadline is redundant once upstream lists the same thing — exactly
+    /// (same type, same day) or, for a date we only estimated, close enough that the
+    /// official one is clearly the same milestone.
+    private func covers(_ candidate: Deadline) -> Bool {
+        for existing in deadlines where existing.type == candidate.type {
+            if existing.date.prefix(10) == candidate.date.prefix(10) { return true }
+            if candidate.estimated, !existing.estimated,
+               let a = DateHelper.parse(existing.date),
+               let b = DateHelper.parse(candidate.date),
+               abs(a.timeIntervalSince(b)) < 45 * 86400 {
+                return true
+            }
+        }
+        return false
+    }
 
     /// Best URL to open for this conference.
     var url: URL? {
@@ -108,6 +142,7 @@ extension Conference: Decodable {
     enum CodingKeys: String, CodingKey {
         case id, name, fullName, year, category, website, brandColor
         case location, deadlines, links, isEstimated
+        case overlayMode = "mode"
     }
 
     init(from decoder: Decoder) throws {
@@ -126,6 +161,7 @@ extension Conference: Decodable {
         deadlines = (try? c.decode([Deadline].self, forKey: .deadlines)) ?? []
         links = (try? c.decode([String: String].self, forKey: .links)) ?? [:]
         isEstimated = (try? c.decode(Bool.self, forKey: .isEstimated)) ?? false
+        overlayMode = try? c.decode(String.self, forKey: .overlayMode)
     }
 }
 

@@ -100,6 +100,12 @@ the same conference — nothing to clean up, no stale duplicate.
 SIGIR, RecSys, COLM, UAI, ACM MM, AAMAS, ECAI. Dates that the next edition's CFP hasn't announced yet
 are inferred from the previous cycle and carry an `Est.` badge — they are never presented as confirmed.
 
+**Patches**: an overlay entry with `"mode": "patch"` and an upstream `id` doesn't replace that
+conference — it adds the deadlines upstream is missing. KDD runs two submission cycles a year and
+upstream tracks only the first, so `kdd-2027` is patched with Cycle 2. A patched deadline drops out
+automatically once upstream publishes the same milestone, matched by type and date (within 45 days,
+for one we only estimated).
+
 **Yours**: gear menu → *Added conferences* creates and reveals
 `~/Library/Application Support/PaperRushBar/extras.json`. Same schema; it's re-read on every refresh,
 so a save and a click on ↻ is the whole loop.

@@ -12,6 +12,7 @@ current. This folder holds the material for that pull request, kept in sync with
 | `scraper_conferences.additions.py` | the `CONFERENCES` dict in `scripts/scraper.py` |
 | `conference_metadata.additions.json` | `scripts/conference_metadata.json` |
 | `data.js.additions.json` | `js/data.js` (manual method, for the four sites the scraper can't follow) |
+| `kdd_cycle2.patch.json` | `js/data.js`, **merged into the existing `kdd-2027` entry** — not a new conference |
 | `PR_BODY.md` | the pull request description |
 
 Also append the new ids to `ALL_CONFERENCES` in `.github/workflows/update-deadlines.yml`:
@@ -36,6 +37,15 @@ Four move to a new host every edition and cannot be templated:
 
 For those, the manual entries in `data.js.additions.json` are the practical route, unless the
 scraper config grows a per-year URL override.
+
+## The KDD patch
+
+KDD runs two submission cycles a year, and `kdd-2027` upstream carries only Cycle 1 (abstract
+19 Jul 2026, paper 26 Jul 2026). `kdd_cycle2.patch.json` holds the five Cycle 2 deadlines to append
+to that entry's `deadlines` array. The KDD 2027 CFP says only "February 2027" for Cycle 2, so those
+dates mirror the KDD 2026 Cycle 2 schedule and are marked `"estimated": true` — worth re-checking
+right before the PR, and worth asking the maintainer whether the scraper should learn to pick up
+both cycles from the research-track page.
 
 ## Before opening the PR
 

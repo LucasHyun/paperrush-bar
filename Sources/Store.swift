@@ -142,6 +142,11 @@ final class Store: ObservableObject {
         return feed.conferences.map { conf in
             var copy = conf
             copy.isExtra = true
+            copy.deadlines = conf.deadlines.map { deadline in
+                var d = deadline
+                d.isExtra = true
+                return d
+            }
             return copy
         }
     }
@@ -156,15 +161,29 @@ final class Store: ObservableObject {
         return true
     }
 
-    /// Overlay order: bundled extras < user extras < upstream. Upstream always wins,
-    /// so an entry disappears from the overlay by itself once paperrush ships it.
+    /// Overlay order: bundled extras < user extras < upstream.
+    ///
+    /// A normal overlay entry only fills a gap: once upstream ships the same id it is
+    /// dropped entirely, so nothing goes stale. An entry marked `"mode": "patch"` instead
+    /// adds its deadlines to the upstream entry — that is how a conference upstream tracks
+    /// only partially (KDD's second submission cycle, say) gets completed.
     private func merge() {
         var byId: [String: Conference] = [:]
         for conf in bundledExtras { byId[conf.id] = conf }
         for conf in userExtras { byId[conf.id] = conf }
-        for conf in upstream { byId[conf.id] = conf }
+
+        for conf in upstream {
+            if let overlay = byId[conf.id], overlay.isPatch {
+                byId[conf.id] = conf.patched(with: overlay)
+            } else {
+                byId[conf.id] = conf
+            }
+        }
+
         conferences = Array(byId.values)
-        extrasCount = conferences.reduce(into: 0) { $0 += $1.isExtra ? 1 : 0 }
+        extrasCount = conferences.reduce(into: 0) { count, conf in
+            count += conf.deadlines.contains { $0.isExtra } ? 1 : 0
+        }
         rebuild()
     }
 
@@ -320,7 +339,7 @@ final class Store: ObservableObject {
 
     private static let userExtrasTemplate = """
     {
-      "note": "Your own conferences, merged on top of the paperrush dataset. Same schema as the app's bundled extras.json. An upstream entry with the same id always wins, and the app reloads this file on every refresh.",
+      "note": "Your own conferences, merged on top of the paperrush dataset. Same schema as the app's bundled extras.json, and re-read on every refresh. An entry is used only until upstream has the same id; to instead ADD deadlines to a conference upstream already tracks, give the entry that id plus \\"mode\\": \\"patch\\".",
       "conferences": [],
       "_example_move_this_into_conferences": [
         {

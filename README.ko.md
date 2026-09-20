@@ -97,6 +97,11 @@ Info.plist                   LSUIElement = true (Dock 아이콘 없음)
 RecSys, COLM, UAI, ACM MM, AAMAS, ECAI. 다음 회차 CFP가 아직 안 나온 학회는 직전 사이클에서 추정한
 날짜이며 `예상` 배지가 붙습니다 — 확정된 것처럼 표시하지 않습니다.
 
+**패치**: `"mode": "patch"` 와 원본에 있는 `id` 를 가진 항목은 그 학회를 대체하는 대신 **빠진 마감만
+덧붙입니다**. KDD는 1년에 두 번 받는데 원본은 Cycle 1만 추적하고 있어서, `kdd-2027` 에 Cycle 2를
+패치했습니다. 패치된 마감은 원본이 같은 일정을 게시하면 자동으로 빠집니다(타입 + 날짜로 매칭,
+추정치는 45일 이내면 동일한 일정으로 간주).
+
 **내 학회**: 톱니바퀴 메뉴 → *추가된 학회* 를 누르면
 `~/Library/Application Support/PaperRushBar/extras.json` 을 만들어 Finder로 열어줍니다.
 스키마는 동일하고, 새로고침할 때마다 다시 읽으므로 저장 후 ↻ 한 번이면 끝입니다.

@@ -57,18 +57,26 @@ jobs:
                       if d['type'] not in types:
                           errors.append(f"{label} {c['id']}: type {d['type']}")
 
-          # An overlay entry upstream already covers is dead weight.
-          clash = {c['id'] for c in up} & {c['id'] for c in ex}
-          if clash:
-              errors.append(f'extras shadowed by upstream, remove them: {sorted(clash)}')
+          up_ids = {c['id'] for c in up}
+          patches = [c for c in ex if c.get('mode') == 'patch']
+          fillers = [c for c in ex if c.get('mode') != 'patch']
+
+          # A gap-filler upstream already covers is dead weight; a patch with no upstream
+          # entry to attach to is a typo.
+          for c in fillers:
+              if c['id'] in up_ids:
+                  errors.append(f"extras {c['id']}: shadowed by upstream, remove it or mark it \"mode\": \"patch\"")
+          for c in patches:
+              if c['id'] not in up_ids:
+                  errors.append(f"extras {c['id']}: marked as a patch but upstream has no such id")
 
           # Colors are how rows are told apart at a glance. Upstream reuses a color across
-          # years of the same conference, which is fine; ours just must not borrow another
-          # conference's color.
+          # years of the same conference, which is fine; a gap-filler just must not borrow
+          # another conference's color. Patches deliberately reuse upstream's.
           by_color = {}
           for c in up:
               by_color.setdefault(c['brandColor'].upper(), set()).add(c['name'])
-          for c in ex:
+          for c in fillers:
               key = c['brandColor'].upper()
               others = by_color.get(key, set()) - {c['name']}
               if others:
@@ -86,8 +94,9 @@ jobs:
           if errors:
               print('\n'.join(f'  - {e}' for e in errors))
               sys.exit(1)
-          print(f'{len(up)} upstream + {len(ex)} extra conferences, '
-                f'{sum(len(c["deadlines"]) for c in up + ex)} deadlines OK')
+          print(f'{len(up)} upstream + {len(fillers)} added conferences '
+                f'+ {len(patches)} patched ({sum(len(c["deadlines"]) for c in patches)} deadlines), '
+                f'{sum(len(c["deadlines"]) for c in up + ex)} deadlines total OK')
           PY
 
       - name: Upload app
