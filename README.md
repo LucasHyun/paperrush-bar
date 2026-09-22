@@ -1,6 +1,8 @@
 <div align="center">
 
-# PaperRush Bar ⏳
+<img src="Resources/AppIcon.iconset/icon_256x256.png" width="120" alt="PaperRush Bar">
+
+# PaperRush Bar
 
 **AI conference deadlines, live in your macOS menu bar.**
 
@@ -32,7 +34,7 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 | **D-7 / D-3 / D-1 alerts** | Native notifications at 09:00 — off / favorites / all |
 | **Favorites** | Star a conference to pin it to the top, and optionally limit the menu bar and alerts to starred ones |
 | **Click to open** | Any row opens the conference's official site |
-| **Extra conferences** | 12 venues upstream doesn't cover yet, re-read from their own CFPs weekly — plus your own, in a file you can edit |
+| **Extra conferences** | 18 venues upstream doesn't cover plus 7 it covers only partly, re-read from their own CFPs weekly — and your own, in a file you can edit |
 | **Launch at login** | One toggle, via `SMAppService` |
 | **3 languages** | English · 한국어 · 中文, switchable live from the gear menu (follows system language by default) |
 
@@ -49,6 +51,8 @@ Requirements: **macOS 13 (Ventura) or newer** and Xcode Command Line Tools
 `build.sh` calls `swiftc` once and assembles the `.app` bundle itself.
 
 Remove everything with `./uninstall.sh`.
+
+Homebrew: the cask and what it would take to publish it are in [`packaging/`](packaging/README.md).
 
 > The build is ad-hoc signed (`codesign --sign -`), which is what notifications and the login item need.
 > macOS may still ask you to confirm the first launch since there is no Developer ID signature.
@@ -96,9 +100,12 @@ bundled extras.json  <  your extras.json  <  upstream paperrush
 Upstream always wins on a shared `id`, so an overlay entry retires itself the moment paperrush ships
 the same conference — nothing to clean up, no stale duplicate.
 
-**The overlay** (marked `Added` in the list): WWW, WSDM, ICDM, CIKM, ECML PKDD, SIGIR, RecSys, COLM,
-UAI, ACM MM, AAMAS, ECAI. Dates the next edition's CFP hasn't announced yet are inferred from the
-previous cycle and carry an `Est.` badge — they are never presented as confirmed.
+**The overlay** (marked `Added` in the list) holds 18 conferences upstream doesn't have — WWW, WSDM,
+ICDM, CIKM, ECML PKDD, SIGIR, RecSys, COLM, UAI, ACM MM, AAMAS, ECAI, and the next editions of NAACL,
+INTERSPEECH, ICRA, WACV, AAAI and 3DV — plus 7 patches that fill in what upstream has only partly:
+KDD's second cycle, ICASSP 2027's whole schedule, and the ARR commitment deadlines for ACL, EACL and
+COLING, which is the date those venues actually gate on. Dates the next edition's CFP hasn't announced
+yet are inferred from the previous cycle and carry an `Est.` badge — never presented as confirmed.
 
 It keeps itself current. `scripts/update_extras.py` runs weekly in Actions (Mondays 06:30 UTC, just
 after upstream's own job): it re-reads each deadline's `sourceUrl`, asks **Gemini 2.5 Flash** to
@@ -130,7 +137,7 @@ so a save and a click on ↻ is the whole loop.
 
 If a deadline is wrong or a conference is missing for everyone, the fix belongs upstream in
 [awsaf49/paperrush](https://github.com/awsaf49/paperrush). [`upstream/`](upstream/) holds a ready
-draft of that contribution for the twelve above. To point the app at your own fork instead, change
+draft of that contribution. To point the app at your own fork instead, change
 `Store.sourceURL`.
 
 ## License

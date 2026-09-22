@@ -70,17 +70,18 @@ jobs:
               if c['id'] not in up_ids:
                   errors.append(f"extras {c['id']}: marked as a patch but upstream has no such id")
 
-          # Colors are how rows are told apart at a glance. Upstream reuses a color across
-          # years of the same conference, which is fine; a gap-filler just must not borrow
-          # another conference's color. Patches deliberately reuse upstream's.
+          # Colors are how rows are told apart at a glance. A series keeps its own color
+          # across editions, and upstream itself double-books a few (NAACL/ECCV, EACL/KDD),
+          # so the mistake to catch is a gap-filler borrowing a color no edition of that
+          # conference uses. Patches deliberately reuse upstream's.
           by_color = {}
           for c in up:
               by_color.setdefault(c['brandColor'].upper(), set()).add(c['name'])
           for c in fillers:
               key = c['brandColor'].upper()
-              others = by_color.get(key, set()) - {c['name']}
-              if others:
-                  errors.append(f"extras {c['id']}: brandColor {key} already used by {sorted(others)}")
+              owners = by_color.get(key, set())
+              if owners and c['name'] not in owners:
+                  errors.append(f"extras {c['id']}: brandColor {key} belongs to {sorted(owners)}")
               by_color.setdefault(key, set()).add(c['name'])
 
           # Ours are hand-written, so they carry their receipts.

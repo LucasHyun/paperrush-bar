@@ -44,6 +44,17 @@ jobs:
           zip -r -y "PaperRushBar-$TAG.zip" PaperRushBar.app
           shasum -a 256 "PaperRushBar-$TAG.zip" | tee "PaperRushBar-$TAG.zip.sha256"
 
+      - name: Render the Homebrew cask
+        run: |
+          TAG="${{ steps.package.outputs.tag }}"
+          VERSION="${TAG#v}"
+          SHA="$(shasum -a 256 "build/PaperRushBar-$TAG.zip" | cut -d' ' -f1)"
+          sed -e "s/^  version \".*\"/  version \"$VERSION\"/" \
+              -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" \
+              packaging/Casks/paperrush-bar.rb > "build/paperrush-bar.rb"
+          echo "--- rendered cask ---"
+          head -4 "build/paperrush-bar.rb"
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
@@ -52,6 +63,7 @@ jobs:
           files: |
             build/*.zip
             build/*.sha256
+            build/paperrush-bar.rb
           body: |
             ### Install
 

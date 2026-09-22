@@ -1,7 +1,195 @@
 {
- "lastUpdated": "2026-09-20T21:19:22Z",
+ "lastUpdated": "2026-09-22T05:33:31Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
+  {
+   "id": "3dv-2028",
+   "name": "3DV",
+   "fullName": "International Conference on 3D Vision",
+   "year": 2028,
+   "category": "cv",
+   "website": "https://3dvconf.github.io/",
+   "brandColor": "#0E7490",
+   "location": {
+    "city": "TBD",
+    "country": "TBD",
+    "flag": "🌍",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "abstract",
+     "label": "Abstract Registration",
+     "date": "2027-08-27T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission",
+     "date": "2027-08-27T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
+    },
+    {
+     "type": "supplementary",
+     "label": "Supplementary Material",
+     "date": "2027-09-01T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Preliminary Notification",
+     "date": "2027-10-26T11:00:00-07:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Final Notification",
+     "date": "2027-12-01T11:00:00-08:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2028-04-04",
+     "endDate": "2028-04-07",
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://3dvconf.github.io/2027/"
+    }
+   ],
+   "links": {
+    "official": "https://3dvconf.github.io/",
+    "previousEdition": "https://3dvconf.github.io/2027/call-for-papers/"
+   },
+   "info": {},
+   "notes": [
+    "3DV 2028 has not been announced; host city is unknown.",
+    "Dates are inferred from 3DV 2027 shifted 364 days. The conference has been drifting later each year, so April 2028 could just as well be March."
+   ],
+   "isEstimated": true,
+   "datesTBD": true
+  },
+  {
+   "id": "aaai-2028",
+   "name": "AAAI",
+   "fullName": "AAAI Conference on Artificial Intelligence",
+   "year": 2028,
+   "category": "ml",
+   "website": "https://aaai.org/conference/aaai/",
+   "brandColor": "#00008B",
+   "location": {
+    "city": "TBD",
+    "country": "TBD",
+    "flag": "🌍",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "abstract",
+     "label": "Abstract Submission",
+     "date": "2027-07-20T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission",
+     "date": "2027-07-27T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "supplementary",
+     "label": "Supplementary Material and Code",
+     "date": "2027-07-30T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "notification",
+     "label": "Phase 1 Notification",
+     "date": "2027-09-23",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "rebuttal",
+     "label": "Author Feedback Period",
+     "date": "2027-10-18",
+     "endDate": "2027-10-24",
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "notification",
+     "label": "Author Notification",
+     "date": "2027-11-29",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-Ready Deadline",
+     "date": "2027-12-13",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2028-02-15",
+     "endDate": "2028-02-22",
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    }
+   ],
+   "links": {
+    "official": "https://aaai.org/conference/aaai/",
+    "previousEdition": "https://aaai.org/conference/aaai/aaai-27/"
+   },
+   "info": {},
+   "notes": [
+    "AAAI-28 has not been announced; host city and dates are unknown.",
+    "Dates are inferred from AAAI-27 shifted 364 days. AAAI-26's submissions fell a week later in the year, so expect drift of about a week."
+   ],
+   "isEstimated": true,
+   "datesTBD": true
+  },
   {
    "id": "aamas-2027",
    "name": "AAMAS",
@@ -88,6 +276,46 @@
    "datesTBD": false
   },
   {
+   "id": "acl-2027",
+   "name": "ACL",
+   "fullName": "Annual Meeting of the Association for Computational Linguistics",
+   "year": 2027,
+   "category": "nlp",
+   "mode": "patch",
+   "website": "https://2027.aclweb.org",
+   "brandColor": "#B22222",
+   "location": {
+    "city": "Kyoto",
+    "country": "Japan",
+    "flag": "🇯🇵",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "paper",
+     "label": "ARR Submission (January 2027 Cycle)",
+     "date": "2027-01-04",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://aclrollingreview.org/dates"
+    }
+   ],
+   "links": {
+    "official": "https://2027.aclweb.org",
+    "cfp": "https://2027.aclweb.org/calls/main_conference_papers/",
+    "submission": "https://aclrollingreview.org/dates"
+   },
+   "info": {},
+   "notes": [
+    "ARR lists only \"January 2027\" as the last cycle feeding ACL 2027; the day is inferred from ACL 2026's cycle start and is provisional.",
+    "The ACL 2027 commitment, notification and camera-ready dates are not published yet (the CFP says \"Coming soon\"), so they are left out rather than guessed."
+   ],
+   "isEstimated": true,
+   "datesTBD": false
+  },
+  {
    "id": "acm-mm-2027",
    "name": "ACM MM",
    "fullName": "ACM International Conference on Multimedia",
@@ -143,6 +371,72 @@
    "datesTBD": true
   },
   {
+   "id": "bmvc-2027",
+   "name": "BMVC",
+   "fullName": "British Machine Vision Conference",
+   "year": 2027,
+   "category": "cv",
+   "mode": "patch",
+   "website": "https://www.bmva.org/bmvc",
+   "brandColor": "#1D4ED8",
+   "location": {
+    "city": "TBD",
+    "country": "United Kingdom",
+    "flag": "🇬🇧",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "rebuttal",
+     "label": "Rebuttal Period",
+     "date": "2027-07-02T23:59:00-12:00",
+     "endDate": "2027-07-09T23:59:00-12:00",
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://bmvc2026.bmva.org/calls/call-for-papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Author Notification",
+     "date": "2027-08-06T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://bmvc2026.bmva.org/calls/call-for-papers/"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-Ready Paper",
+     "date": "2027-08-27T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://bmvc2026.bmva.org/calls/call-for-papers/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-11-22",
+     "endDate": "2027-11-25",
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://bmvc2026.bmva.org/"
+    }
+   ],
+   "links": {
+    "official": "https://www.bmva.org/bmvc",
+    "previousEdition": "https://bmvc2026.bmva.org/calls/call-for-papers/"
+   },
+   "info": {},
+   "notes": [
+    "BMVC 2027 has no announced host or site; these dates are inferred from BMVC 2026 by weekday.",
+    "The submission dates already held for 2027 (22 and 29 May) fall on Saturdays, while BMVC always uses Fridays - 21 and 28 May are the likely real dates."
+   ],
+   "isEstimated": true,
+   "datesTBD": true
+  },
+  {
    "id": "cikm-2027",
    "name": "CIKM",
    "fullName": "ACM Conference on Information and Knowledge Management",
@@ -189,6 +483,53 @@
    ],
    "isEstimated": true,
    "datesTBD": true
+  },
+  {
+   "id": "coling-2027",
+   "name": "COLING",
+   "fullName": "International Conference on Computational Linguistics",
+   "year": 2027,
+   "category": "nlp",
+   "mode": "patch",
+   "website": "https://2027.coling-iccl.org/",
+   "brandColor": "#00695C",
+   "location": {
+    "city": "Macau",
+    "country": "China",
+    "flag": "🇲🇴",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "paper",
+     "label": "COLING Commitment Deadline",
+     "date": "2026-12-23T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of Acceptance",
+     "date": "2027-02-10T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
+    }
+   ],
+   "links": {
+    "official": "https://2027.coling-iccl.org/",
+    "cfp": "https://2027.coling-iccl.org/calls/main_conference_papers/"
+   },
+   "info": {},
+   "notes": [
+    "ARR-only: the October 2026 cycle is the last one that can reach COLING 2027, and commitment closes 2026-12-23.",
+    "A virtual presentation day pair runs 2027-05-06/07 before the in-person conference."
+   ],
+   "isEstimated": false,
+   "datesTBD": false
   },
   {
    "id": "colm-2027",
@@ -264,6 +605,71 @@
     "COLM 2026 in San Francisco closed its submissions on 31 March 2026."
    ],
    "isEstimated": true,
+   "datesTBD": false
+  },
+  {
+   "id": "eacl-2027",
+   "name": "EACL",
+   "fullName": "Conference of the European Chapter of the Association for Computational Linguistics",
+   "year": 2027,
+   "category": "nlp",
+   "mode": "patch",
+   "website": "https://2027.eacl.org",
+   "brandColor": "#2A6EBB",
+   "location": {
+    "city": "Athens",
+    "country": "Greece",
+    "flag": "🇬🇷",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "notification",
+     "label": "ARR Meta-Reviews Released (August 2026 Cycle)",
+     "date": "2026-10-08T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.eacl.org/calls/papers/"
+    },
+    {
+     "type": "paper",
+     "label": "EACL Commitment Deadline",
+     "date": "2026-10-11T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.eacl.org/calls/papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of Acceptance",
+     "date": "2026-11-12T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.eacl.org/calls/papers/"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-Ready Papers Due",
+     "date": "2026-11-26T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.eacl.org/calls/papers/"
+    }
+   ],
+   "links": {
+    "official": "https://2027.eacl.org",
+    "cfp": "https://2027.eacl.org/calls/papers/"
+   },
+   "info": {},
+   "notes": [
+    "ARR-only, no direct submissions: the August 2026 cycle feeds this edition and commitment closes 2026-10-11.",
+    "All deadlines are 23:59 Anywhere on Earth."
+   ],
+   "isEstimated": false,
    "datesTBD": false
   },
   {
@@ -412,6 +818,85 @@
    "datesTBD": true
   },
   {
+   "id": "icassp-2027",
+   "name": "ICASSP",
+   "fullName": "IEEE International Conference on Acoustics, Speech and Signal Processing",
+   "year": 2027,
+   "category": "speech",
+   "mode": "patch",
+   "website": "https://2027.ieeeicassp.org",
+   "brandColor": "#DC143C",
+   "location": {
+    "city": "Toronto",
+    "country": "Canada",
+    "flag": "🇨🇦",
+    "venue": "Metro Toronto Convention Centre"
+   },
+   "deadlines": [
+    {
+     "type": "paper",
+     "label": "Full Paper Submission",
+     "date": "2026-09-23T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://cmsworkshops.com/ICASSP2027/papers.php"
+    },
+    {
+     "type": "tutorial",
+     "label": "Tutorial Proposal Deadline",
+     "date": "2026-11-02",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.ieeeicassp.org/important-dates/"
+    },
+    {
+     "type": "notification",
+     "label": "Paper Acceptance Notification",
+     "date": "2027-01-13",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.ieeeicassp.org/important-dates/"
+    },
+    {
+     "type": "camera",
+     "label": "Final Paper Submission",
+     "date": "2027-01-27",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.ieeeicassp.org/important-dates/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-05-16",
+     "endDate": "2027-05-21",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.ieeeicassp.org/"
+    }
+   ],
+   "links": {
+    "official": "https://2027.ieeeicassp.org",
+    "submission": "https://cmsworkshops.com/ICASSP2027/papers.php",
+    "dates": "https://2027.ieeeicassp.org/important-dates/"
+   },
+   "info": {},
+   "notes": [
+    "Submission closes 23 Sep 2026 at 23:59 AoE; the site's global-times table resolves to 12:00 UTC on 24 Sep.",
+    "The older paper-kit page still shows 16 Sep; the live submission page and IEEE SPS both say 23 Sep."
+   ],
+   "isEstimated": false,
+   "datesTBD": false
+  },
+  {
    "id": "icdm-2027",
    "name": "ICDM",
    "fullName": "IEEE International Conference on Data Mining",
@@ -477,6 +962,200 @@
     "Deadlines are inferred from the ICDM 2026 cycle (paper 6 Jun 2026, no separate abstract deadline)."
    ],
    "isEstimated": true,
+   "datesTBD": false
+  },
+  {
+   "id": "icra-2028",
+   "name": "ICRA",
+   "fullName": "IEEE International Conference on Robotics and Automation",
+   "year": 2028,
+   "category": "robotics",
+   "website": "https://www.ieee-ras.org/event/2028-ieee-international-conference-on-robotics-and-automation-icra-64236/",
+   "brandColor": "#DB2777",
+   "location": {
+    "city": "Guadalajara",
+    "country": "Mexico",
+    "flag": "🇲🇽",
+    "venue": "Expo Guadalajara"
+   },
+   "deadlines": [
+    {
+     "type": "paper",
+     "label": "Paper Submission",
+     "date": "2027-08-16",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://www.ieee-ras.org/event/2028-ieee-international-conference-on-robotics-and-automation-icra-64236/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2028-05-15",
+     "endDate": "2028-05-19",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://www.ieee-ras.org/event/2028-ieee-international-conference-on-robotics-and-automation-icra-64236/"
+    }
+   ],
+   "links": {
+    "official": "https://www.ieee-ras.org/event/2028-ieee-international-conference-on-robotics-and-automation-icra-64236/"
+   },
+   "info": {},
+   "notes": [
+    "No edition site yet; the IEEE RAS event record is the only source. The August date is earlier than ICRA's usual mid-September pattern, so treat it as provisional.",
+    "ICRA uses PST rather than AoE for submission cutoffs."
+   ],
+   "isEstimated": false,
+   "datesTBD": false
+  },
+  {
+   "id": "interspeech-2027",
+   "name": "INTERSPEECH",
+   "fullName": "Conference of the International Speech Communication Association",
+   "year": 2027,
+   "category": "speech",
+   "website": "https://interspeech2027.org",
+   "brandColor": "#FF6347",
+   "location": {
+    "city": "São Paulo",
+    "country": "Brazil",
+    "flag": "🇧🇷",
+    "venue": "Mercado Livre Arena Pacaembu"
+   },
+   "deadlines": [
+    {
+     "type": "event",
+     "label": "Call for Challenges",
+     "date": "2026-11-03",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/"
+    },
+    {
+     "type": "event",
+     "label": "Call for Special Sessions",
+     "date": "2026-11-10",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/"
+    },
+    {
+     "type": "tutorial",
+     "label": "Call for Tutorials",
+     "date": "2027-02-05",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission",
+     "date": "2027-02-09",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/important-dates/"
+    },
+    {
+     "type": "supplementary",
+     "label": "Paper Update",
+     "date": "2027-02-16",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/important-dates/"
+    },
+    {
+     "type": "notification",
+     "label": "Acceptance Notification",
+     "date": "2027-06-02",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/important-dates/"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-Ready",
+     "date": "2027-06-09",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/important-dates/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-08-29",
+     "endDate": "2027-09-02",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/"
+    }
+   ],
+   "links": {
+    "official": "https://interspeech2027.org",
+    "dates": "https://interspeech2027.org/important-dates/",
+    "cfp": "https://interspeech2027.org/call-for-papers/"
+   },
+   "info": {},
+   "notes": [
+    "Only calendar dates are published; no time or timezone yet, so these are date-only.",
+    "Single full-paper submission with a one-week paper-update window; no rebuttal phase announced."
+   ],
+   "isEstimated": false,
+   "datesTBD": false
+  },
+  {
+   "id": "iros-2027",
+   "name": "IROS",
+   "fullName": "IEEE/RSJ International Conference on Intelligent Robots and Systems",
+   "year": 2027,
+   "category": "robotics",
+   "mode": "patch",
+   "website": "https://2027.ieee-iros.org/",
+   "brandColor": "#FF1493",
+   "location": {
+    "city": "Florence",
+    "country": "Italy",
+    "flag": "🇮🇹",
+    "venue": "Fortezza da Basso"
+   },
+   "deadlines": [
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-09-26",
+     "endDate": "2027-10-01",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.ieee-iros.org/"
+    }
+   ],
+   "links": {
+    "official": "https://2027.ieee-iros.org/"
+   },
+   "info": {},
+   "notes": [
+    "The IEEE RAS record prints the paper deadline as 1 Mar 2027, one day before the date already held here; the existing entry is left as it is rather than showing two conflicting rows.",
+    "No abstract, notification or camera-ready dates have been announced; IROS does not use AoE."
+   ],
+   "isEstimated": false,
    "datesTBD": false
   },
   {
@@ -555,6 +1234,90 @@
     "The KDD 2027 CFP says only \"February 2027\" for Cycle 2, so these dates mirror the KDD 2026 Cycle 2 schedule (abstract Feb 1, paper Feb 8, rebuttal Apr 4-17, notification May 16, camera-ready Jun 1, all AoE)."
    ],
    "isEstimated": true,
+   "datesTBD": false
+  },
+  {
+   "id": "naacl-2027",
+   "name": "NAACL",
+   "fullName": "Annual Conference of the North American Chapter of the Association for Computational Linguistics",
+   "year": 2027,
+   "category": "nlp",
+   "website": "https://2027.naacl.org",
+   "brandColor": "#2E8B57",
+   "location": {
+    "city": "San Francisco",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "paper",
+     "label": "ARR Submission (October 2026 Cycle)",
+     "date": "2026-10-12T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "notification",
+     "label": "ARR Meta-Reviews Released (October 2026 Cycle)",
+     "date": "2026-12-18T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "paper",
+     "label": "NAACL Commitment Deadline",
+     "date": "2026-12-23T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of Acceptance",
+     "date": "2027-02-10T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-Ready Papers Due",
+     "date": "2027-03-03T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-06-01",
+     "endDate": "2027-06-05",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+    }
+   ],
+   "links": {
+    "official": "https://2027.naacl.org",
+    "cfp": "https://2027.naacl.org/calls/main_conference_papers/",
+    "submission": "https://aclrollingreview.org/dates"
+   },
+   "info": {},
+   "notes": [
+    "ARR-only: submit to an ARR cycle, then commit the reviewed paper by 2026-12-23. Earlier cycles are also eligible.",
+    "The ARR cycle table gives the October cycle end as Dec 20 while the NAACL CFP says Dec 23; the CFP date is used."
+   ],
+   "isEstimated": false,
    "datesTBD": false
   },
   {
@@ -757,6 +1520,134 @@
    ],
    "isEstimated": true,
    "datesTBD": false
+  },
+  {
+   "id": "wacv-2028",
+   "name": "WACV",
+   "fullName": "IEEE/CVF Winter Conference on Applications of Computer Vision",
+   "year": 2028,
+   "category": "cv",
+   "website": "https://wacv.thecvf.com/",
+   "brandColor": "#4169E1",
+   "location": {
+    "city": "Waikoloa",
+    "country": "United States",
+    "flag": "🇺🇸",
+    "venue": null
+   },
+   "deadlines": [
+    {
+     "type": "abstract",
+     "label": "Paper Enrollment (Round 1)",
+     "date": "2027-06-18T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission (Round 1)",
+     "date": "2027-06-25T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "supplementary",
+     "label": "Supplementary Material (Round 1)",
+     "date": "2027-06-27T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "notification",
+     "label": "Round 1 Reviews & Decisions",
+     "date": "2027-08-08T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "abstract",
+     "label": "Paper Enrollment (Round 2)",
+     "date": "2027-08-20T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission (Round 2)",
+     "date": "2027-08-27T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "rebuttal",
+     "label": "Round 1 Rebuttal & Revision",
+     "date": "2027-08-27T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "supplementary",
+     "label": "Supplementary Material (Round 2)",
+     "date": "2027-08-29T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "notification",
+     "label": "Round 2 Reviews & Final Decisions",
+     "date": "2027-10-08T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-Ready Deadline",
+     "date": "2027-11-01T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2028-01-03",
+     "endDate": "2028-01-07",
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    }
+   ],
+   "links": {
+    "official": "https://wacv.thecvf.com/",
+    "previousEdition": "https://wacv.thecvf.com/Conferences/2027/Dates"
+   },
+   "info": {},
+   "notes": [
+    "Waikoloa is confirmed by the CVF and IEEE TC-PAMI conference tables, but no WACV 2028 site or dates exist yet.",
+    "Every date is inferred from WACV 2027 shifted 364 days, which preserves the weekday."
+   ],
+   "isEstimated": true,
+   "datesTBD": true
   },
   {
    "id": "wsdm-2028",

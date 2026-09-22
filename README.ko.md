@@ -1,6 +1,8 @@
 <div align="center">
 
-# PaperRush Bar ⏳
+<img src="Resources/AppIcon.iconset/icon_256x256.png" width="120" alt="PaperRush Bar">
+
+# PaperRush Bar
 
 **AI 학회 마감을 맥 메뉴바에서 바로.**
 
@@ -32,7 +34,7 @@ Electron도 Python도 없는 약 1MB짜리 네이티브 메뉴바 앱입니다. 
 | **D-7 / D-3 / D-1 알림** | 해당 날짜 오전 9시 네이티브 알림 — 끄기 / 즐겨찾기만 / 전체 |
 | **즐겨찾기** | ★ 표시한 학회는 목록 상단에 고정, 메뉴바·알림도 즐겨찾기만으로 제한 가능 |
 | **클릭 = 사이트 열기** | 행을 누르면 학회 공식 사이트가 열립니다 |
-| **학회 추가** | 원본에 없는 12개 학회를 매주 CFP에서 다시 읽어 갱신, 직접 편집하는 파일로 본인 학회도 추가 가능 |
+| **학회 추가** | 원본에 없는 18개 + 일부만 있는 7개를 매주 CFP에서 다시 읽어 갱신, 직접 편집하는 파일로 본인 학회도 추가 가능 |
 | **로그인 시 자동 실행** | `SMAppService` 토글 하나 |
 | **3개 국어** | English · 한국어 · 中文, 톱니바퀴 메뉴에서 즉시 전환 (기본값은 시스템 언어) |
 
@@ -49,6 +51,8 @@ cd paperrush-bar
 `build.sh`가 `swiftc`를 한 번 호출해 `.app` 번들을 직접 조립합니다.
 
 제거는 `./uninstall.sh`.
+
+Homebrew: cask 파일과 배포에 필요한 조건은 [`packaging/`](packaging/README.md)에 정리해 뒀습니다.
 
 > 빌드는 ad-hoc 서명(`codesign --sign -`)을 합니다. 알림과 로그인 항목이 동작하려면 이 서명이 필요합니다.
 > Developer ID 서명은 아니므로 첫 실행 시 macOS가 확인을 요구할 수 있습니다.
@@ -93,9 +97,12 @@ Info.plist                   LSUIElement = true (Dock 아이콘 없음)
 `id`가 같으면 항상 원본이 이깁니다. 즉 paperrush에 같은 학회가 추가되는 순간 오버레이 항목은 스스로
 물러납니다 — 중복이 남거나 따로 정리할 일이 없습니다.
 
-**오버레이** (목록에 `추가` 배지): WWW, WSDM, ICDM, CIKM, ECML PKDD, SIGIR, RecSys, COLM, UAI,
-ACM MM, AAMAS, ECAI. 다음 회차 CFP가 아직 안 나온 학회는 직전 사이클에서 추정한 날짜이며
-`예상` 배지가 붙습니다 — 확정된 것처럼 표시하지 않습니다.
+**오버레이** (목록에 `추가` 배지)에는 원본에 없는 18개 학회 — WWW, WSDM, ICDM, CIKM, ECML PKDD,
+SIGIR, RecSys, COLM, UAI, ACM MM, AAMAS, ECAI와 NAACL·INTERSPEECH·ICRA·WACV·AAAI·3DV의 다음 회차 —
+그리고 원본이 일부만 담고 있는 7개에 대한 패치가 들어 있습니다: KDD 2번째 사이클, ICASSP 2027 전체 일정,
+그리고 ACL·EACL·COLING의 ARR commitment 마감(실제로 이 학회들이 기준으로 삼는 날짜입니다).
+다음 회차 CFP가 아직 안 나온 학회는 직전 사이클에서 추정한 날짜이며 `예상` 배지가 붙습니다 —
+확정된 것처럼 표시하지 않습니다.
 
 이 오버레이는 스스로 최신화됩니다. `scripts/update_extras.py` 가 매주 Actions에서 돌면서
 (월요일 06:30 UTC, 원본 작업 직후) 각 마감의 `sourceUrl` 을 다시 읽고 **Gemini 2.5 Flash** 로
@@ -126,7 +133,7 @@ python scripts/update_extras.py -c www,sigir       # 특정 학회만
 
 마감이 틀렸거나 모두에게 필요한 학회가 빠졌다면 원본인
 [awsaf49/paperrush](https://github.com/awsaf49/paperrush)에 고치는 편이 이득입니다.
-위 12개에 대한 기여 초안은 [`upstream/`](upstream/)에 준비해 뒀습니다.
+기여 초안은 [`upstream/`](upstream/)에 준비해 뒀습니다.
 본인 포크를 쓰고 싶다면 `Store.sourceURL`만 바꾸세요.
 
 ## 라이선스

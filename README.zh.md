@@ -1,6 +1,8 @@
 <div align="center">
 
-# PaperRush Bar ⏳
+<img src="Resources/AppIcon.iconset/icon_256x256.png" width="120" alt="PaperRush Bar">
+
+# PaperRush Bar
 
 **把 AI 会议截止日期放进 macOS 菜单栏。**
 
@@ -32,7 +34,7 @@ AI/ML 会议投稿截止还有几天，并在后台自动保持数据最新。
 | **D-7 / D-3 / D-1 提醒** | 当天上午 9:00 发送系统通知 —— 关闭 / 仅收藏 / 全部 |
 | **收藏** | 加 ★ 的会议置顶，也可让菜单栏与通知只关注收藏项 |
 | **点击打开官网** | 点击任意一行即可打开该会议官方网站 |
-| **补充会议** | 12 个上游尚未收录的会议，每周从各自 CFP 重新读取更新，也可在可编辑的文件中添加你自己的会议 |
+| **补充会议** | 18 个上游未收录 + 7 个只收录一半的会议，每周从各自 CFP 重新读取更新，也可添加你自己的会议 |
 | **登录时自动启动** | 通过 `SMAppService` 一键开关 |
 | **三种语言** | English · 한국어 · 中文，齿轮菜单中即时切换（默认跟随系统语言） |
 
@@ -49,6 +51,8 @@ cd paperrush-bar
 `build.sh` 只调用一次 `swiftc` 并自行组装 `.app`。
 
 卸载执行 `./uninstall.sh`。
+
+Homebrew：cask 文件与发布所需条件见 [`packaging/`](packaging/README.md)。
 
 > 构建会做 ad-hoc 签名（`codesign --sign -`），通知和登录项依赖它。
 > 由于没有 Developer ID 签名，macOS 首次启动时可能要求确认。
@@ -91,9 +95,11 @@ Info.plist                   LSUIElement = true（不显示 Dock 图标）
 
 `id` 相同时永远以上游为准，因此一旦 paperrush 收录了同一个会议，补充条目会自动退场 —— 不留重复，无需清理。
 
-**补充层**（列表中标记 `补充`）：WWW、WSDM、ICDM、CIKM、ECML PKDD、SIGIR、RecSys、COLM、UAI、
-ACM MM、AAMAS、ECAI。若下一届 CFP 尚未公布，日期由上一轮推断得出并标记 `预估` —— 绝不会当作已确认
-的日期展示。
+**补充层**（列表中标记 `补充`）包含上游没有的 18 个会议 —— WWW、WSDM、ICDM、CIKM、ECML PKDD、
+SIGIR、RecSys、COLM、UAI、ACM MM、AAMAS、ECAI，以及 NAACL、INTERSPEECH、ICRA、WACV、AAAI、3DV 的下一届 ——
+外加 7 个补丁，补上上游只收录了一半的部分：KDD 第二轮、ICASSP 2027 的完整日程，以及 ACL、EACL、COLING
+的 ARR commitment 截止（这才是这些会议真正卡的日期）。若下一届 CFP 尚未公布，日期由上一轮推断得出并标记
+`预估` —— 绝不会当作已确认的日期展示。
 
 它会自动保持最新。`scripts/update_extras.py` 每周在 Actions 中运行（周一 06:30 UTC，紧接上游任务之后）：
 重新读取每条截止的 `sourceUrl`，用 **Gemini 2.5 Flash** 提取日程，只提交能够验证的结果。CFP 一旦公布，
@@ -120,7 +126,7 @@ KDD 每年有两轮投稿，而上游只收录了 Cycle 1，因此 `kdd-2027` �
 保存后点一下 ↻ 即可生效。
 
 若截止日期有误，或缺少的会议对所有人都有价值，请到上游
-[awsaf49/paperrush](https://github.com/awsaf49/paperrush) 修正。上述 12 个会议的贡献草稿已放在
+[awsaf49/paperrush](https://github.com/awsaf49/paperrush) 修正。贡献草稿已放在
 [`upstream/`](upstream/)。想改用自己的 fork，修改 `Store.sourceURL` 即可。
 
 ## 许可证

@@ -45,6 +45,12 @@ for RESOURCE in conferences.json extras.json; do
 	fi
 done
 
+# The icon is kept as PNGs in git and compiled here, so no binary blob is committed.
+# It has no Dock presence (LSUIElement) but shows in Finder, notifications and Login Items.
+if [ -d "Resources/AppIcon.iconset" ] && command -v iconutil >/dev/null 2>&1; then
+	iconutil --convert icns "Resources/AppIcon.iconset" --output "${APP}/Contents/Resources/AppIcon.icns"
+fi
+
 # Ad-hoc signature: notifications and the login item need the bundle to be signed.
 if ! codesign --force --deep --sign - "${APP}" >/dev/null 2>&1; then
 	echo "WARNING: ad-hoc signing failed (usually harmless)"
