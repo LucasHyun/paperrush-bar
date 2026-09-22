@@ -133,6 +133,15 @@ KDD 每年有两轮投稿，而上游只收录了 Cycle 1，因此 `kdd-2027` �
 `~/Library/Application Support/PaperRushBar/extras.json`。schema 完全相同，每次刷新都会重新读取，
 保存后点一下 ↻ 即可生效。
 
+**自己核对**：齿轮菜单 → *用 Gemini 核对截止日期…*，可在其中填入你自己的 Gemini API 密钥。密钥保存在
+macOS 钥匙串中，仅发送至 Google；[aistudio.google.com](https://aistudio.google.com/apikey) 的免费额度
+足够完成一次核对。点击 *开始核对*，应用会逐一读取各会议官网，列出与数据不一致的日期，并附上来源页面
+与被划掉的旧日期。在你点击 *应用* 之前，什么都不会改变。
+
+规则与每周任务一致：只有当 `sourceUrl` 是应用真正抓取过的页面、且该日期确实出现在页面正文中时，才会
+被提议。已应用的日期带 `已核对` 标记，只保存在这台 Mac 上，每次刷新后重新覆盖到下载的数据之上；但每条
+更正都记得自己替换掉的日期，一旦来源更新便自动退出，因此你几个月前确认的日期永远不会盖住更新的官方日期。
+
 若截止日期有误，或缺少的会议对所有人都有价值，请到上游
 [awsaf49/paperrush](https://github.com/awsaf49/paperrush) 修正。贡献草稿已放在
 [`upstream/`](upstream/)。想改用自己的 fork，修改 `Store.sourceURL` 即可。

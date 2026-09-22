@@ -30,14 +30,18 @@ struct Deadline: Hashable {
     let status: String
     let estimated: Bool
     let timeUnknown: Bool
+    /// The page this date was read from, when the data records one.
+    let sourceUrl: String?
 
     /// True when this deadline came from an overlay file rather than upstream.
     var isExtra: Bool = false
+    /// True when a scan confirmed this date against the conference's own page.
+    var isVerified: Bool = false
 }
 
 extension Deadline: Decodable {
     enum CodingKeys: String, CodingKey {
-        case type, label, date, endDate, status, estimated, timeUnknown
+        case type, label, date, endDate, status, estimated, timeUnknown, sourceUrl
     }
 
     init(from decoder: Decoder) throws {
@@ -50,6 +54,7 @@ extension Deadline: Decodable {
         status = (try? c.decode(String.self, forKey: .status)) ?? "upcoming"
         estimated = (try? c.decode(Bool.self, forKey: .estimated)) ?? false
         timeUnknown = (try? c.decode(Bool.self, forKey: .timeUnknown)) ?? false
+        sourceUrl = try? c.decode(String.self, forKey: .sourceUrl)
     }
 
     static func defaultLabel(for type: String) -> String {

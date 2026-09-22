@@ -111,6 +111,22 @@ final class Store: ObservableObject {
     private var remoteExtras: [Conference] = []
     /// Conferences the user added in their own extras.json.
     private var userExtras: [Conference] = []
+    /// Dates this Mac checked against the conference's own page and the person approved.
+    private var corrections: [Correction] = []
+
+    // MARK: Scan state
+
+    enum ScanState: Equatable {
+        case idle
+        case running(done: Int, total: Int)
+        case finished(checked: Int)
+    }
+
+    @Published private(set) var hasGeminiKey = Keychain.get(account: GeminiScout.apiKeyAccount) != nil
+    @Published private(set) var scanState: ScanState = .idle
+    @Published private(set) var proposals: [DeadlineProposal] = []
+    @Published private(set) var scanError: String?
+    private var scanTask: Task<Void, Never>?
 
     private enum Keys {
         static let favorites = "favorites"
@@ -185,6 +201,7 @@ final class Store: ObservableObject {
 
     private var cacheURL: URL { supportDirectory.appendingPathComponent("conferences.json") }
     private var remoteExtrasCacheURL: URL { supportDirectory.appendingPathComponent("extras-remote.json") }
+    private var correctionsURL: URL { supportDirectory.appendingPathComponent("verified-dates.json") }
 
     /// The user's own overlay, edited by hand.
     var userExtrasURL: URL { supportDirectory.appendingPathComponent("extras.json") }
@@ -204,6 +221,15 @@ final class Store: ObservableObject {
         bundledExtras = Store.decodeConferences(at: Bundle.main.url(forResource: "extras", withExtension: "json"))
         remoteExtras = Store.decodeConferences(at: remoteExtrasCacheURL)
         userExtras = Store.decodeConferences(at: userExtrasURL)
+        if let data = try? Data(contentsOf: correctionsURL),
+           let saved = try? JSONDecoder().decode([Correction].self, from: data) {
+            corrections = saved
+        }
+    }
+
+    private func saveCorrections() {
+        guard let data = try? JSONEncoder().encode(corrections) else { return }
+        try? data.write(to: correctionsURL, options: .atomic)
     }
 
     /// The published overlay replaces the bundled one wholesale — same file, newer.
@@ -254,11 +280,57 @@ final class Store: ObservableObject {
             }
         }
 
-        conferences = Array(byId.values)
+        conferences = applyCorrections(to: Array(byId.values))
         extrasCount = conferences.reduce(into: 0) { count, conf in
             count += conf.deadlines.contains { $0.isExtra } ? 1 : 0
         }
         rebuild()
+    }
+
+    /// Lay approved, page-verified dates over whatever the downloads say.
+    ///
+    /// A correction remembers the date it replaced and only applies while that is still
+    /// what the data holds. Once the source moves on the correction is stale and drops
+    /// itself, so an old verified date can never bury a newer published one.
+    private func applyCorrections(to list: [Conference]) -> [Conference] {
+        guard !corrections.isEmpty else { return list }
+        var byId = Dictionary(uniqueKeysWithValues: list.map { ($0.id, $0) })
+        var surviving: [Correction] = []
+
+        for correction in corrections {
+            guard var conf = byId[correction.conferenceId] else { surviving.append(correction); continue }
+            let index = conf.deadlines.firstIndex { $0.type == correction.type && $0.label == correction.label }
+
+            if let index {
+                let current = conf.deadlines[index]
+                if current.date == correction.date {
+                    // The source caught up; the correction has done its job.
+                    continue
+                }
+                guard current.date == correction.replacedDate else { continue }
+                conf.deadlines[index] = Deadline(
+                    type: current.type, label: current.label, date: correction.date,
+                    endDate: correction.endDate, status: current.status, estimated: false,
+                    timeUnknown: correction.timeUnknown, sourceUrl: correction.sourceUrl,
+                    isExtra: current.isExtra, isVerified: true)
+            } else {
+                guard correction.replacedDate == nil else { continue }
+                conf.deadlines.append(Deadline(
+                    type: correction.type, label: correction.label, date: correction.date,
+                    endDate: correction.endDate, status: "upcoming", estimated: false,
+                    timeUnknown: correction.timeUnknown, sourceUrl: correction.sourceUrl,
+                    isExtra: true, isVerified: true))
+            }
+            conf.deadlines.sort { $0.date < $1.date }
+            byId[conf.id] = conf
+            surviving.append(correction)
+        }
+
+        if surviving.count != corrections.count {
+            corrections = surviving
+            saveCorrections()
+        }
+        return Array(byId.values)
     }
 
     private func rebuild() {
@@ -651,6 +723,95 @@ final class Store: ObservableObject {
                 center.add(request, withCompletionHandler: nil)
             }
         }
+    }
+
+    // MARK: - Gemini scan
+
+    func saveGeminiKey(_ key: String) -> Bool {
+        let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        let ok = Keychain.set(trimmed, account: GeminiScout.apiKeyAccount)
+        hasGeminiKey = ok
+        if ok { scanError = nil }
+        return ok
+    }
+
+    func removeGeminiKey() {
+        Keychain.remove(account: GeminiScout.apiKeyAccount)
+        hasGeminiKey = false
+        proposals = []
+        scanState = .idle
+        scanError = nil
+    }
+
+    var isScanning: Bool {
+        if case .running = scanState { return true }
+        return false
+    }
+
+    /// Read every conference's own pages and collect what disagrees with the data.
+    /// Nothing is applied here — the person decides, because a wrong deadline is
+    /// worse than a missing one.
+    func startScan() {
+        guard !isScanning, let key = Keychain.get(account: GeminiScout.apiKeyAccount) else { return }
+        proposals = []
+        scanError = nil
+        scanState = .running(done: 0, total: conferences.count)
+
+        let snapshot = conferences
+        scanTask = Task { [weak self] in
+            let (found, failure) = await GeminiScout.scan(conferences: snapshot, key: key) { done, total in
+                Task { @MainActor in
+                    guard let self, self.isScanning else { return }
+                    self.scanState = .running(done: done, total: total)
+                }
+            }
+            await MainActor.run {
+                guard let self else { return }
+                self.scanTask = nil
+                if Task.isCancelled {
+                    self.scanState = .idle
+                    return
+                }
+                self.proposals = found
+                self.scanError = failure
+                self.scanState = .finished(checked: snapshot.count)
+            }
+        }
+    }
+
+    func cancelScan() {
+        scanTask?.cancel()
+        scanTask = nil
+        scanState = .idle
+    }
+
+    func dismissProposals() {
+        proposals = []
+        scanState = .idle
+        scanError = nil
+    }
+
+    func apply(_ proposal: DeadlineProposal) {
+        corrections.removeAll {
+            $0.conferenceId == proposal.conferenceId && $0.type == proposal.type && $0.label == proposal.label
+        }
+        corrections.append(Correction(
+            conferenceId: proposal.conferenceId, type: proposal.type, label: proposal.label,
+            replacedDate: proposal.replacedDate, date: proposal.date, endDate: proposal.endDate,
+            timeUnknown: proposal.timeUnknown, sourceUrl: proposal.sourceUrl, verifiedAt: Date()))
+        saveCorrections()
+        proposals.removeAll { $0.id == proposal.id }
+        merge()
+        scheduleNotifications()
+    }
+
+    func applyAll() {
+        for proposal in proposals { apply(proposal) }
+    }
+
+    func openSource(of proposal: DeadlineProposal) {
+        if let url = URL(string: proposal.sourceUrl) { NSWorkspace.shared.open(url) }
     }
 
     // MARK: - Launch at login

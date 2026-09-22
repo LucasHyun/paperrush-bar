@@ -143,6 +143,18 @@ for one we only estimated).
 `~/Library/Application Support/PaperRushBar/extras.json`. Same schema; it's re-read on every refresh,
 so a save and a click on ↻ is the whole loop.
 
+**Check it yourself**: gear menu -> *Verify deadlines with Gemini...* opens a page where you paste your
+own Gemini API key. It is stored in the macOS keychain and sent only to Google; a free key from
+[aistudio.google.com](https://aistudio.google.com/apikey) is enough for a scan. *Start scan* reads every
+conference's own site and lists the dates that disagree with the data, each with the page it came from
+and the old date struck through. Nothing changes until you press *Apply*.
+
+The same rule as the weekly job holds here: a date is proposed only when its `sourceUrl` is a page the
+app actually fetched and the date is legible in that page's text. Applied dates are marked `Verified`,
+stay on this Mac, and are re-laid over the downloads on every refresh - but a correction remembers the
+date it replaced and retires itself once the source moves on, so a date you approved months ago can
+never bury a newer published one.
+
 If a deadline is wrong or a conference is missing for everyone, the fix belongs upstream in
 [awsaf49/paperrush](https://github.com/awsaf49/paperrush). [`upstream/`](upstream/) holds a ready
 draft of that contribution. To point the app at your own fork instead, change

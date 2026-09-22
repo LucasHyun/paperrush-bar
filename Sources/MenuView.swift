@@ -32,11 +32,16 @@ extension Color {
 // MARK: - Root
 
 struct MenuView: View {
+    /// The panel is one window, so settings is a page inside it rather than a
+    /// separate window that would steal focus and close the menu bar popover.
+    private enum Page { case list, settings }
+
     @EnvironmentObject private var store: Store
     @State private var query = ""
     @State private var category = "all"
     @State private var favoritesOnly = false
     @State private var submissionOnly = true
+    @State private var page: Page = .list
 
     private var rows: [DeadlineItem] {
         store.visibleItems(query: query,
@@ -46,14 +51,21 @@ struct MenuView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-            Divider()
-            filters
-            Divider()
-            list
-            Divider()
-            footer
+        Group {
+            switch page {
+            case .list:
+                VStack(spacing: 0) {
+                    header
+                    Divider()
+                    filters
+                    Divider()
+                    list
+                    Divider()
+                    footer
+                }
+            case .settings:
+                SettingsView { page = .list }
+            }
         }
         .frame(width: 400, height: 540)
         // Reading the language here makes every string re-render on a switch.
@@ -124,6 +136,7 @@ struct MenuView: View {
             Toggle(L10n.t("settings.menubarSubmission"), isOn: $store.menuBarSubmissionOnly)
             Toggle(L10n.t("settings.urgencyAnimation"), isOn: $store.urgencyAnimation)
             Divider()
+            Button(L10n.t("settings.open")) { page = .settings }
             Button(L10n.t("action.openExtras", String(store.extrasCount))) { store.openUserExtras() }
             Button(L10n.t("action.openSource")) { store.openSource() }
             Button(L10n.t("action.quit")) { NSApplication.shared.terminate(nil) }
@@ -303,7 +316,10 @@ struct DeadlineRow: View {
                     if item.deadline.estimated || item.conference.isEstimated {
                         badge(L10n.t("badge.estimated"))
                     }
-                    if item.deadline.isExtra {
+                    if item.deadline.isVerified {
+                        badge(L10n.t("badge.verified"))
+                            .help(L10n.t("badge.verified.help"))
+                    } else if item.deadline.isExtra {
                         badge(L10n.t("badge.extra"))
                     }
                 }

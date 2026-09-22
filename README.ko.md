@@ -139,6 +139,17 @@ python scripts/update_extras.py -c www,sigir       # 특정 학회만
 `~/Library/Application Support/PaperRushBar/extras.json` 을 만들어 Finder로 열어줍니다.
 스키마는 동일하고, 새로고침할 때마다 다시 읽으므로 저장 후 ↻ 한 번이면 끝입니다.
 
+**직접 검증하기**: 톱니바퀴 메뉴 → *Gemini로 마감일 검증…* 을 누르면 본인 Gemini API 키를 입력하는
+화면이 열립니다. 키는 macOS 키체인에 저장되고 Google로만 전송되며,
+[aistudio.google.com](https://aistudio.google.com/apikey) 의 무료 키로도 한 번의 검사에 충분합니다.
+*검사 시작* 을 누르면 각 학회 사이트를 직접 읽어 데이터와 다른 날짜를 모아 보여줍니다. 출처 페이지와
+기존 날짜(취소선)가 함께 표시되고, *적용* 을 누르기 전까지는 아무것도 바뀌지 않습니다.
+
+주간 작업과 같은 규칙이 적용됩니다. `sourceUrl` 이 실제로 가져온 페이지이고 그 페이지 본문에 날짜가
+적혀 있을 때만 제안합니다. 적용한 날짜에는 `검증` 배지가 붙고 이 Mac에만 저장되며 새로고침할 때마다
+다시 덮어씁니다. 다만 각 수정은 자신이 대체한 날짜를 기억했다가 원본이 갱신되면 스스로 물러나므로,
+예전에 승인한 날짜가 새로 공개된 날짜를 가리는 일은 없습니다.
+
 마감이 틀렸거나 모두에게 필요한 학회가 빠졌다면 원본인
 [awsaf49/paperrush](https://github.com/awsaf49/paperrush)에 고치는 편이 이득입니다.
 기여 초안은 [`upstream/`](upstream/)에 준비해 뒀습니다.
