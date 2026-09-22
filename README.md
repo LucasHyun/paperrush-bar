@@ -28,11 +28,11 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 
 | | |
 |---|---|
-| **Menu bar countdown** | The nearest submission deadline as `ICLR D-5`; the hourglass's sand level shows how much of the last 30 days is left and turns yellow → orange → red from D-7, one grain falls when the day rolls over, and within D-3 the sand trickles on its own, faster as the deadline nears, with a restless little shake from D-1 (honours Reduce Motion) |
+| **Menu bar countdown** | Your nearest submission deadline as `ICLR D-5`, taking turns between the conferences you starred and settling on one once it is inside D-3; the hourglass's sand level shows how much of the last 30 days is left and turns yellow → orange → red from D-7, one grain falls when the day rolls over, and within D-3 the sand trickles on its own, faster as the deadline nears, with a restless little shake from D-1 (honours Reduce Motion) |
 | **Daily auto-update** | Checks every 30 min, re-downloads when the data is older than 6 h, and refreshes on wake |
 | **Offline-friendly** | Last payload cached in Application Support; a snapshot ships inside the app for first launch |
 | **D-7 / D-3 / D-1 alerts** | Native notifications at 09:00 — off / favorites / all |
-| **Favorites** | Star a conference to pin it to the top, and optionally limit the menu bar and alerts to starred ones |
+| **Favorites** | Star the conferences you are actually targeting and the menu bar follows your stars; alerts can too |
 | **Click to open** | Any row opens the conference's official site |
 | **Extra conferences** | 18 venues upstream doesn't cover plus 7 it covers only partly, re-read from their own CFPs weekly — and your own, in a file you can edit |
 | **Verify a date yourself** | Your own Gemini API key, in the gear menu: it reads each conference's own site and proposes only dates legible on the page it cites. Nothing changes until you apply one |

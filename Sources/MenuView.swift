@@ -132,8 +132,8 @@ struct MenuView: View {
                 }
             }
             Divider()
-            Toggle(L10n.t("settings.menubarFavorites"), isOn: $store.menuBarFavoritesOnly)
             Toggle(L10n.t("settings.menubarSubmission"), isOn: $store.menuBarSubmissionOnly)
+            Toggle(L10n.t("settings.menubarRotate"), isOn: $store.menuBarRotate)
             Toggle(L10n.t("settings.urgencyAnimation"), isOn: $store.urgencyAnimation)
             Toggle(L10n.t("settings.notifyUpdates"), isOn: $store.notifyUpdates)
             Divider()

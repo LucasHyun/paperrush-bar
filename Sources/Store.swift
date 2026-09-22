@@ -71,18 +71,33 @@ final class Store: ObservableObject {
     @Published var favorites: Set<String> = [] {
         didSet {
             defaults.set(Array(favorites), forKey: Keys.favorites)
+            rotationIndex = 0
             rebuild()
             scheduleNotifications()
         }
     }
 
-    @Published var menuBarFavoritesOnly: Bool {
-        didSet { defaults.set(menuBarFavoritesOnly, forKey: Keys.menuBarFavoritesOnly) }
+    @Published var menuBarSubmissionOnly: Bool {
+        didSet {
+            defaults.set(menuBarSubmissionOnly, forKey: Keys.menuBarSubmissionOnly)
+            menuBarSelectionChanged()
+        }
     }
 
-    @Published var menuBarSubmissionOnly: Bool {
-        didSet { defaults.set(menuBarSubmissionOnly, forKey: Keys.menuBarSubmissionOnly) }
+    /// One line holds one deadline, so when several are being tracked the menu bar
+    /// takes turns showing them.
+    @Published var menuBarRotate: Bool {
+        didSet {
+            defaults.set(menuBarRotate, forKey: Keys.menuBarRotate)
+            menuBarSelectionChanged()
+        }
     }
+
+    private var rotationIndex = 0
+    private var rotationTimer: Timer?
+    /// Past a handful the cycle is too slow to be a glance, so it stays at the nearest few.
+    private static let rotationSlots = 5
+    private static let rotationInterval: TimeInterval = 7
 
     @Published var notifyMode: NotifyMode {
         didSet {
@@ -136,24 +151,24 @@ final class Store: ObservableObject {
 
     private enum Keys {
         static let favorites = "favorites"
-        static let menuBarFavoritesOnly = "menuBarFavoritesOnly"
         static let menuBarSubmissionOnly = "menuBarSubmissionOnly"
         static let notifyMode = "notifyMode"
         static let language = "language"
         static let urgencyAnimation = "urgencyAnimation"
         static let lastFetch = "lastFetch"
         static let lastUpdateCheck = "lastUpdateCheck"
+        static let menuBarRotate = "menuBarRotate"
         static let notifyUpdates = "notifyUpdates"
         static let notifiedUpdateVersion = "notifiedUpdateVersion"
     }
 
     private init() {
         favorites = Set(defaults.stringArray(forKey: Keys.favorites) ?? [])
-        menuBarFavoritesOnly = defaults.bool(forKey: Keys.menuBarFavoritesOnly)
         menuBarSubmissionOnly = defaults.object(forKey: Keys.menuBarSubmissionOnly) as? Bool ?? true
         notifyMode = NotifyMode(rawValue: defaults.string(forKey: Keys.notifyMode) ?? "all") ?? .all
         language = AppLanguage(rawValue: defaults.string(forKey: Keys.language) ?? "system") ?? .system
         urgencyAnimation = defaults.object(forKey: Keys.urgencyAnimation) as? Bool ?? true
+        menuBarRotate = defaults.object(forKey: Keys.menuBarRotate) as? Bool ?? true
         notifyUpdates = defaults.object(forKey: Keys.notifyUpdates) as? Bool ?? true
         if let t = defaults.object(forKey: Keys.lastFetch) as? Date { lastFetch = t }
         L10n.apply(language)
@@ -353,6 +368,7 @@ final class Store: ObservableObject {
         items = out.sorted { $0.date < $1.date }
         updateIcon()
         scheduleUrgencyTrickle()
+        scheduleRotation()
     }
 
     // MARK: - Urgency trickle
@@ -646,12 +662,60 @@ final class Store: ObservableObject {
         }
     }
 
+    /// Everything eligible for the menu bar, nearest first.
+    ///
+    /// Starring a conference is already the person saying "this one is mine", so the
+    /// menu bar follows the stars rather than a separate setting to find and switch on.
+    /// With nothing starred there is nothing to narrow by, so it shows the field.
+    var menuBarCandidates: [DeadlineItem] {
+        let eligible = upcoming.filter { !menuBarSubmissionOnly || $0.isSubmission }
+        let starred = eligible.filter { favorites.contains($0.conference.id) }
+        return starred.isEmpty ? eligible : starred
+    }
+
+    /// What the menu bar is showing right now.
+    ///
+    /// Cycling stops as soon as the nearest deadline is inside D-3: draining sand and a
+    /// reddening glyph only mean something while they keep describing one conference,
+    /// and by then there is a single deadline worth looking at anyway.
     var menuBarItem: DeadlineItem? {
-        upcoming.first { item in
-            if menuBarSubmissionOnly && !item.isSubmission { return false }
-            if menuBarFavoritesOnly && !favorites.contains(item.conference.id) { return false }
-            return true
+        let candidates = menuBarCandidates
+        guard let nearest = candidates.first else { return nil }
+        guard isCycling(candidates) else { return nearest }
+        return candidates[rotationIndex % min(candidates.count, Store.rotationSlots)]
+    }
+
+    private func isCycling(_ candidates: [DeadlineItem]) -> Bool {
+        guard menuBarRotate, candidates.count > 1, let nearest = candidates.first else { return false }
+        return nearest.date.timeIntervalSince(now) / 3600 >= 72
+    }
+
+    /// Restart the cycle from the top whenever what it cycles over changes, so a newly
+    /// starred conference is shown at once rather than after a lap.
+    private func menuBarSelectionChanged() {
+        rotationIndex = 0
+        updateIcon()
+        scheduleUrgencyTrickle()
+        scheduleRotation()
+    }
+
+    private func scheduleRotation() {
+        let wanted = isCycling(menuBarCandidates)
+        if !wanted {
+            rotationTimer?.invalidate()
+            rotationTimer = nil
+            if rotationIndex != 0 { rotationIndex = 0; updateIcon() }
+            return
         }
+        guard rotationTimer == nil else { return }
+        rotationTimer = Timer.scheduledTimer(withTimeInterval: Store.rotationInterval, repeats: true) { _ in
+            Task { @MainActor in
+                let store = Store.shared
+                store.rotationIndex &+= 1
+                store.updateIcon()
+            }
+        }
+        rotationTimer?.tolerance = Store.rotationInterval * 0.3
     }
 
     var menuBarTitle: String {
