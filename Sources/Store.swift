@@ -30,6 +30,8 @@ final class Store: ObservableObject {
     /// Bumped on every redraw; the label uses it as an identity so SwiftUI cannot
     /// decide two NSImages are "the same" and skip the frame.
     @Published private(set) var iconVersion = 0
+    /// False once the sand has a colour; the label must then stop forcing template rendering.
+    @Published private(set) var iconIsTemplate = true
     private var grainProgress: Double?
     private var grainStep = 0
     private var grainTimer: Timer?
@@ -303,10 +305,11 @@ final class Store: ObservableObject {
     // MARK: - Menu bar glyph
 
     private func updateIcon() {
-        let fill = menuBarItem.map {
-            HourglassIcon.fill(daysRemaining: $0.date.timeIntervalSince(now) / 86_400)
-        }
-        menuBarIcon = HourglassIcon.image(fill: fill, grain: grainProgress, tilt: tilt)
+        let hoursLeft = menuBarItem.map { $0.date.timeIntervalSince(now) / 3600 }
+        let fill = hoursLeft.map { HourglassIcon.fill(daysRemaining: $0 / 24) }
+        let sand = hoursLeft.flatMap { HourglassIcon.sandColor(hoursLeft: $0) }
+        menuBarIcon = HourglassIcon.image(fill: fill, grain: grainProgress, tilt: tilt, sand: sand)
+        iconIsTemplate = (sand == nil)
         iconVersion &+= 1
     }
 

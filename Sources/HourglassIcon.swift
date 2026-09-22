@@ -30,7 +30,10 @@ enum HourglassIcon {
     ///   - grain: 0 … 1 position of a single falling grain along the throat-to-floor
     ///     path, or `nil` for none. Used for the brief drop animation.
     ///   - tilt: rotation in degrees about the centre, for the anxious wobble.
-    static func image(fill: Double?, grain: Double?, tilt: Double = 0) -> NSImage {
+    ///   - sand: a colour for the sand once the deadline is close. `nil` keeps the glyph
+    ///     a monochrome template that the system tints; a colour switches it to a real
+    ///     image whose glass follows the label colour and whose sand carries the alarm.
+    static func image(fill: Double?, grain: Double?, tilt: Double = 0, sand: NSColor? = nil) -> NSImage {
         let image = NSImage(size: size, flipped: true) { _ in
             if tilt != 0 {
                 let t = NSAffineTransform()
@@ -39,17 +42,33 @@ enum HourglassIcon {
                 t.translateX(by: -size.width / 2, yBy: -size.height / 2)
                 t.concat()
             }
-            draw(fill: fill, grain: grain)
+            draw(fill: fill, grain: grain, sand: sand)
             return true
         }
-        image.isTemplate = true
+        image.isTemplate = (sand == nil)
         return image
+    }
+
+    /// Sand colour for the time left: none a week out, then yellow → orange → red.
+    /// Colour is the loudest thing a menu bar item can do, so it is spent only here.
+    static func sandColor(hoursLeft: Double) -> NSColor? {
+        switch hoursLeft {
+        case ..<0: return nil
+        case ..<24: return .systemRed
+        case ..<72: return .systemOrange
+        case ..<168: return .systemYellow
+        default: return nil
+        }
     }
 
     // MARK: - Drawing (18×18, y grows downward)
 
-    private static func draw(fill: Double?, grain: Double?) {
-        let ink = NSColor.black
+    private static func draw(fill: Double?, grain: Double?, sand: NSColor?) {
+        // Template mode paints everything black and lets the system tint it. Colour
+        // mode draws the glass in the dynamic label colour so it still follows the
+        // menu bar's light/dark appearance, and only the sand is coloured.
+        let ink: NSColor = sand == nil ? .black : .labelColor
+        let sandInk: NSColor = sand ?? .black
         ink.setFill()
         ink.setStroke()
 
@@ -98,6 +117,7 @@ enum HourglassIcon {
         // Sand left in the upper bulb: a horizontal band clipped to the bulb, its top
         // edge rising with `fill`. (The bulb narrows toward the throat, so a band of
         // constant height holds less sand lower down — which is exactly right.)
+        sandInk.setFill()
         if f > 0.02 {
             let usable = (mid - glassTop) - inset * 1.4
             let top = mid - inset * 0.4 - usable * f
@@ -137,7 +157,13 @@ enum HourglassIcon {
             let p = CGFloat(min(max(grain, 0), 1))
             let y = start + (end - start) * p
             NSGraphicsContext.saveGraphicsState()
-            NSGraphicsContext.current?.compositingOperation = .xor
+            // In colour mode the grain is drawn in the glass colour, which contrasts
+            // with the coloured mound on its own; XOR is only needed for monochrome.
+            if sand == nil {
+                NSGraphicsContext.current?.compositingOperation = .xor
+            } else {
+                ink.setFill()
+            }
             NSBezierPath(ovalIn: NSRect(x: cx - 1.2, y: y - 1.2, width: 2.4, height: 2.4)).fill()
             if p > 0.15 {
                 let trailY = y - 2.6
