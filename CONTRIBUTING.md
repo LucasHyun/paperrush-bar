@@ -21,9 +21,13 @@ While iterating, `pkill -x PaperRushBar` before rebuilding so the old instance r
 | File | Responsibility |
 |---|---|
 | `Sources/Models.swift` | Data model, date parsing, categories |
-| `Sources/Store.swift` | Networking, cache, favorites, notifications, login item |
+| `Sources/Store.swift` | Networking, cache, favorites, notifications, login item, verified-date corrections |
 | `Sources/L10n.swift` | Every user-facing string, in every language |
 | `Sources/MenuView.swift` | The dropdown UI |
+| `Sources/SettingsView.swift` | The second page: Gemini key, scan, proposed changes |
+| `Sources/GeminiScout.swift` | Fetches each conference's pages and checks what the model reports against them |
+| `Sources/Keychain.swift` | Where the Gemini key lives |
+| `Sources/HourglassIcon.swift` | The menu bar glyph, drawn at runtime |
 | `Sources/App.swift` | `MenuBarExtra` entry point, app delegate |
 | `scripts/update_extras.py` | Weekly Gemini job that re-reads the overlay's sources |
 

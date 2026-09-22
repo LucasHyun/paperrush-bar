@@ -41,8 +41,8 @@ cp Info.plist "${APP}/Contents/Info.plist"
 printf 'APPL????' > "${APP}/Contents/PkgInfo"
 
 # Stamp the version: VERSION env if set (the release workflow passes the tag),
-# else the nearest git tag, else a dev marker. The in-app update check and the
-# pip installer both compare against this.
+# else the nearest git tag, else a dev marker. This is what the in-app update
+# check compares the latest release against.
 VERSION="${VERSION:-$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || true)}"
 VERSION="${VERSION:-0.0.0}"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${APP}/Contents/Info.plist"

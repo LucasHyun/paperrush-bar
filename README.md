@@ -35,8 +35,10 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 | **Favorites** | Star a conference to pin it to the top, and optionally limit the menu bar and alerts to starred ones |
 | **Click to open** | Any row opens the conference's official site |
 | **Extra conferences** | 18 venues upstream doesn't cover plus 7 it covers only partly, re-read from their own CFPs weekly — and your own, in a file you can edit |
+| **Verify a date yourself** | Your own Gemini API key, in the gear menu: it reads each conference's own site and proposes only dates legible on the page it cites. Nothing changes until you apply one |
 | **Launch at login** | One toggle, via `SMAppService` |
 | **3 languages** | English · 한국어 · 中文, switchable live from the gear menu (follows system language by default) |
+| **Update notice** | One notification when a new version appears - once per version, never again, with a toggle of its own |
 
 ## Install
 
