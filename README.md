@@ -28,7 +28,7 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 
 | | |
 |---|---|
-| **Menu bar countdown** | The nearest submission deadline as `ICLR D-5`, updated as the day rolls over |
+| **Menu bar countdown** | The nearest submission deadline as `ICLR D-5`; the hourglass's sand level shows how much of the last 30 days is left, and one grain falls when the day rolls over |
 | **Daily auto-update** | Checks every 30 min, re-downloads when the data is older than 6 h, and refreshes on wake |
 | **Offline-friendly** | Last payload cached in Application Support; a snapshot ships inside the app for first launch |
 | **D-7 / D-3 / D-1 alerts** | Native notifications at 09:00 — off / favorites / all |
@@ -65,6 +65,7 @@ Sources/
 ├─ Store.swift     Download, cache, favorites, notification scheduling, login item
 ├─ L10n.swift      In-app translations (en / ko / zh) + localized date formats
 ├─ MenuView.swift  Dropdown UI: search, filters, list, settings
+├─ HourglassIcon.swift  Menu bar glyph drawn at runtime, sand level = time left
 └─ App.swift       MenuBarExtra entry point
 Resources/conferences.json   Offline snapshot for the very first launch
 Info.plist                   LSUIElement = true (no Dock icon)

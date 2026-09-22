@@ -10,8 +10,9 @@ struct PaperRushBarApp: App {
         MenuBarExtra {
             MenuView().environmentObject(store)
         } label: {
-            HStack(spacing: 3) {
-                Image(systemName: "hourglass")
+            HStack(spacing: 4) {
+                Image(nsImage: store.menuBarIcon)
+                    .renderingMode(.template)
                 Text(verbatim: store.menuBarTitle)
             }
         }

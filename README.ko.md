@@ -28,7 +28,7 @@ Electron도 Python도 없는 약 1MB짜리 네이티브 메뉴바 앱입니다. 
 
 | | |
 |---|---|
-| **메뉴바 D-day** | 가장 가까운 제출 마감을 `ICLR D-5` 형태로 표시, 자정이 지나면 자동으로 갱신 |
+| **메뉴바 D-day** | 가장 가까운 제출 마감을 `ICLR D-5` 형태로 표시. 모래시계의 모래 양이 남은 시간(30일 기준)을 보여주고, 자정에 모래 한 알이 떨어집니다 |
 | **매일 자동 업데이트** | 30분마다 확인해 데이터가 6시간 지났으면 재다운로드, 절전에서 깨어날 때도 갱신 |
 | **오프라인 대응** | 마지막 데이터는 Application Support에 캐시, 첫 실행용 스냅샷을 앱에 내장 |
 | **D-7 / D-3 / D-1 알림** | 해당 날짜 오전 9시 네이티브 알림 — 끄기 / 즐겨찾기만 / 전체 |
@@ -65,6 +65,7 @@ Sources/
 ├─ Store.swift     다운로드·캐시·즐겨찾기·알림 예약·로그인 항목
 ├─ L10n.swift      앱 내 번역(en/ko/zh) 및 언어별 날짜 형식
 ├─ MenuView.swift  드롭다운 UI: 검색, 필터, 목록, 설정
+├─ HourglassIcon.swift  런타임에 그리는 메뉴바 글리프, 모래 양 = 남은 시간
 └─ App.swift       MenuBarExtra 진입점
 Resources/conferences.json   최초 실행용 오프라인 스냅샷
 Info.plist                   LSUIElement = true (Dock 아이콘 없음)

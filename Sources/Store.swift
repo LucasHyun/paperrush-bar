@@ -24,6 +24,14 @@ final class Store: ObservableObject {
     @Published private(set) var errorMessage: String?
     @Published var now = Date()
 
+    /// The menu bar glyph. Redrawn whenever the nearest deadline or the clock moves,
+    /// so the sand level tracks how much time is left.
+    @Published private(set) var menuBarIcon: NSImage = HourglassIcon.image(fill: nil, grain: nil)
+    private var grainProgress: Double?
+    private var grainStep = 0
+    private var grainTimer: Timer?
+    private var lastTickDay: Date?
+
     @Published var favorites: Set<String> = [] {
         didSet {
             defaults.set(Array(favorites), forKey: Keys.favorites)
@@ -97,13 +105,19 @@ final class Store: ObservableObject {
         refreshTimer = Timer.scheduledTimer(withTimeInterval: 1800, repeats: true) { _ in
             Task { @MainActor in await Store.shared.refresh(force: false) }
         }
-        // Keeps the D-day label honest across midnight.
+        // Keeps the D-day label honest across midnight, and lets one grain fall when it does.
+        lastTickDay = Calendar.current.startOfDay(for: Date())
         tickTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
             Task { @MainActor in
-                Store.shared.now = Date()
-                Store.shared.rebuild()
+                let store = Store.shared
+                store.now = Date()
+                store.rebuild()
+                let today = Calendar.current.startOfDay(for: store.now)
+                if let last = store.lastTickDay, last != today { store.dropGrain() }
+                store.lastTickDay = today
             }
         }
+        dropGrain()
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didWakeNotification, object: nil, queue: .main
         ) { _ in
@@ -207,6 +221,39 @@ final class Store: ObservableObject {
             }
         }
         items = out.sorted { $0.date < $1.date }
+        updateIcon()
+    }
+
+    // MARK: - Menu bar glyph
+
+    private func updateIcon() {
+        let fill = menuBarItem.map {
+            HourglassIcon.fill(daysRemaining: $0.date.timeIntervalSince(now) / 86_400)
+        }
+        menuBarIcon = HourglassIcon.image(fill: fill, grain: grainProgress)
+    }
+
+    /// One grain falls from the throat to the floor over ~0.6 s. Fired at launch, when a
+    /// refresh lands, and when the day rolls over — never continuously, which in a menu
+    /// bar is a distraction and a battery drain.
+    func dropGrain() {
+        guard grainTimer == nil, menuBarItem != nil else { return }
+        let steps = 18
+        grainStep = 0
+        grainTimer = Timer.scheduledTimer(withTimeInterval: 0.6 / Double(steps), repeats: true) { _ in
+            Task { @MainActor in
+                let store = Store.shared
+                store.grainStep += 1
+                if store.grainStep >= steps {
+                    store.grainTimer?.invalidate()
+                    store.grainTimer = nil
+                    store.grainProgress = nil
+                } else {
+                    store.grainProgress = Double(store.grainStep) / Double(steps)
+                }
+                store.updateIcon()
+            }
+        }
     }
 
     func refresh(force: Bool) async {
@@ -239,6 +286,7 @@ final class Store: ObservableObject {
             defaults.set(lastFetch, forKey: Keys.lastFetch)
             errorMessage = nil
             scheduleNotifications()
+            dropGrain()
         } catch {
             errorMessage = error.localizedDescription
         }

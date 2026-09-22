@@ -1,0 +1,131 @@
+import AppKit
+
+/// The menu bar hourglass, drawn at runtime so the sand can show how much time is left.
+///
+/// Rendered as a template image: the system tints it for light/dark menu bars, and
+/// urgency is carried by the amount of sand, not by colour.
+enum HourglassIcon {
+    static let size = NSSize(width: 18, height: 18)
+
+    /// How full the upper bulb is for a given number of days left.
+    ///
+    /// Linear over 30 days would make D-30 and D-7 look alike. These anchors keep the
+    /// last week dramatic: half the sand is gone by D-7, most of it by D-3.
+    static func fill(daysRemaining days: Double) -> Double {
+        let anchors: [(day: Double, fill: Double)] = [
+            (0, 0.0), (1, 0.10), (3, 0.25), (7, 0.45), (14, 0.70), (30, 1.0)
+        ]
+        if days <= 0 { return 0 }
+        if days >= anchors.last!.day { return 1 }
+        for i in 1..<anchors.count where days <= anchors[i].day {
+            let (a, b) = (anchors[i - 1], anchors[i])
+            let t = (days - a.day) / (b.day - a.day)
+            return a.fill + (b.fill - a.fill) * t
+        }
+        return 1
+    }
+
+    /// - Parameters:
+    ///   - fill: 0 (empty top bulb) … 1 (full). `nil` draws an idle glass with no sand.
+    ///   - grain: 0 … 1 position of a single falling grain along the throat-to-floor
+    ///     path, or `nil` for none. Used for the brief drop animation.
+    static func image(fill: Double?, grain: Double?) -> NSImage {
+        let image = NSImage(size: size, flipped: true) { _ in
+            draw(fill: fill, grain: grain)
+            return true
+        }
+        image.isTemplate = true
+        return image
+    }
+
+    // MARK: - Drawing (18×18, y grows downward)
+
+    private static func draw(fill: Double?, grain: Double?) {
+        let ink = NSColor.black
+        ink.setFill()
+        ink.setStroke()
+
+        let cx: CGFloat = 9
+        let capW: CGFloat = 10, capH: CGFloat = 1.6
+        let capTopY: CGFloat = 1.6
+        let capBotY: CGFloat = 18 - 1.6 - capH
+        let bulbHalfW: CGFloat = 4.2
+        let throatHalfW: CGFloat = 0.9
+        let glassTop = capTopY + capH
+        let glassBot = capBotY
+        let mid = (glassTop + glassBot) / 2
+        let stroke: CGFloat = 1.25
+
+        // Caps
+        for y in [capTopY, capBotY] {
+            NSBezierPath(roundedRect: NSRect(x: cx - capW / 2, y: y, width: capW, height: capH),
+                         xRadius: capH / 2, yRadius: capH / 2).fill()
+        }
+
+        // Bulb outlines: two trapezoids meeting at a narrow throat.
+        let upper = NSBezierPath()
+        upper.move(to: NSPoint(x: cx - bulbHalfW, y: glassTop))
+        upper.line(to: NSPoint(x: cx + bulbHalfW, y: glassTop))
+        upper.line(to: NSPoint(x: cx + throatHalfW, y: mid))
+        upper.line(to: NSPoint(x: cx - throatHalfW, y: mid))
+        upper.close()
+
+        let lower = NSBezierPath()
+        lower.move(to: NSPoint(x: cx - throatHalfW, y: mid))
+        lower.line(to: NSPoint(x: cx + throatHalfW, y: mid))
+        lower.line(to: NSPoint(x: cx + bulbHalfW, y: glassBot))
+        lower.line(to: NSPoint(x: cx - bulbHalfW, y: glassBot))
+        lower.close()
+
+        for path in [upper, lower] {
+            path.lineWidth = stroke
+            path.lineJoinStyle = .round
+            path.stroke()
+        }
+
+        guard let fill else { return }
+        let f = CGFloat(min(max(fill, 0), 1))
+        let inset: CGFloat = 1.1   // keep a sliver of glass visible around the sand
+
+        // Sand left in the upper bulb: a horizontal band clipped to the bulb, its top
+        // edge rising with `fill`. (The bulb narrows toward the throat, so a band of
+        // constant height holds less sand lower down — which is exactly right.)
+        if f > 0.02 {
+            let usable = (mid - glassTop) - inset * 1.4
+            let top = mid - inset * 0.4 - usable * f
+            NSGraphicsContext.saveGraphicsState()
+            upper.addClip()
+            NSRect(x: cx - bulbHalfW, y: top, width: bulbHalfW * 2, height: mid - top).fill()
+            NSGraphicsContext.restoreGraphicsState()
+        }
+
+        // Sand already fallen: a mound on the lower floor, growing as the top empties.
+        let fallen = 1 - f
+        if fallen > 0.02 {
+            let usable = (glassBot - mid) - inset * 1.4
+            let height = max(usable * fallen, 0.9)
+            let floor = glassBot - inset * 0.6
+            NSGraphicsContext.saveGraphicsState()
+            lower.addClip()
+            // A shallow dome reads as a pile rather than a flat floor.
+            let mound = NSBezierPath()
+            mound.move(to: NSPoint(x: cx - bulbHalfW, y: floor))
+            mound.line(to: NSPoint(x: cx + bulbHalfW, y: floor))
+            mound.line(to: NSPoint(x: cx + bulbHalfW, y: floor - height * 0.55))
+            mound.curve(to: NSPoint(x: cx - bulbHalfW, y: floor - height * 0.55),
+                        controlPoint1: NSPoint(x: cx + bulbHalfW * 0.5, y: floor - height * 1.25),
+                        controlPoint2: NSPoint(x: cx - bulbHalfW * 0.5, y: floor - height * 1.25))
+            mound.close()
+            mound.fill()
+            NSGraphicsContext.restoreGraphicsState()
+        }
+
+        // The falling grain.
+        if let grain, f > 0.02 {
+            let start = mid + 0.6
+            let end = glassBot - inset - 1.2
+            let y = start + (end - start) * CGFloat(min(max(grain, 0), 1))
+            NSBezierPath(ovalIn: NSRect(x: cx - 0.7, y: y - 0.7, width: 1.4, height: 1.4)).fill()
+        }
+    }
+}
