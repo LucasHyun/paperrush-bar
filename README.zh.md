@@ -42,8 +42,11 @@ AI/ML 会议投稿截止还有几天，并在后台自动保持数据最新。
 
 ```bash
 brew tap LucasHyun/tap
+brew trust lucashyun/tap
 brew install --cask paperrush-bar
 ```
+
+中间那行是向 Homebrew 声明信任这个第三方 tap —— 每个 tap 只需执行一次。
 
 之后用 `brew upgrade --cask paperrush-bar` 升级 —— 有新版本时应用自己也会提示。
 或者从 [Releases](https://github.com/LucasHyun/paperrush-bar/releases) 下载 `PaperRushBar-vX.zip`

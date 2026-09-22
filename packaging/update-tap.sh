@@ -1,5 +1,10 @@
 #!/bin/bash
-# Copy a release's cask into the personal Homebrew tap.
+# Point the personal Homebrew tap at a release.
+#
+# The cask is rendered here from packaging/Casks/paperrush-bar.rb, using the
+# release's own checksum, rather than copied from the asset the release built.
+# A fix to the template therefore reaches the tap on the next run, without
+# waiting for another release.
 #
 # Run this after a release. It uses your own gh/git credentials, so there is no
 # token to store, rotate or leak — the release workflow builds the cask, you
@@ -12,10 +17,16 @@ set -euo pipefail
 REPO="${REPO:-LucasHyun/paperrush-bar}"
 TAP="${TAP:-LucasHyun/homebrew-tap}"
 CASK="paperrush-bar.rb"
+TEMPLATE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/Casks/${CASK}"
 TAG="${1:-}"
 
 if ! command -v gh >/dev/null 2>&1; then
 	echo "ERROR: the gh CLI is required (brew install gh, then gh auth login)."
+	exit 1
+fi
+
+if [ ! -f "${TEMPLATE}" ]; then
+	echo "ERROR: cask template not found at ${TEMPLATE}"
 	exit 1
 fi
 
@@ -27,12 +38,24 @@ echo "==> ${REPO} ${TAG} -> ${TAP}"
 WORK="$(mktemp -d)"
 trap 'rm -rf "${WORK}"' EXIT
 
-if ! gh release download "${TAG}" --repo "${REPO}" --pattern "${CASK}" --dir "${WORK}" --clobber; then
-	echo "ERROR: release ${TAG} has no ${CASK} asset."
+if ! gh release download "${TAG}" --repo "${REPO}" \
+	--pattern "PaperRushBar-${TAG}.zip.sha256" --dir "${WORK}" --clobber; then
+	echo "ERROR: release ${TAG} has no checksum asset."
 	echo "       Releases from before the cask was added need a re-run:"
 	echo "       gh workflow run release.yml -f tag=${TAG}"
 	exit 1
 fi
+
+SHA="$(cut -d' ' -f1 "${WORK}/PaperRushBar-${TAG}.zip.sha256")"
+if [ "${#SHA}" -ne 64 ]; then
+	echo "ERROR: ${TAG} checksum does not look like a sha256: ${SHA}"
+	exit 1
+fi
+
+# Same substitution the release workflow does, so the two never drift.
+sed -e "s/^  version \".*\"/  version \"${TAG#v}\"/" \
+    -e "s/^  sha256 \".*\"/  sha256 \"${SHA}\"/" \
+    "${TEMPLATE}" > "${WORK}/${CASK}"
 
 git clone --quiet "https://github.com/${TAP}.git" "${WORK}/tap" || {
 	echo "ERROR: could not clone ${TAP}. Create it once with:"

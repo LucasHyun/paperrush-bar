@@ -7,7 +7,7 @@ next one.
 | Channel | Command | Status |
 |---|---|---|
 | GitHub release | download zip | works |
-| Homebrew tap | `brew tap LucasHyun/tap && brew install --cask paperrush-bar` | works; the tap is updated with one command after each release (below) |
+| Homebrew tap | `brew tap LucasHyun/tap && brew trust lucashyun/tap && brew install --cask paperrush-bar` | works; the tap is updated with one command after each release (below) |
 | Official homebrew-cask | `brew install --cask paperrush-bar` | blocked on notarization (below) |
 
 ## Your own tap
@@ -37,8 +37,12 @@ Users install with:
 
 ```bash
 brew tap LucasHyun/tap
+brew trust lucashyun/tap
 brew install --cask paperrush-bar
 ```
+
+`brew trust` is required once per tap: Homebrew refuses to load a cask from a tap outside its own
+repositories until the user says so.
 
 and `brew upgrade --cask` follows the tap from there.
 

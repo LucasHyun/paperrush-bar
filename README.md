@@ -42,8 +42,12 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 
 ```bash
 brew tap LucasHyun/tap
+brew trust lucashyun/tap
 brew install --cask paperrush-bar
 ```
+
+Homebrew asks you to trust any tap outside its own repositories before it will load a cask from
+it - that is the middle line, and it is asked once per tap.
 
 `brew upgrade --cask paperrush-bar` later — though the app also tells you itself when a new release
 is out. Or download `PaperRushBar-vX.zip` from [Releases](https://github.com/LucasHyun/paperrush-bar/releases)

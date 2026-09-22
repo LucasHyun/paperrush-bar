@@ -42,8 +42,11 @@ Electron도 Python도 없는 약 1MB짜리 네이티브 메뉴바 앱입니다. 
 
 ```bash
 brew tap LucasHyun/tap
+brew trust lucashyun/tap
 brew install --cask paperrush-bar
 ```
+
+가운데 줄은 Homebrew 공식 저장소 밖의 tap 을 신뢰한다는 선언입니다. tap 당 한 번만 하면 됩니다.
 
 이후엔 `brew upgrade --cask paperrush-bar` — 새 릴리즈가 나오면 앱이 직접 알려주기도 합니다.
 또는 [Releases](https://github.com/LucasHyun/paperrush-bar/releases)에서 `PaperRushBar-vX.zip`을 받아

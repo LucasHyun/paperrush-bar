@@ -2,8 +2,7 @@ cask "paperrush-bar" do
   version "1.2.0"
   sha256 "0000000000000000000000000000000000000000000000000000000000000000"
 
-  url "https://github.com/LucasHyun/paperrush-bar/releases/download/v#{version}/PaperRushBar-v#{version}.zip",
-      verified: "github.com/LucasHyun/paperrush-bar/"
+  url "https://github.com/LucasHyun/paperrush-bar/releases/download/v#{version}/PaperRushBar-v#{version}.zip"
   name "PaperRush Bar"
   desc "Menu bar countdown to the next AI conference deadline"
   homepage "https://github.com/LucasHyun/paperrush-bar"
@@ -13,7 +12,7 @@ cask "paperrush-bar" do
     strategy :github_latest
   end
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
 
   app "PaperRushBar.app"
 
