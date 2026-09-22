@@ -28,7 +28,7 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 
 | | |
 |---|---|
-| **Menu bar countdown** | The nearest submission deadline as `ICLR D-5`; the hourglass's sand level shows how much of the last 30 days is left, one grain falls when the day rolls over, and within D-3 the sand trickles on its own, faster as the deadline nears (honours Reduce Motion) |
+| **Menu bar countdown** | The nearest submission deadline as `ICLR D-5`; the hourglass's sand level shows how much of the last 30 days is left, one grain falls when the day rolls over, and within D-3 the sand trickles on its own, faster as the deadline nears, with a restless little shake from D-1 (honours Reduce Motion) |
 | **Daily auto-update** | Checks every 30 min, re-downloads when the data is older than 6 h, and refreshes on wake |
 | **Offline-friendly** | Last payload cached in Application Support; a snapshot ships inside the app for first launch |
 | **D-7 / D-3 / D-1 alerts** | Native notifications at 09:00 — off / favorites / all |

@@ -44,6 +44,12 @@ final class Store: ObservableObject {
     private var urgencyTimer: Timer?
     private var urgencyTier = -1
 
+    /// The anxious wobble: a short, damped side-to-side tilt, like tapping a foot.
+    private var tilt: Double = 0
+    private var wobbleTimer: Timer?
+    private var wobbleStep = 0
+    private var grainsSinceWobble = 0
+
     @Published var favorites: Set<String> = [] {
         didSet {
             defaults.set(Array(favorites), forKey: Keys.favorites)
@@ -297,7 +303,32 @@ final class Store: ObservableObject {
         let fill = menuBarItem.map {
             HourglassIcon.fill(daysRemaining: $0.date.timeIntervalSince(now) / 86_400)
         }
-        menuBarIcon = HourglassIcon.image(fill: fill, grain: grainProgress)
+        menuBarIcon = HourglassIcon.image(fill: fill, grain: grainProgress, tilt: tilt)
+    }
+
+    /// ~0.55 s of damped side-to-side tilt. Fired every few grains once the trickle is
+    /// in its urgent tiers, so the glass looks restless rather than merely draining.
+    func wobble() {
+        guard wobbleTimer == nil else { return }
+        let steps = 11
+        let amplitude = 9.0
+        wobbleStep = 0
+        wobbleTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
+            Task { @MainActor in
+                let store = Store.shared
+                store.wobbleStep += 1
+                let t = Double(store.wobbleStep) / Double(steps)
+                if store.wobbleStep >= steps {
+                    store.wobbleTimer?.invalidate()
+                    store.wobbleTimer = nil
+                    store.tilt = 0
+                } else {
+                    // Three swings, fading out: sin gives the swing, (1 - t) the fade.
+                    store.tilt = amplitude * sin(t * .pi * 3) * (1 - t)
+                }
+                store.updateIcon()
+            }
+        }
     }
 
     /// One grain falls from the throat to the floor over ~0.6 s. Fired at launch, when a
@@ -305,6 +336,18 @@ final class Store: ObservableObject {
     /// bar is a distraction and a battery drain.
     func dropGrain() {
         guard grainTimer == nil, menuBarItem != nil else { return }
+
+        // In the urgent tiers, every few grains the glass also gives a little shake:
+        // roughly every 15 s at D-1, every 6 s in the last half day.
+        if urgencyTier >= 2 {
+            grainsSinceWobble += 1
+            let every = urgencyTier == 3 ? 8 : 5
+            if grainsSinceWobble >= every {
+                grainsSinceWobble = 0
+                wobble()
+            }
+        }
+
         let steps = 18
         grainStep = 0
         grainTimer = Timer.scheduledTimer(withTimeInterval: 0.6 / Double(steps), repeats: true) { _ in

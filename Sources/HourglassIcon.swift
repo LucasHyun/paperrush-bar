@@ -29,8 +29,16 @@ enum HourglassIcon {
     ///   - fill: 0 (empty top bulb) … 1 (full). `nil` draws an idle glass with no sand.
     ///   - grain: 0 … 1 position of a single falling grain along the throat-to-floor
     ///     path, or `nil` for none. Used for the brief drop animation.
-    static func image(fill: Double?, grain: Double?) -> NSImage {
+    ///   - tilt: rotation in degrees about the centre, for the anxious wobble.
+    static func image(fill: Double?, grain: Double?, tilt: Double = 0) -> NSImage {
         let image = NSImage(size: size, flipped: true) { _ in
+            if tilt != 0 {
+                let t = NSAffineTransform()
+                t.translateX(by: size.width / 2, yBy: size.height / 2)
+                t.rotate(byDegrees: CGFloat(tilt))
+                t.translateX(by: -size.width / 2, yBy: -size.height / 2)
+                t.concat()
+            }
             draw(fill: fill, grain: grain)
             return true
         }
