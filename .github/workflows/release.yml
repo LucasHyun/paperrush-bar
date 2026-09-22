@@ -89,10 +89,10 @@ jobs:
 
             Requires macOS 13+.
 
-            Or from the terminal, on any Mac with Python:
+            Homebrew:
 
             ```bash
-            pip install paperrush-bar && paperrush-bar install     # or: uvx paperrush-bar install
+            brew tap LucasHyun/tap && brew install --cask paperrush-bar
             ```
 
       # Push the rendered cask to the personal tap, when one is configured.
@@ -114,40 +114,3 @@ jobs:
           git diff --cached --quiet && { echo "tap already current"; exit 0; }
           git commit -m "paperrush-bar ${TAG#v}"
           git push
-
-  # The pip installer shares the app's version number, so it is published from the
-  # same tag. Uses PyPI trusted publishing: no token, just the `pypi` environment
-  # registered as a publisher on pypi.org (see packaging/README.md).
-  pypi:
-    name: Publish installer to PyPI
-    needs: release
-    runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Stamp version
-        run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          VERSION="${TAG#v}"
-          sed -i "s/^version = \"0.0.0\"/version = \"${VERSION}\"/" pypi/pyproject.toml
-          grep '^version' pypi/pyproject.toml
-
-      - name: Build sdist and wheel
-        run: |
-          pip install --quiet build
-          python -m build pypi/ --outdir pypi/dist
-          ls -l pypi/dist
-
-      - name: Publish
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: pypi/dist
-          skip-existing: true

@@ -1,33 +1,14 @@
 # Distribution
 
-Three channels, all fed by the same tag push. Every release carries the same version number in the
-app's `Info.plist`, the pip package and the cask, and the app checks GitHub once a day to offer the
+Two channels, both fed by the same tag push. Every release carries the same version number in the
+app's `Info.plist` and the cask, and the app checks GitHub once a day to offer the
 next one.
 
 | Channel | Command | Status |
 |---|---|---|
 | GitHub release | download zip | works |
-| pip / uvx | `pip install paperrush-bar && paperrush-bar install` | works once PyPI is set up (below) |
 | Homebrew tap | `brew tap LucasHyun/tap && brew install --cask paperrush-bar` | works once the tap repo exists (below) |
 | Official homebrew-cask | `brew install --cask paperrush-bar` | blocked on notarization (below) |
-
-## pip — the installer package
-
-[`../pypi/`](../pypi/) is a dependency-free Python package whose only job is to fetch the release
-zip, verify its SHA-256 against the published checksum, unpack it with `ditto` and open it. It is on
-PyPI because the people who want this app already have `pip` and live in a terminal — and because a
-download made through Python carries no quarantine flag, so macOS does not stop them at first launch.
-
-The `pypi` job in `release.yml` publishes it on every tag using **trusted publishing** (no API token
-in secrets). One-time setup on pypi.org, before the first tagged release:
-
-1. Sign in → *Your account* → *Publishing* → **Add a new pending publisher**.
-2. PyPI project name `paperrush-bar`, owner `LucasHyun`, repository `paperrush-bar`,
-   workflow `release.yml`, environment `pypi`.
-3. In the GitHub repo: *Settings → Environments → New environment* named `pypi` (no secrets needed).
-
-The first publish claims the name; after that every tag updates it. `skip-existing` means a re-run
-of an old tag is a no-op instead of a failure.
 
 ## Your own tap
 
@@ -68,8 +49,7 @@ published repository with few stars is normally declined, though the policy allo
 consideration "when there is substantial, independently verifiable public interest".
 
 So the honest order is: notarize first, gather users second, submit third. Until then the tap above
-gives exactly the same install command apart from one `brew tap` line, and pip reaches the people
-who never installed Homebrew at all.
+gives exactly the same install command apart from one `brew tap` line.
 
 ## Updates
 
