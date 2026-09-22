@@ -91,6 +91,12 @@ final class Store: ObservableObject {
         }
     }
 
+    /// Separate from `notifyMode`: someone who wants no deadline reminders may still
+    /// want to hear that a new version exists, and the reverse.
+    @Published var notifyUpdates: Bool {
+        didSet { defaults.set(notifyUpdates, forKey: Keys.notifyUpdates) }
+    }
+
     @Published var language: AppLanguage {
         didSet {
             defaults.set(language.rawValue, forKey: Keys.language)
@@ -137,6 +143,8 @@ final class Store: ObservableObject {
         static let urgencyAnimation = "urgencyAnimation"
         static let lastFetch = "lastFetch"
         static let lastUpdateCheck = "lastUpdateCheck"
+        static let notifyUpdates = "notifyUpdates"
+        static let notifiedUpdateVersion = "notifiedUpdateVersion"
     }
 
     private init() {
@@ -146,6 +154,7 @@ final class Store: ObservableObject {
         notifyMode = NotifyMode(rawValue: defaults.string(forKey: Keys.notifyMode) ?? "all") ?? .all
         language = AppLanguage(rawValue: defaults.string(forKey: Keys.language) ?? "system") ?? .system
         urgencyAnimation = defaults.object(forKey: Keys.urgencyAnimation) as? Bool ?? true
+        notifyUpdates = defaults.object(forKey: Keys.notifyUpdates) as? Bool ?? true
         if let t = defaults.object(forKey: Keys.lastFetch) as? Date { lastFetch = t }
         L10n.apply(language)
         loadFromDisk()
@@ -522,6 +531,28 @@ final class Store: ObservableObject {
         let latest = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
         availableUpdate = Store.isNewer(latest, than: Store.currentVersion)
             ? UpdateInfo(version: latest, url: page) : nil
+        if let update = availableUpdate { announce(update) }
+    }
+
+    /// Say it once per version and never again. Nobody downloads a zip and then goes
+    /// looking for a gear menu, so the app has to speak first -- but an update notice
+    /// that reappears every day is how people learn to silence an app for good.
+    private func announce(_ update: UpdateInfo) {
+        guard notifyUpdates,
+              defaults.string(forKey: Keys.notifiedUpdateVersion) != update.version else { return }
+        defaults.set(update.version, forKey: Keys.notifiedUpdateVersion)
+
+        let content = UNMutableNotificationContent()
+        content.title = L10n.t("update.notify.title", update.version)
+        content.body = L10n.t("update.notify.body")
+        content.sound = .default
+        content.userInfo = ["url": update.url.absoluteString]
+        // No trigger: delivered now rather than left pending, where the next
+        // scheduleNotifications() would clear it along with the deadline reminders.
+        UNUserNotificationCenter.current().add(
+            UNNotificationRequest(identifier: "update|" + update.version,
+                                  content: content, trigger: nil),
+            withCompletionHandler: nil)
     }
 
     /// Numeric dotted comparison; "1.10.0" is newer than "1.9.9".

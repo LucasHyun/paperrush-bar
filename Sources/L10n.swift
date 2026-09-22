@@ -112,6 +112,16 @@ enum L10n {
         "settings.urgencyAnimation": ["en": "Sand flows when a deadline is near",
                                       "ko": "마감 임박 시 모래 흐르기",
                                       "zh": "临近截止时流沙"],
+        "settings.notifyUpdates": ["en": "Tell me when a new version is out",
+                                   "ko": "새 버전이 나오면 알리기",
+                                   "zh": "有新版本时通知我"],
+
+        "update.notify.title": ["en": "PaperRush Bar %@ is out",
+                                "ko": "PaperRush Bar %@ 나왔습니다",
+                                "zh": "PaperRush Bar %@ 已发布"],
+        "update.notify.body": ["en": "Click to see what changed and download it.",
+                               "ko": "클릭하면 변경 사항과 다운로드로 이동합니다.",
+                               "zh": "点击查看更新内容并下载。"],
 
         "lang.system": ["en": "System", "ko": "시스템 설정", "zh": "跟随系统"],
 

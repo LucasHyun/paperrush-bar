@@ -135,6 +135,7 @@ struct MenuView: View {
             Toggle(L10n.t("settings.menubarFavorites"), isOn: $store.menuBarFavoritesOnly)
             Toggle(L10n.t("settings.menubarSubmission"), isOn: $store.menuBarSubmissionOnly)
             Toggle(L10n.t("settings.urgencyAnimation"), isOn: $store.urgencyAnimation)
+            Toggle(L10n.t("settings.notifyUpdates"), isOn: $store.notifyUpdates)
             Divider()
             Button(L10n.t("settings.open")) { page = .settings }
             Button(L10n.t("action.openExtras", String(store.extrasCount))) { store.openUserExtras() }

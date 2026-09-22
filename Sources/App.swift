@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import UserNotifications
 
@@ -26,6 +27,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             Store.shared.requestNotificationAuthorization()
             Store.shared.bootstrap()
         }
+    }
+
+    /// Clicking the update notice should land on the release notes, not just dismiss.
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                didReceive response: UNNotificationResponse,
+                                withCompletionHandler completionHandler: @escaping () -> Void) {
+        if let string = response.notification.request.content.userInfo["url"] as? String,
+           let url = URL(string: string) {
+            NSWorkspace.shared.open(url)
+        }
+        completionHandler()
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter,
