@@ -13,6 +13,7 @@ struct PaperRushBarApp: App {
             HStack(spacing: 4) {
                 Image(nsImage: store.menuBarIcon)
                     .renderingMode(.template)
+                    .id(store.iconVersion)
                 Text(verbatim: store.menuBarTitle)
             }
         }

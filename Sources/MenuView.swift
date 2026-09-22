@@ -82,6 +82,9 @@ struct MenuView: View {
                 ProgressView().controlSize(.small)
             } else {
                 Button {
+                    // Also a way to see the glyph move without waiting for midnight.
+                    store.dropGrain()
+                    store.wobble()
                     Task { await store.refresh(force: true) }
                 } label: {
                     Image(systemName: "arrow.clockwise")

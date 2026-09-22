@@ -27,6 +27,9 @@ final class Store: ObservableObject {
     /// The menu bar glyph. Redrawn whenever the nearest deadline or the clock moves,
     /// so the sand level tracks how much time is left.
     @Published private(set) var menuBarIcon: NSImage = HourglassIcon.image(fill: nil, grain: nil)
+    /// Bumped on every redraw; the label uses it as an identity so SwiftUI cannot
+    /// decide two NSImages are "the same" and skip the frame.
+    @Published private(set) var iconVersion = 0
     private var grainProgress: Double?
     private var grainStep = 0
     private var grainTimer: Timer?
@@ -261,7 +264,7 @@ final class Store: ObservableObject {
     private static func trickleInterval(hoursLeft: Double) -> TimeInterval? {
         switch hoursLeft {
         case ..<0: return nil          // passed; the next deadline takes over on rebuild
-        case ..<12: return 0.7         // last half day: a continuous stream
+        case ..<12: return 0.9         // last half day: a continuous stream
         case ..<24: return 3           // D-1
         case ..<72: return 8           // D-3
         default: return nil            // a week or more out: just the level
@@ -304,12 +307,14 @@ final class Store: ObservableObject {
             HourglassIcon.fill(daysRemaining: $0.date.timeIntervalSince(now) / 86_400)
         }
         menuBarIcon = HourglassIcon.image(fill: fill, grain: grainProgress, tilt: tilt)
+        iconVersion &+= 1
     }
 
     /// ~0.55 s of damped side-to-side tilt. Fired every few grains once the trickle is
     /// in its urgent tiers, so the glass looks restless rather than merely draining.
     func wobble() {
-        guard wobbleTimer == nil else { return }
+        guard wobbleTimer == nil,
+              !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
         let steps = 11
         let amplitude = 9.0
         wobbleStep = 0
@@ -337,20 +342,20 @@ final class Store: ObservableObject {
     func dropGrain() {
         guard grainTimer == nil, menuBarItem != nil else { return }
 
-        // In the urgent tiers, every few grains the glass also gives a little shake:
-        // roughly every 15 s at D-1, every 6 s in the last half day.
-        if urgencyTier >= 2 {
+        // Once the trickle is on, every few grains the glass also gives a little shake:
+        // about every 40 s at D-3, every 12 s at D-1, every 6 s in the last half day.
+        if urgencyTier >= 1 {
             grainsSinceWobble += 1
-            let every = urgencyTier == 3 ? 8 : 5
+            let every = [1: 5, 2: 4, 3: 8][urgencyTier] ?? 5
             if grainsSinceWobble >= every {
                 grainsSinceWobble = 0
                 wobble()
             }
         }
 
-        let steps = 18
+        let steps = 22
         grainStep = 0
-        grainTimer = Timer.scheduledTimer(withTimeInterval: 0.6 / Double(steps), repeats: true) { _ in
+        grainTimer = Timer.scheduledTimer(withTimeInterval: 0.8 / Double(steps), repeats: true) { _ in
             Task { @MainActor in
                 let store = Store.shared
                 store.grainStep += 1

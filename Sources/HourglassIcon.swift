@@ -128,12 +128,22 @@ enum HourglassIcon {
             NSGraphicsContext.restoreGraphicsState()
         }
 
-        // The falling grain.
+        // The falling grain, with a short trail. Drawn with XOR so it is dark against
+        // the empty glass and punches a light hole through the mound — otherwise the
+        // grain vanishes exactly when the pile it lands on is big, i.e. when it matters.
         if let grain, f > 0.02 {
-            let start = mid + 0.6
-            let end = glassBot - inset - 1.2
-            let y = start + (end - start) * CGFloat(min(max(grain, 0), 1))
-            NSBezierPath(ovalIn: NSRect(x: cx - 0.7, y: y - 0.7, width: 1.4, height: 1.4)).fill()
+            let start = mid + 0.4
+            let end = glassBot - inset - 1.0
+            let p = CGFloat(min(max(grain, 0), 1))
+            let y = start + (end - start) * p
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current?.compositingOperation = .xor
+            NSBezierPath(ovalIn: NSRect(x: cx - 1.2, y: y - 1.2, width: 2.4, height: 2.4)).fill()
+            if p > 0.15 {
+                let trailY = y - 2.6
+                NSBezierPath(ovalIn: NSRect(x: cx - 0.7, y: trailY - 0.7, width: 1.4, height: 1.4)).fill()
+            }
+            NSGraphicsContext.restoreGraphicsState()
         }
     }
 }
