@@ -11,6 +11,10 @@ final class Store: ObservableObject {
     static let sourceURL = URL(string: "https://raw.githubusercontent.com/awsaf49/paperrush/main/js/data.js")!
     static let projectURL = URL(string: "https://github.com/awsaf49/paperrush")!
 
+    // The overlay ships inside the app, but this repo's own weekly Gemini job keeps the
+    // published copy fresher — so read that and treat the bundled one as the fallback.
+    static let extrasURL = URL(string: "https://raw.githubusercontent.com/LucasHyun/paperrush-bar/main/Resources/extras.json")!
+
     @Published private(set) var conferences: [Conference] = []
     @Published private(set) var extrasCount = 0
     @Published private(set) var items: [DeadlineItem] = []
@@ -59,6 +63,8 @@ final class Store: ObservableObject {
     private var upstream: [Conference] = []
     /// Conferences shipped with the app that upstream does not cover yet.
     private var bundledExtras: [Conference] = []
+    /// The same overlay, as published by this app's repository (preferred when present).
+    private var remoteExtras: [Conference] = []
     /// Conferences the user added in their own extras.json.
     private var userExtras: [Conference] = []
 
@@ -115,6 +121,7 @@ final class Store: ObservableObject {
     }
 
     private var cacheURL: URL { supportDirectory.appendingPathComponent("conferences.json") }
+    private var remoteExtrasCacheURL: URL { supportDirectory.appendingPathComponent("extras-remote.json") }
 
     /// The user's own overlay, edited by hand.
     var userExtrasURL: URL { supportDirectory.appendingPathComponent("extras.json") }
@@ -132,8 +139,12 @@ final class Store: ObservableObject {
 
     private func loadExtras() {
         bundledExtras = Store.decodeConferences(at: Bundle.main.url(forResource: "extras", withExtension: "json"))
+        remoteExtras = Store.decodeConferences(at: remoteExtrasCacheURL)
         userExtras = Store.decodeConferences(at: userExtrasURL)
     }
+
+    /// The published overlay replaces the bundled one wholesale — same file, newer.
+    private var overlay: [Conference] { remoteExtras.isEmpty ? bundledExtras : remoteExtras }
 
     private static func decodeConferences(at url: URL?) -> [Conference] {
         guard let url,
@@ -169,7 +180,7 @@ final class Store: ObservableObject {
     /// only partially (KDD's second submission cycle, say) gets completed.
     private func merge() {
         var byId: [String: Conference] = [:]
-        for conf in bundledExtras { byId[conf.id] = conf }
+        for conf in overlay { byId[conf.id] = conf }
         for conf in userExtras { byId[conf.id] = conf }
 
         for conf in upstream {
@@ -208,15 +219,12 @@ final class Store: ObservableObject {
         isRefreshing = true
         defer { isRefreshing = false }
 
+        // The overlay is published alongside the app and refreshed weekly; a failure here
+        // is not worth surfacing, since the cached or bundled copy still stands.
+        await fetchPublishedOverlay()
+
         do {
-            var request = URLRequest(url: Store.sourceURL)
-            request.cachePolicy = .reloadIgnoringLocalCacheData
-            request.timeoutInterval = 20
-            let (data, response) = try await URLSession.shared.data(for: request)
-            if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-                throw NSError(domain: "PaperRushBar", code: http.statusCode,
-                              userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode)"])
-            }
+            let data = try await Store.download(Store.sourceURL)
             guard let text = String(data: data, encoding: .utf8),
                   let json = Store.extractJSONObject(from: text, after: "CONFERENCES_DATA") else {
                 throw NSError(domain: "PaperRushBar", code: -1,
@@ -234,6 +242,27 @@ final class Store: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    private static func download(_ url: URL) async throws -> Data {
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+        request.timeoutInterval = 20
+        let (data, response) = try await URLSession.shared.data(for: request)
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw NSError(domain: "PaperRushBar", code: http.statusCode,
+                          userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode)"])
+        }
+        return data
+    }
+
+    private func fetchPublishedOverlay() async {
+        guard let data = try? await Store.download(Store.extrasURL),
+              let feed = try? JSONDecoder().decode(ConferenceFeed.self, from: data),
+              !feed.conferences.isEmpty else { return }
+        try? data.write(to: remoteExtrasCacheURL, options: .atomic)
+        loadExtras()
+        merge()
     }
 
     /// data.js holds `const CONFERENCES_DATA = { ... };` followed by other declarations,

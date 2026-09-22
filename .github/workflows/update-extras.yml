@@ -1,0 +1,112 @@
+name: update-extras
+
+# The overlay is hand-written, so its estimated dates go stale as CFPs appear.
+# Once a week, re-read each conference's own pages and write back what can be verified.
+on:
+  schedule:
+    - cron: '30 6 * * 1'   # Mondays 06:30 UTC, after upstream paperrush runs at 06:00
+  workflow_dispatch:
+    inputs:
+      conferences:
+        description: 'Comma-separated ids, e.g. www,sigir,kdd-2027 (blank = all)'
+        required: false
+      dry_run:
+        description: 'Report changes without committing'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-extras
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Refresh extras.json
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "${GEMINI_API_KEY}" ]; then
+            echo "::error::GEMINI_API_KEY secret is not set (Settings > Secrets and variables > Actions)."
+            exit 1
+          fi
+          ARGS=""
+          if [ -n "${{ github.event.inputs.conferences }}" ]; then
+            ARGS="--conferences ${{ github.event.inputs.conferences }}"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python scripts/update_extras.py $ARGS | tee /tmp/update.log
+
+      - name: Validate the result
+        run: |
+          python3 - <<'PY'
+          import json, re, sys
+          up = json.load(open('Resources/conferences.json'))['conferences']
+          ex = json.load(open('Resources/extras.json'))['conferences']
+          assert ex, 'extras is empty'
+
+          errors = []
+          date_re = re.compile(r'^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2}))?$')
+          types = {'abstract','paper','supplementary','rebuttal','notification',
+                   'camera','conference','workshop','tutorial','event'}
+          up_ids = {c['id'] for c in up}
+
+          for c in ex:
+              for d in c['deadlines']:
+                  if not date_re.match(d['date']):
+                      errors.append(f"{c['id']}: date {d['date']}")
+                  if d.get('endDate') and not date_re.match(d['endDate']):
+                      errors.append(f"{c['id']}: endDate {d['endDate']}")
+                  if d['type'] not in types:
+                      errors.append(f"{c['id']}: type {d['type']}")
+                  if not d.get('sourceUrl'):
+                      errors.append(f"{c['id']}: '{d['label']}' has no sourceUrl")
+              if c.get('mode') == 'patch' and c['id'] not in up_ids:
+                  errors.append(f"{c['id']}: patch with no upstream entry")
+              if c.get('mode') != 'patch' and c['id'] in up_ids:
+                  errors.append(f"{c['id']}: shadowed by upstream")
+
+          if errors:
+              print('\n'.join(f'  - {e}' for e in errors))
+              sys.exit(1)
+          print(f"{len(ex)} conferences, {sum(len(c['deadlines']) for c in ex)} deadlines OK")
+          PY
+
+      - name: Commit
+        if: github.event.inputs.dry_run != 'true'
+        run: |
+          if git diff --quiet -- Resources/extras.json; then
+            echo "No changes."
+            exit 0
+          fi
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add Resources/extras.json
+          git commit -m "chore: refresh extras deadlines [automated]" -m "$(grep -E '^  (new:|rejected|location:|[A-Z].*->)' /tmp/update.log | head -40)"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '### extras update'
+            echo '```'
+            tail -60 /tmp/update.log 2>/dev/null || echo 'no log'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

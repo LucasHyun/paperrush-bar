@@ -32,7 +32,7 @@ AI/ML 会议投稿截止还有几天，并在后台自动保持数据最新。
 | **D-7 / D-3 / D-1 提醒** | 当天上午 9:00 发送系统通知 —— 关闭 / 仅收藏 / 全部 |
 | **收藏** | 加 ★ 的会议置顶，也可让菜单栏与通知只关注收藏项 |
 | **点击打开官网** | 点击任意一行即可打开该会议官方网站 |
-| **补充会议** | 内置 12 个上游尚未收录的会议并自动合并，也可在可编辑的文件中添加你自己的会议 |
+| **补充会议** | 12 个上游尚未收录的会议，每周从各自 CFP 重新读取更新，也可在可编辑的文件中添加你自己的会议 |
 | **登录时自动启动** | 通过 `SMAppService` 一键开关 |
 | **三种语言** | English · 한국어 · 中文，齿轮菜单中即时切换（默认跟随系统语言） |
 
@@ -91,9 +91,25 @@ Info.plist                   LSUIElement = true（不显示 Dock 图标）
 
 `id` 相同时永远以上游为准，因此一旦 paperrush 收录了同一个会议，补充条目会自动退场 —— 不留重复，无需清理。
 
-**内置**（`Resources/extras.json`，列表中标记 `补充`）：WWW、WSDM、ICDM、CIKM、ECML PKDD、SIGIR、
-RecSys、COLM、UAI、ACM MM、AAMAS、ECAI。若下一届 CFP 尚未公布，日期由上一轮推断得出并标记 `预估` ——
-绝不会当作已确认的日期展示。
+**补充层**（列表中标记 `补充`）：WWW、WSDM、ICDM、CIKM、ECML PKDD、SIGIR、RecSys、COLM、UAI、
+ACM MM、AAMAS、ECAI。若下一届 CFP 尚未公布，日期由上一轮推断得出并标记 `预估` —— 绝不会当作已确认
+的日期展示。
+
+它会自动保持最新。`scripts/update_extras.py` 每周在 Actions 中运行（周一 06:30 UTC，紧接上游任务之后）：
+重新读取每条截止的 `sourceUrl`，用 **Gemini 2.5 Flash** 提取日程，只提交能够验证的结果。CFP 一旦公布，
+`预估` 会自动变成确认日期。应用通过网络读取已发布的 `Resources/extras.json`，因此**无需重新构建**即可生效，
+应用内置的副本只作为离线回退。
+
+未经验证的内容不会进入：模型给出的日期只有在 (1) 其 `sourceUrl` 属于实际抓取过的页面，且 (2) 该日期确实
+出现在该页面正文中时才会被采纳；验证失败则保留原值。模型也无法把自己的推断从 `预估` 提升为已确认。
+配置只需一个密钥：*Settings → Secrets and variables → Actions* 中的 `GEMINI_API_KEY`。
+未设置时仅该任务失败，其余功能照常。
+
+```bash
+export GEMINI_API_KEY=...
+python scripts/update_extras.py --dry-run          # 只看会改动什么
+python scripts/update_extras.py -c www,sigir       # 仅指定会议
+```
 
 **补丁**：带 `"mode": "patch"` 且 `id` 与上游相同的条目不会替换该会议，而是**只补上上游缺少的截止**。
 KDD 每年有两轮投稿，而上游只收录了 Cycle 1，因此 `kdd-2027` 被补上了 Cycle 2。一旦上游发布了同一个

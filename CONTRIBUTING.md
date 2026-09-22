@@ -25,6 +25,7 @@ While iterating, `pkill -x PaperRushBar` before rebuilding so the old instance r
 | `Sources/L10n.swift` | Every user-facing string, in every language |
 | `Sources/MenuView.swift` | The dropdown UI |
 | `Sources/App.swift` | `MenuBarExtra` entry point, app delegate |
+| `scripts/update_extras.py` | Weekly Gemini job that re-reads the overlay's sources |
 
 ## Adding or fixing a translation
 
@@ -62,6 +63,20 @@ An overlay entry does one of two things:
 - Pick a `brandColor` no other conference uses, and run the checks in `.github/workflows/build.yml`.
 - Please also add it to `upstream/` so it can go to paperrush, where it benefits everyone and the
   scraper keeps it current.
+
+**The overlay updates itself.** `scripts/update_extras.py` runs weekly in Actions: it fetches each
+deadline's `sourceUrl`, asks Gemini 2.5 Flash for the current schedule, and accepts a date only when
+its `sourceUrl` is one of the pages actually fetched and the date is legible in that page's text.
+Anything unverified leaves the existing entry alone, and an estimate can never be promoted to
+confirmed by the model. Run it yourself with `GEMINI_API_KEY` set:
+
+```bash
+pip install -r scripts/requirements.txt
+python scripts/update_extras.py --dry-run
+```
+
+If you loosen a check in that script, say in the PR what stops a hallucinated deadline from landing —
+a wrong date here is worse than a missing one.
 
 Wrong dates for a conference upstream already covers belong in paperrush's tracker, not here. This
 repository only needs a change if the *format* of `js/data.js` changes, or if a deadline type is being

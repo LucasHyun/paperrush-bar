@@ -1,6 +1,8 @@
 build/
 *.app
 *.zip
+.env
+__pycache__/
 .DS_Store
 *.swp
 .vscode/

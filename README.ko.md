@@ -32,7 +32,7 @@ Electron도 Python도 없는 약 1MB짜리 네이티브 메뉴바 앱입니다. 
 | **D-7 / D-3 / D-1 알림** | 해당 날짜 오전 9시 네이티브 알림 — 끄기 / 즐겨찾기만 / 전체 |
 | **즐겨찾기** | ★ 표시한 학회는 목록 상단에 고정, 메뉴바·알림도 즐겨찾기만으로 제한 가능 |
 | **클릭 = 사이트 열기** | 행을 누르면 학회 공식 사이트가 열립니다 |
-| **학회 추가** | 원본에 아직 없는 12개 학회를 내장해서 병합, 직접 편집하는 파일로 본인 학회도 추가 가능 |
+| **학회 추가** | 원본에 없는 12개 학회를 매주 CFP에서 다시 읽어 갱신, 직접 편집하는 파일로 본인 학회도 추가 가능 |
 | **로그인 시 자동 실행** | `SMAppService` 토글 하나 |
 | **3개 국어** | English · 한국어 · 中文, 톱니바퀴 메뉴에서 즉시 전환 (기본값은 시스템 언어) |
 
@@ -93,9 +93,27 @@ Info.plist                   LSUIElement = true (Dock 아이콘 없음)
 `id`가 같으면 항상 원본이 이깁니다. 즉 paperrush에 같은 학회가 추가되는 순간 오버레이 항목은 스스로
 물러납니다 — 중복이 남거나 따로 정리할 일이 없습니다.
 
-**내장** (`Resources/extras.json`, 목록에 `추가` 배지): WWW, WSDM, ICDM, CIKM, ECML PKDD, SIGIR,
-RecSys, COLM, UAI, ACM MM, AAMAS, ECAI. 다음 회차 CFP가 아직 안 나온 학회는 직전 사이클에서 추정한
-날짜이며 `예상` 배지가 붙습니다 — 확정된 것처럼 표시하지 않습니다.
+**오버레이** (목록에 `추가` 배지): WWW, WSDM, ICDM, CIKM, ECML PKDD, SIGIR, RecSys, COLM, UAI,
+ACM MM, AAMAS, ECAI. 다음 회차 CFP가 아직 안 나온 학회는 직전 사이클에서 추정한 날짜이며
+`예상` 배지가 붙습니다 — 확정된 것처럼 표시하지 않습니다.
+
+이 오버레이는 스스로 최신화됩니다. `scripts/update_extras.py` 가 매주 Actions에서 돌면서
+(월요일 06:30 UTC, 원본 작업 직후) 각 마감의 `sourceUrl` 을 다시 읽고 **Gemini 2.5 Flash** 로
+일정을 추출한 뒤, 검증된 것만 커밋합니다. CFP가 공개되는 대로 `예상` 이 확정 날짜로 바뀝니다.
+앱은 게시된 `Resources/extras.json` 을 네트워크로 읽으므로 **재빌드 없이** 반영되고, 앱에 내장된
+사본은 오프라인 폴백 역할만 합니다.
+
+검증 없이는 아무것도 들어가지 않습니다. 모델이 제안한 날짜는 (1) `sourceUrl` 이 실제로 가져온
+페이지 중 하나이고 (2) 그 페이지 본문에 그 날짜가 실제로 적혀 있을 때만 채택되며, 검증에 실패하면
+기존 값을 그대로 둡니다. 모델이 자기 추정치를 `예상` 에서 확정으로 승격시킬 수도 없습니다.
+설정은 시크릿 하나, *Settings → Secrets and variables → Actions* 의 `GEMINI_API_KEY` 뿐입니다.
+없으면 그 작업만 실패하고 나머지는 그대로 동작합니다.
+
+```bash
+export GEMINI_API_KEY=...
+python scripts/update_extras.py --dry-run          # 무엇이 바뀔지만 확인
+python scripts/update_extras.py -c www,sigir       # 특정 학회만
+```
 
 **패치**: `"mode": "patch"` 와 원본에 있는 `id` 를 가진 항목은 그 학회를 대체하는 대신 **빠진 마감만
 덧붙입니다**. KDD는 1년에 두 번 받는데 원본은 Cycle 1만 추적하고 있어서, `kdd-2027` 에 Cycle 2를

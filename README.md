@@ -32,7 +32,7 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 | **D-7 / D-3 / D-1 alerts** | Native notifications at 09:00 — off / favorites / all |
 | **Favorites** | Star a conference to pin it to the top, and optionally limit the menu bar and alerts to starred ones |
 | **Click to open** | Any row opens the conference's official site |
-| **Extra conferences** | 12 venues upstream doesn't cover yet, merged in locally — plus your own, in a file you can edit |
+| **Extra conferences** | 12 venues upstream doesn't cover yet, re-read from their own CFPs weekly — plus your own, in a file you can edit |
 | **Launch at login** | One toggle, via `SMAppService` |
 | **3 languages** | English · 한국어 · 中文, switchable live from the gear menu (follows system language by default) |
 
@@ -96,9 +96,27 @@ bundled extras.json  <  your extras.json  <  upstream paperrush
 Upstream always wins on a shared `id`, so an overlay entry retires itself the moment paperrush ships
 the same conference — nothing to clean up, no stale duplicate.
 
-**Bundled** (`Resources/extras.json`, marked `Added` in the list): WWW, WSDM, ICDM, CIKM, ECML PKDD,
-SIGIR, RecSys, COLM, UAI, ACM MM, AAMAS, ECAI. Dates that the next edition's CFP hasn't announced yet
-are inferred from the previous cycle and carry an `Est.` badge — they are never presented as confirmed.
+**The overlay** (marked `Added` in the list): WWW, WSDM, ICDM, CIKM, ECML PKDD, SIGIR, RecSys, COLM,
+UAI, ACM MM, AAMAS, ECAI. Dates the next edition's CFP hasn't announced yet are inferred from the
+previous cycle and carry an `Est.` badge — they are never presented as confirmed.
+
+It keeps itself current. `scripts/update_extras.py` runs weekly in Actions (Mondays 06:30 UTC, just
+after upstream's own job): it re-reads each deadline's `sourceUrl`, asks **Gemini 2.5 Flash** to
+extract the schedule, and commits what it can verify. Estimates become confirmed dates on their own
+as CFPs appear. The app reads the published `Resources/extras.json` over the network, so those
+updates land without a rebuild; the copy inside the app is only the offline fallback.
+
+Nothing goes in unverified: a proposed date is accepted only when its `sourceUrl` is one of the pages
+actually fetched **and** the date is legible in that page's text; an unverified date leaves the
+existing entry untouched rather than replacing it, and the model can never promote its own guess from
+`Est.` to confirmed. Setup is one secret, `GEMINI_API_KEY`, under *Settings → Secrets and variables →
+Actions*. Without it the job fails loudly and everything else keeps working.
+
+```bash
+export GEMINI_API_KEY=...
+python scripts/update_extras.py --dry-run          # see what would change
+python scripts/update_extras.py -c www,sigir       # just these two
+```
 
 **Patches**: an overlay entry with `"mode": "patch"` and an upstream `id` doesn't replace that
 conference — it adds the deadlines upstream is missing. KDD runs two submission cycles a year and
