@@ -257,6 +257,17 @@ def ask_gemini(client, conference: dict, pages: dict[str, str], today: str) -> d
 
 # --------------------------------------------------------------------------- merge
 
+def days_between(a: str, b: str) -> int:
+    from datetime import date
+    return abs((date.fromisoformat(a[:10]) - date.fromisoformat(b[:10])).days)
+
+
+def supersedes(confirmed: list[dict], estimate: dict) -> bool:
+    """True when a confirmed deadline is obviously the same milestone as this estimate."""
+    return any(d["type"] == estimate["type"] and days_between(d["date"], estimate["date"]) < 45
+               for d in confirmed)
+
+
 def merge_conference(conference: dict, proposal: dict, pages: dict[str, str]) -> tuple[dict, list[str]]:
     """Apply a proposal on top of the current entry, keeping anything unverified."""
     log: list[str] = []
@@ -302,9 +313,18 @@ def merge_conference(conference: dict, proposal: dict, pages: dict[str, str]) ->
                        + ("  [est]" if clean["estimated"] else ""))
         accepted[key] = clean
 
-    # Nothing is dropped silently: whatever the model did not replace stays.
+    # Nothing is dropped silently: whatever the model did not replace stays. The one
+    # exception is an estimate that a confirmed date has clearly overtaken - a CFP often
+    # renames the milestone as it publishes it ("Paper Submission (Cycle 2)" becoming
+    # "Cycle 2 Paper Deadline"), which would otherwise leave both rows in the list.
+    confirmed = [d for d in accepted.values() if not d.get("estimated")]
     for key, deadline in existing.items():
-        accepted.setdefault(key, deadline)
+        if key in accepted:
+            continue
+        if deadline.get("estimated") and supersedes(confirmed, deadline):
+            log.append(f"dropped estimate '{deadline['label']}' {deadline['date'][:10]}: superseded by a confirmed date")
+            continue
+        accepted[key] = deadline
 
     updated = dict(conference)
     updated["deadlines"] = sorted(accepted.values(), key=lambda d: d["date"])
