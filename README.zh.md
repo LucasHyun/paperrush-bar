@@ -40,19 +40,27 @@ AI/ML 会议投稿截止还有几天，并在后台自动保持数据最新。
 
 ## 安装
 
+最快的方式 —— 任何装有 Python 的 Mac（会向这些会议投稿的人，机器上一定有）：
+
+```bash
+pip install paperrush-bar && paperrush-bar install      # 或：uvx paperrush-bar install
+```
+
+它会下载发布包、校验 SHA-256，并把 `PaperRushBar.app` 放进 `/Applications`。
+之后用 `paperrush-bar upgrade` 升级 —— 有新版本时应用自己也会提示。
+Homebrew 用户：`brew tap LucasHyun/tap && brew install --cask paperrush-bar`。
+
+从源码构建，需要 Xcode 命令行工具（`xcode-select --install`）：
+
 ```bash
 git clone https://github.com/LucasHyun/paperrush-bar.git
 cd paperrush-bar
 ./build.sh && ./install.sh
 ```
 
-环境要求：**macOS 13 (Ventura) 及以上**，以及 Xcode 命令行工具
-（若缺少 `swiftc`，先执行 `xcode-select --install`）。项目没有 Xcode 工程文件，也不用包管理器，
-`build.sh` 只调用一次 `swiftc` 并自行组装 `.app`。
-
-卸载执行 `./uninstall.sh`。
-
-Homebrew：cask 文件与发布所需条件见 [`packaging/`](packaging/README.md)。
+没有 Xcode 工程也不用包管理器 —— `build.sh` 只调用一次 `swiftc` 并自行组装 `.app`。
+需要 **macOS 13 (Ventura) 及以上**。卸载用 `./uninstall.sh` 或 `paperrush-bar uninstall`。
+各发布渠道的配置见 [`packaging/`](packaging/README.md)。
 
 > 构建会做 ad-hoc 签名（`codesign --sign -`），通知和登录项依赖它。
 > 由于没有 Developer ID 签名，macOS 首次启动时可能要求确认。

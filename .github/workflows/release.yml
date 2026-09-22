@@ -31,13 +31,22 @@ jobs:
           print('snapshot:', len(obj['conferences']), 'conferences,', obj['lastUpdated'])
           PY
 
+      - name: Resolve tag
+        id: tag
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
       - name: Build
+        env:
+          VERSION: ${{ steps.tag.outputs.version }}
         run: ./build.sh
 
       - name: Package
         id: package
         run: |
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          TAG="${{ steps.tag.outputs.tag }}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           cd build
           # -y keeps symlinks inside the bundle intact
@@ -79,3 +88,66 @@ jobs:
             ```
 
             Requires macOS 13+.
+
+            Or from the terminal, on any Mac with Python:
+
+            ```bash
+            pip install paperrush-bar && paperrush-bar install     # or: uvx paperrush-bar install
+            ```
+
+      # Push the rendered cask to the personal tap, when one is configured.
+      # TAP_TOKEN: a fine-grained PAT with Contents: read/write on LucasHyun/homebrew-tap.
+      - name: Update Homebrew tap
+        env:
+          TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
+        if: env.TAP_TOKEN != ''
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.package.outputs.tag }}"
+          git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/LucasHyun/homebrew-tap.git" /tmp/tap
+          mkdir -p /tmp/tap/Casks
+          cp build/paperrush-bar.rb /tmp/tap/Casks/paperrush-bar.rb
+          cd /tmp/tap
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add Casks/paperrush-bar.rb
+          git diff --cached --quiet && { echo "tap already current"; exit 0; }
+          git commit -m "paperrush-bar ${TAG#v}"
+          git push
+
+  # The pip installer shares the app's version number, so it is published from the
+  # same tag. Uses PyPI trusted publishing: no token, just the `pypi` environment
+  # registered as a publisher on pypi.org (see packaging/README.md).
+  pypi:
+    name: Publish installer to PyPI
+    needs: release
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Stamp version
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          sed -i "s/^version = \"0.0.0\"/version = \"${VERSION}\"/" pypi/pyproject.toml
+          grep '^version' pypi/pyproject.toml
+
+      - name: Build sdist and wheel
+        run: |
+          pip install --quiet build
+          python -m build pypi/ --outdir pypi/dist
+          ls -l pypi/dist
+
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: pypi/dist
+          skip-existing: true

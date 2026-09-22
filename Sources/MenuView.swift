@@ -100,6 +100,10 @@ struct MenuView: View {
 
     private var settingsMenu: some View {
         Menu {
+            if let update = store.availableUpdate {
+                Button(L10n.t("action.update", update.version)) { store.openUpdate() }
+                Divider()
+            }
             Picker(L10n.t("settings.language"), selection: $store.language) {
                 ForEach(AppLanguage.allCases) { lang in
                     Text(verbatim: lang.nativeName).tag(lang)
@@ -124,7 +128,9 @@ struct MenuView: View {
             Button(L10n.t("action.openSource")) { store.openSource() }
             Button(L10n.t("action.quit")) { NSApplication.shared.terminate(nil) }
         } label: {
-            Image(systemName: "gearshape")
+            // A dot on the gear says an update is waiting, without a second control.
+            Image(systemName: store.availableUpdate == nil ? "gearshape" : "gearshape.fill")
+                .foregroundStyle(store.availableUpdate == nil ? Color.primary : Color.accentColor)
         }
         .menuStyle(.borderlessButton)
         .menuIndicator(.hidden)

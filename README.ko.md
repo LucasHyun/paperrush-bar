@@ -40,19 +40,27 @@ Electron도 Python도 없는 약 1MB짜리 네이티브 메뉴바 앱입니다. 
 
 ## 설치
 
+가장 빠른 방법 — Python이 있는 맥이면 어디서나 (이 학회들에 투고하신다면 있을 겁니다):
+
+```bash
+pip install paperrush-bar && paperrush-bar install      # 또는: uvx paperrush-bar install
+```
+
+릴리즈를 받아 체크섬을 검증하고 `PaperRushBar.app`을 `/Applications`에 넣습니다.
+이후엔 `paperrush-bar upgrade` — 새 릴리즈가 나오면 앱이 직접 알려주기도 합니다.
+Homebrew 사용자: `brew tap LucasHyun/tap && brew install --cask paperrush-bar`.
+
+소스에서 빌드하려면 Xcode Command Line Tools(`xcode-select --install`)를 준비하고:
+
 ```bash
 git clone https://github.com/LucasHyun/paperrush-bar.git
 cd paperrush-bar
 ./build.sh && ./install.sh
 ```
 
-필요 조건: **macOS 13 (Ventura) 이상**, Xcode Command Line Tools
-(`swiftc`가 없다면 `xcode-select --install` 한 번). Xcode 프로젝트도 패키지 매니저도 쓰지 않고,
-`build.sh`가 `swiftc`를 한 번 호출해 `.app` 번들을 직접 조립합니다.
-
-제거는 `./uninstall.sh`.
-
-Homebrew: cask 파일과 배포에 필요한 조건은 [`packaging/`](packaging/README.md)에 정리해 뒀습니다.
+Xcode 프로젝트도 패키지 매니저도 없습니다 — `build.sh`가 `swiftc`를 한 번 호출해 `.app`을 직접
+조립합니다. **macOS 13 (Ventura) 이상** 필요. 제거는 `./uninstall.sh` 또는 `paperrush-bar uninstall`.
+배포 채널 구성은 [`packaging/`](packaging/README.md)에 있습니다.
 
 > 빌드는 ad-hoc 서명(`codesign --sign -`)을 합니다. 알림과 로그인 항목이 동작하려면 이 서명이 필요합니다.
 > Developer ID 서명은 아니므로 첫 실행 시 macOS가 확인을 요구할 수 있습니다.

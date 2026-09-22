@@ -90,6 +90,7 @@ enum L10n {
 
         "action.refresh": ["en": "Refresh now", "ko": "지금 새로고침", "zh": "立即刷新"],
         "action.quit": ["en": "Quit", "ko": "종료", "zh": "退出"],
+        "action.update": ["en": "Update available: %@", "ko": "업데이트 있음: %@", "zh": "有可用更新：%@"],
         "action.openSource": ["en": "Open data source (paperrush)",
                               "ko": "데이터 출처 열기 (paperrush)",
                               "zh": "打开数据来源 (paperrush)"],

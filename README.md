@@ -40,19 +40,27 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 
 ## Install
 
+The quickest way, on any Mac that has Python (which, if you submit to these conferences, yours does):
+
+```bash
+pip install paperrush-bar && paperrush-bar install      # or: uvx paperrush-bar install
+```
+
+That fetches the release, verifies its checksum, and puts `PaperRushBar.app` in `/Applications`.
+Later, `paperrush-bar upgrade` — though the app also tells you itself when a new release is out.
+Homebrew users: `brew tap LucasHyun/tap && brew install --cask paperrush-bar`.
+
+From source, with Xcode Command Line Tools (`xcode-select --install`):
+
 ```bash
 git clone https://github.com/LucasHyun/paperrush-bar.git
 cd paperrush-bar
 ./build.sh && ./install.sh
 ```
 
-Requirements: **macOS 13 (Ventura) or newer** and Xcode Command Line Tools
-(`xcode-select --install` if `swiftc` is missing). There is no Xcode project and no package manager —
-`build.sh` calls `swiftc` once and assembles the `.app` bundle itself.
-
-Remove everything with `./uninstall.sh`.
-
-Homebrew: the cask and what it would take to publish it are in [`packaging/`](packaging/README.md).
+There is no Xcode project and no package manager — `build.sh` calls `swiftc` once and assembles the
+`.app` itself. Requires **macOS 13 (Ventura) or newer**. Remove with `./uninstall.sh` or
+`paperrush-bar uninstall`. How the channels are wired up is in [`packaging/`](packaging/README.md).
 
 > The build is ad-hoc signed (`codesign --sign -`), which is what notifications and the login item need.
 > macOS may still ask you to confirm the first launch since there is no Developer ID signature.

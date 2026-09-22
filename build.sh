@@ -39,6 +39,15 @@ swiftc \
 
 cp Info.plist "${APP}/Contents/Info.plist"
 printf 'APPL????' > "${APP}/Contents/PkgInfo"
+
+# Stamp the version: VERSION env if set (the release workflow passes the tag),
+# else the nearest git tag, else a dev marker. The in-app update check and the
+# pip installer both compare against this.
+VERSION="${VERSION:-$(git describe --tags --abbrev=0 2>/dev/null | sed 's/^v//' || true)}"
+VERSION="${VERSION:-0.0.0}"
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${VERSION}" "${APP}/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${VERSION}" "${APP}/Contents/Info.plist"
+echo "    version ${VERSION}"
 for RESOURCE in conferences.json extras.json; do
 	if [ -f "Resources/${RESOURCE}" ]; then
 		cp "Resources/${RESOURCE}" "${APP}/Contents/Resources/${RESOURCE}"

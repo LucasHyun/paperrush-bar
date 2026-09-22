@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "paperrush-bar"
+# Replaced with the release tag by the release workflow; the app and this
+# installer always share a version number.
+version = "0.0.0"
+description = "Installer for PaperRush Bar, the macOS menu bar countdown to AI conference deadlines"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+authors = [{ name = "Hyun Lee" }]
+keywords = ["conference", "deadline", "menu bar", "macos", "neurips", "icml", "cvpr", "acl"]
+classifiers = [
+  "Environment :: MacOS X",
+  "Operating System :: MacOS",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Utilities",
+]
+# Standard library only, on purpose: this runs in whatever environment a
+# researcher happens to have active, and must not drag anything into it.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/LucasHyun/paperrush-bar"
+Releases = "https://github.com/LucasHyun/paperrush-bar/releases"
+Issues = "https://github.com/LucasHyun/paperrush-bar/issues"
+
+[project.scripts]
+paperrush-bar = "paperrush_bar.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/paperrush_bar"]

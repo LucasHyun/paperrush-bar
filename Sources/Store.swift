@@ -14,6 +14,19 @@ final class Store: ObservableObject {
     // The overlay ships inside the app, but this repo's own weekly Gemini job keeps the
     // published copy fresher — so read that and treat the bundled one as the fallback.
     static let extrasURL = URL(string: "https://raw.githubusercontent.com/LucasHyun/paperrush-bar/main/Resources/extras.json")!
+    static let latestReleaseURL = URL(string: "https://api.github.com/repos/LucasHyun/paperrush-bar/releases/latest")!
+
+    struct UpdateInfo: Equatable {
+        let version: String
+        let url: URL
+    }
+
+    /// Set when GitHub has a release newer than the running build. Checked once a day.
+    @Published private(set) var availableUpdate: UpdateInfo?
+
+    static var currentVersion: String {
+        Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.0.0"
+    }
 
     @Published private(set) var conferences: [Conference] = []
     @Published private(set) var extrasCount = 0
@@ -107,6 +120,7 @@ final class Store: ObservableObject {
         static let language = "language"
         static let urgencyAnimation = "urgencyAnimation"
         static let lastFetch = "lastFetch"
+        static let lastUpdateCheck = "lastUpdateCheck"
     }
 
     private init() {
@@ -387,6 +401,7 @@ final class Store: ObservableObject {
         // The overlay is published alongside the app and refreshed weekly; a failure here
         // is not worth surfacing, since the cached or bundled copy still stands.
         await fetchPublishedOverlay()
+        await checkForUpdate()
 
         do {
             let data = try await Store.download(Store.sourceURL)
@@ -420,6 +435,38 @@ final class Store: ObservableObject {
                           userInfo: [NSLocalizedDescriptionKey: "HTTP \(http.statusCode)"])
         }
         return data
+    }
+
+    /// Once a day, ask GitHub for the latest release and remember it if it is newer.
+    /// Quiet on every failure: an update notice is a nicety, not something to alarm about.
+    private func checkForUpdate() async {
+        if let last = defaults.object(forKey: Keys.lastUpdateCheck) as? Date,
+           Date().timeIntervalSince(last) < 24 * 3600 { return }
+        guard let data = try? await Store.download(Store.latestReleaseURL),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let tag = json["tag_name"] as? String,
+              let page = (json["html_url"] as? String).flatMap(URL.init(string:)) else { return }
+        defaults.set(Date(), forKey: Keys.lastUpdateCheck)
+        let latest = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
+        availableUpdate = Store.isNewer(latest, than: Store.currentVersion)
+            ? UpdateInfo(version: latest, url: page) : nil
+    }
+
+    /// Numeric dotted comparison; "1.10.0" is newer than "1.9.9".
+    static func isNewer(_ a: String, than b: String) -> Bool {
+        func parts(_ s: String) -> [Int] {
+            s.split(separator: ".").map { Int($0.prefix { $0.isNumber }) ?? 0 }
+        }
+        let (pa, pb) = (parts(a), parts(b))
+        for i in 0..<max(pa.count, pb.count) {
+            let (x, y) = (i < pa.count ? pa[i] : 0, i < pb.count ? pb[i] : 0)
+            if x != y { return x > y }
+        }
+        return false
+    }
+
+    func openUpdate() {
+        if let url = availableUpdate?.url { NSWorkspace.shared.open(url) }
     }
 
     private func fetchPublishedOverlay() async {
