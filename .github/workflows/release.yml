@@ -16,10 +16,6 @@ jobs:
   release:
     name: Build and publish .zip
     runs-on: macos-14
-    # Job-level on purpose: a step's `if` is evaluated before that step's own `env`
-    # exists, so a step-level TAP_TOKEN would always read as empty and skip.
-    env:
-      TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -93,27 +89,8 @@ jobs:
 
             Requires macOS 13+.
 
-            Homebrew:
+            Homebrew (once the tap is pointed at this release):
 
             ```bash
             brew tap LucasHyun/tap && brew install --cask paperrush-bar
             ```
-
-      # Push the rendered cask to the personal tap, when one is configured.
-      # TAP_TOKEN: a fine-grained PAT with Contents: read/write on LucasHyun/homebrew-tap.
-      - name: Update Homebrew tap
-        if: env.TAP_TOKEN != ''
-        run: |
-          set -euo pipefail
-          TAG="${{ steps.package.outputs.tag }}"
-          git clone --depth 1 "https://x-access-token:${TAP_TOKEN}@github.com/LucasHyun/homebrew-tap.git" /tmp/tap
-          mkdir -p /tmp/tap/Casks
-          cp build/paperrush-bar.rb /tmp/tap/Casks/paperrush-bar.rb
-          cd /tmp/tap
-          git config user.name  'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-          git add Casks/paperrush-bar.rb
-          git diff --cached --quiet && { echo "tap already current"; exit 0; }
-          git commit -m "paperrush-bar ${TAG#v}"
-          # Explicit ref: the tap starts out as an empty repository with no upstream branch.
-          git push origin HEAD:main

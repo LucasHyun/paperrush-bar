@@ -1,13 +1,13 @@
 # Distribution
 
-Two channels, both fed by the same tag push. Every release carries the same version number in the
+Two channels. A tag push builds and publishes the release; one command then points the tap at it. Every release carries the same version number in the
 app's `Info.plist` and the cask, and the app checks GitHub once a day to offer the
 next one.
 
 | Channel | Command | Status |
 |---|---|---|
 | GitHub release | download zip | works |
-| Homebrew tap | `brew tap LucasHyun/tap && brew install --cask paperrush-bar` | works once the tap repo exists (below) |
+| Homebrew tap | `brew tap LucasHyun/tap && brew install --cask paperrush-bar` | works; the tap is updated with one command after each release (below) |
 | Official homebrew-cask | `brew install --cask paperrush-bar` | blocked on notarization (below) |
 
 ## Your own tap
@@ -18,10 +18,20 @@ Create the repository once — the name must start with `homebrew-`:
 gh repo create homebrew-tap --public --description "Homebrew tap for LucasHyun's tools"
 ```
 
-Then give the release workflow a way to push to it: a fine-grained personal access token scoped to
-that one repository with *Contents: read and write*, stored in this repo as the secret `TAP_TOKEN`.
-From then on every release copies the rendered cask into `Casks/paperrush-bar.rb` in the tap and
-commits it. If the secret is absent the step is skipped, nothing else is affected.
+The release workflow renders `paperrush-bar.rb` with the tag's version and SHA-256 and attaches it to
+the release. Pointing the tap at it is one command, run after a release:
+
+```bash
+./packaging/update-tap.sh            # the latest release
+./packaging/update-tap.sh v1.2.0     # a specific tag
+```
+
+It downloads that release's cask, commits it to the tap and pushes, using your own `gh` and `git`
+credentials. Re-running it for a release the tap already has does nothing.
+
+This deliberately stays out of CI. Automating it would mean a personal access token living as a
+repository secret — something to create, scope, rotate and worry about leaking — to save one command
+a few times a year, on a step where a human pausing to look is worth more than the automation.
 
 Users install with:
 
