@@ -32,6 +32,18 @@ final class Store: ObservableObject {
     private var grainTimer: Timer?
     private var lastTickDay: Date?
 
+    /// When the nearest deadline is close, sand trickles on its own — the closer, the
+    /// faster. Off by choice, or automatically when the system asks for reduced motion.
+    @Published var urgencyAnimation: Bool {
+        didSet {
+            defaults.set(urgencyAnimation, forKey: Keys.urgencyAnimation)
+            urgencyTier = -1
+            scheduleUrgencyTrickle()
+        }
+    }
+    private var urgencyTimer: Timer?
+    private var urgencyTier = -1
+
     @Published var favorites: Set<String> = [] {
         didSet {
             defaults.set(Array(favorites), forKey: Keys.favorites)
@@ -82,6 +94,7 @@ final class Store: ObservableObject {
         static let menuBarSubmissionOnly = "menuBarSubmissionOnly"
         static let notifyMode = "notifyMode"
         static let language = "language"
+        static let urgencyAnimation = "urgencyAnimation"
         static let lastFetch = "lastFetch"
     }
 
@@ -91,6 +104,7 @@ final class Store: ObservableObject {
         menuBarSubmissionOnly = defaults.object(forKey: Keys.menuBarSubmissionOnly) as? Bool ?? true
         notifyMode = NotifyMode(rawValue: defaults.string(forKey: Keys.notifyMode) ?? "all") ?? .all
         language = AppLanguage(rawValue: defaults.string(forKey: Keys.language) ?? "system") ?? .system
+        urgencyAnimation = defaults.object(forKey: Keys.urgencyAnimation) as? Bool ?? true
         if let t = defaults.object(forKey: Keys.lastFetch) as? Date { lastFetch = t }
         L10n.apply(language)
         loadFromDisk()
@@ -123,6 +137,16 @@ final class Store: ObservableObject {
         ) { _ in
             Task { @MainActor in await Store.shared.refresh(force: false) }
         }
+        // Reduce Motion toggled in System Settings: stop or resume the trickle at once.
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil, queue: .main
+        ) { _ in
+            Task { @MainActor in
+                Store.shared.urgencyTier = -1
+                Store.shared.scheduleUrgencyTrickle()
+            }
+        }
+        scheduleUrgencyTrickle()
     }
 
     // MARK: - Data
@@ -222,6 +246,49 @@ final class Store: ObservableObject {
         }
         items = out.sorted { $0.date < $1.date }
         updateIcon()
+        scheduleUrgencyTrickle()
+    }
+
+    // MARK: - Urgency trickle
+
+    /// Seconds between grains for the time left, or nil when it should stay still.
+    private static func trickleInterval(hoursLeft: Double) -> TimeInterval? {
+        switch hoursLeft {
+        case ..<0: return nil          // passed; the next deadline takes over on rebuild
+        case ..<12: return 0.7         // last half day: a continuous stream
+        case ..<24: return 3           // D-1
+        case ..<72: return 8           // D-3
+        default: return nil            // a week or more out: just the level
+        }
+    }
+
+    private func scheduleUrgencyTrickle() {
+        var interval: TimeInterval?
+        if urgencyAnimation,
+           !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion,
+           let item = menuBarItem {
+            interval = Store.trickleInterval(hoursLeft: item.date.timeIntervalSince(now) / 3600)
+        }
+
+        // Only touch the timer when the tier changes, so the minute tick does not
+        // keep resetting the rhythm.
+        let tier: Int
+        switch interval {
+        case nil: tier = 0
+        case .some(let s) where s < 1: tier = 3
+        case .some(let s) where s < 5: tier = 2
+        default: tier = 1
+        }
+        guard tier != urgencyTier else { return }
+        urgencyTier = tier
+
+        urgencyTimer?.invalidate()
+        urgencyTimer = nil
+        guard let interval else { return }
+        urgencyTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { _ in
+            Task { @MainActor in Store.shared.dropGrain() }
+        }
+        urgencyTimer?.tolerance = interval * 0.2
     }
 
     // MARK: - Menu bar glyph

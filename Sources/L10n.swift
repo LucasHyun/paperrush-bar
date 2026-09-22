@@ -108,6 +108,9 @@ enum L10n {
                                        "ko": "메뉴바: 제출 마감만",
                                        "zh": "菜单栏：仅投稿截止"],
         "settings.language": ["en": "Language", "ko": "언어", "zh": "语言"],
+        "settings.urgencyAnimation": ["en": "Sand flows when a deadline is near",
+                                      "ko": "마감 임박 시 모래 흐르기",
+                                      "zh": "临近截止时流沙"],
 
         "lang.system": ["en": "System", "ko": "시스템 설정", "zh": "跟随系统"],
 
