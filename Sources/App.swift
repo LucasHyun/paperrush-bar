@@ -10,12 +10,10 @@ struct PaperRushBarApp: App {
         MenuBarExtra {
             MenuView().environmentObject(store)
         } label: {
-            HStack(spacing: 4) {
-                Image(nsImage: store.menuBarIcon)
-                    .renderingMode(store.iconIsTemplate ? .template : .original)
-                    .id(store.iconVersion)
-                Text(verbatim: store.menuBarTitle)
-            }
+            // Glyph and title are one image, so colour and weight survive the menu bar.
+            Image(nsImage: store.menuBarIcon)
+                .renderingMode(store.iconIsTemplate ? .template : .original)
+                .id(store.iconVersion)
         }
         .menuBarExtraStyle(.window)
     }

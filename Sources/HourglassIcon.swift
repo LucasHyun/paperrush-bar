@@ -49,14 +49,62 @@ enum HourglassIcon {
         return image
     }
 
-    /// Sand colour for the time left: none a week out, then yellow → orange → red.
-    /// Colour is the loudest thing a menu bar item can do, so it is spent only here.
-    static func sandColor(hoursLeft: Double) -> NSColor? {
+    /// Glyph and title rendered together as one image, so the text can carry colour
+    /// and weight too. SwiftUI's menu bar label cannot be trusted to keep a Text's
+    /// colour, but it does keep an image's.
+    static func label(fill: Double?, grain: Double?, tilt: Double, hoursLeft: Double?, title: String) -> NSImage {
+        let tier = hoursLeft.map(urgencyTier) ?? 0
+        let sand = sandColor(tier: tier)
+        let baseFont = NSFont.menuBarFont(ofSize: 0)
+        let font = tier >= 2
+            ? NSFont.systemFont(ofSize: baseFont.pointSize, weight: .semibold)
+            : baseFont
+        let textColor: NSColor = sand == nil ? .black : (tier >= 1 ? sand! : .labelColor)
+        let attributes: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: textColor]
+        let text = NSAttributedString(string: title, attributes: attributes)
+        let textSize = text.size()
+        let gap: CGFloat = 4
+        let width = ceil(size.width + gap + textSize.width)
+
+        let image = NSImage(size: NSSize(width: width, height: size.height), flipped: true) { rect in
+            NSGraphicsContext.saveGraphicsState()
+            if tilt != 0 {
+                let t = NSAffineTransform()
+                t.translateX(by: size.width / 2, yBy: size.height / 2)
+                t.rotate(byDegrees: CGFloat(tilt))
+                t.translateX(by: -size.width / 2, yBy: -size.height / 2)
+                t.concat()
+            }
+            draw(fill: fill, grain: grain, sand: sand)
+            NSGraphicsContext.restoreGraphicsState()
+
+            // Vertically centre the text on the glyph; flipped coordinates, so y is the top.
+            let y = (rect.height - textSize.height) / 2
+            text.draw(at: NSPoint(x: size.width + gap, y: y))
+            return true
+        }
+        image.isTemplate = (sand == nil)
+        return image
+    }
+
+    /// 0 = calm, 1 = under a week, 2 = under three days, 3 = under a day.
+    static func urgencyTier(hoursLeft: Double) -> Int {
         switch hoursLeft {
-        case ..<0: return nil
-        case ..<24: return .systemRed
-        case ..<72: return .systemOrange
-        case ..<168: return .systemYellow
+        case ..<0: return 0
+        case ..<24: return 3
+        case ..<72: return 2
+        case ..<168: return 1
+        default: return 0
+        }
+    }
+
+    /// Sand colour per tier: none a week out, then yellow → orange → red.
+    /// Colour is the loudest thing a menu bar item can do, so it is spent only here.
+    static func sandColor(tier: Int) -> NSColor? {
+        switch tier {
+        case 3: return .systemRed
+        case 2: return .systemOrange
+        case 1: return .systemYellow
         default: return nil
         }
     }

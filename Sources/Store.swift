@@ -307,9 +307,9 @@ final class Store: ObservableObject {
     private func updateIcon() {
         let hoursLeft = menuBarItem.map { $0.date.timeIntervalSince(now) / 3600 }
         let fill = hoursLeft.map { HourglassIcon.fill(daysRemaining: $0 / 24) }
-        let sand = hoursLeft.flatMap { HourglassIcon.sandColor(hoursLeft: $0) }
-        menuBarIcon = HourglassIcon.image(fill: fill, grain: grainProgress, tilt: tilt, sand: sand)
-        iconIsTemplate = (sand == nil)
+        menuBarIcon = HourglassIcon.label(fill: fill, grain: grainProgress, tilt: tilt,
+                                          hoursLeft: hoursLeft, title: menuBarTitle)
+        iconIsTemplate = (hoursLeft.map(HourglassIcon.urgencyTier) ?? 0) == 0
         iconVersion &+= 1
     }
 
