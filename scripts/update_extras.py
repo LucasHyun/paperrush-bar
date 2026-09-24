@@ -156,8 +156,19 @@ def date_is_on_page(date: str, text: str) -> bool:
     lowered = text.lower()
     # No digit may touch either end: a plain substring test let "october 1" match
     # inside "october 15" and "1 oct" inside "21 oct".
-    return any(re.search(r"(?<!\d)" + re.escape(s.lower()) + r"(?!\d)", lowered)
-               for s in spellings)
+    if any(re.search(r"(?<!\d)" + re.escape(s.lower()) + r"(?!\d)", lowered) for s in spellings):
+        return True
+    # What those miss is how conferences write their own dates: day-first ranges
+    # ("16-21 May 2027", "16th-21st May"), ordinals ("16th May", "May 16th") and
+    # "Sept". A main conference is nearly always a range, which is why every
+    # "Main Conference" used to come back as not printed.
+    names = [name.lower(), name[:3].lower() + r"\.?"] + ([r"sept\.?"] if month == 9 else [])
+    month_re = "(?:" + "|".join(names) + ")"
+    ordinal = r"(?:st|nd|rd|th)?"
+    day_first = (r"(?<!\d)0?" + str(day) + ordinal
+                 + r"(?:\s*[-\u2013\u2014]\s*\d{1,2}" + ordinal + r")?\s+(?:of\s+)?" + month_re + r"(?![a-z])")
+    month_first = r"(?<![a-z])" + month_re + r"\s+0?" + str(day) + ordinal + r"(?!\d)"
+    return bool(re.search(day_first, lowered) or re.search(month_first, lowered))
 
 
 def valid_deadline(deadline: dict, allowed_urls: set[str]) -> str | None:
@@ -396,6 +407,27 @@ def supersedes(confirmed: list[dict], estimate: dict) -> bool:
                for d in confirmed)
 
 
+_LABEL_NOISE = {"the", "of", "and", "for", "a", "an", "deadline", "date", "dates", "due"}
+
+
+def _label_words(label: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z0-9]+", label.lower()) if w not in _LABEL_NOISE}
+
+
+def same_milestone(a: dict, b: dict) -> bool:
+    """Same type, same day, and labels made of mostly the same words.
+
+    The model words a milestone differently from one week to the next -- "Abstract
+    Submission (Blue Sky Ideas)", then "Blue Sky Ideas Abstract Submission" -- and
+    matching on the exact label added it again each time. Two milestones that merely
+    share a day ("Paper Submission (Main)" and "(Blue Sky)") share too few words.
+    """
+    if a["type"] != b["type"] or a["date"][:10] != b["date"][:10]:
+        return False
+    wa, wb = _label_words(a["label"]), _label_words(b["label"])
+    return bool(wa and wb) and len(wa & wb) / len(wa | wb) >= 0.6
+
+
 def merge_conference(conference: dict, proposal: dict, pages: dict[str, str],
                      today: str | None = None) -> tuple[dict, list[str]]:
     """Apply a proposal on top of the current entry, keeping anything unverified."""
@@ -415,6 +447,12 @@ def merge_conference(conference: dict, proposal: dict, pages: dict[str, str],
 
         key = (candidate["type"], candidate["label"])
         was = existing.get(key)
+        if was is None:
+            # The same milestone reworded: keep the label we already have.
+            twin = next((d for d in existing.values() if same_milestone(d, candidate)), None)
+            if twin:
+                key, was = (twin["type"], twin["label"]), twin
+                candidate = dict(candidate, label=twin["label"])
 
         if not candidate.get("estimated"):
             if not date_is_on_page(candidate["date"], pages[candidate["sourceUrl"]]):
@@ -485,6 +523,11 @@ def merge_conference(conference: dict, proposal: dict, pages: dict[str, str],
 
     updated["datesTBD"] = not any(d["type"] in ("abstract", "paper") and not d.get("estimated")
                                   for d in updated["deadlines"])
+    # Derived flags can change with nothing else; without a line here such a change
+    # was written with no trace in the log.
+    for flag in ("isEstimated", "datesTBD"):
+        if conference.get(flag) != updated.get(flag):
+            log.append(f"{flag}: {conference.get(flag)} -> {updated.get(flag)}")
     return updated, log
 
 
@@ -571,7 +614,7 @@ def main() -> int:
         return 0
 
     if args.dry_run:
-        print("\nDry run: extras.json left alone.")
+        print(f"\nDry run: extras.json left alone ({tally}).")
         return 0
 
     document["lastUpdated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())

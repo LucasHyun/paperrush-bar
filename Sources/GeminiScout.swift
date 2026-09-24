@@ -520,6 +520,9 @@ enum GeminiScout {
             let timeUnknown = (entry["timeUnknown"] as? Bool) ?? (date.count <= 10)
 
             let existing = conference.deadlines.first { $0.type == type && $0.label == label }
+                ?? conference.deadlines.first {
+                    $0.type == type && $0.date.prefix(10) == date.prefix(10) && sameWords($0.label, label)
+                }
                 ?? conference.deadlines.first { candidate in
                     guard candidate.type == type, candidate.estimated,
                           let a = DateHelper.parse(candidate.date), let b = DateHelper.parse(date) else { return false }
@@ -592,7 +595,34 @@ enum GeminiScout {
             "\(year)-\(mm)-\(dd)", "\(day).\(month).\(year)", "\(dd).\(mm).\(year)",
         ]
         let haystack = text.lowercased()
-        return spellings.contains { containsStandalone(haystack, $0.lowercased()) }
+        if spellings.contains(where: { containsStandalone(haystack, $0.lowercased()) }) { return true }
+
+        // Day-first ranges ("16-21 May 2027"), ordinals ("16th May", "May 16th") and
+        // "Sept": how conferences write their own dates, and why every main conference --
+        // nearly always a range -- used to come back as not printed.
+        var names = [name.lowercased(), abbr.lowercased() + #"\.?"#]
+        if month == 9 { names.append(#"sept\.?"#) }
+        let monthPattern = "(?:" + names.joined(separator: "|") + ")"
+        let ordinal = "(?:st|nd|rd|th)?"
+        let dash = "[-\u{2013}\u{2014}]"
+        // One literal each: a long chain of `+` is what makes Swift give up type-checking.
+        let dayFirst = #"(?<!\d)0?\#(day)\#(ordinal)(?:\s*\#(dash)\s*\d{1,2}\#(ordinal))?\s+(?:of\s+)?\#(monthPattern)(?![a-z])"#
+        let monthFirst = #"(?<![a-z])\#(monthPattern)\s+0?\#(day)\#(ordinal)(?!\d)"#
+        return [dayFirst, monthFirst].contains { haystack.range(of: $0, options: .regularExpression) != nil }
+    }
+
+    private static let labelNoise: Set<String> = ["the", "of", "and", "for", "a", "an", "deadline", "date", "dates", "due"]
+
+    /// Labels made of mostly the same words: the model rewording a milestone from one
+    /// scan to the next ("Abstract Submission (Blue Sky Ideas)", "Blue Sky Ideas
+    /// Abstract Submission"), which should not come back as a new deadline.
+    static func sameWords(_ a: String, _ b: String) -> Bool {
+        func words(_ label: String) -> Set<String> {
+            Set(label.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init)).subtracting(labelNoise)
+        }
+        let (wa, wb) = (words(a), words(b))
+        guard !wa.isEmpty, !wb.isEmpty else { return false }
+        return Double(wa.intersection(wb).count) / Double(wa.union(wb).count) >= 0.6
     }
 
     /// True when `needle` occurs with no digit touching either end. A plain substring
