@@ -376,10 +376,32 @@ final class Store: ObservableObject {
 
     private func rebuild() {
         var out: [DeadlineItem] = []
+        var seen = Set<String>()
         for conf in conferences {
+            // Upstream sometimes lists one milestone twice, reworded, on the same day
+            // ("AC: Final Meta-review Deadline" and "... Due"). Show it once -- the copy
+            // with a time of day if only one has it, else the fuller wording.
+            var kept: [Deadline] = []
             for dl in conf.deadlines {
+                if let i = kept.firstIndex(where: {
+                    $0.type == dl.type && $0.date.prefix(10) == dl.date.prefix(10)
+                        && ($0.label == dl.label || GeminiScout.sameWords($0.label, dl.label))
+                }) {
+                    let twin = kept[i]
+                    let better = dl.isVerified != twin.isVerified ? dl.isVerified
+                        : dl.date.count != twin.date.count ? dl.date.count > twin.date.count
+                        : dl.label.count > twin.label.count
+                    if better { kept[i] = dl }
+                    continue
+                }
+                kept.append(dl)
+            }
+            for dl in kept {
                 guard let date = DateHelper.parse(dl.date) else { continue }
-                out.append(DeadlineItem(conference: conf, deadline: dl, date: date))
+                let item = DeadlineItem(conference: conf, deadline: dl, date: date)
+                // And never two rows with one id, whatever the data says.
+                guard seen.insert(item.id).inserted else { continue }
+                out.append(item)
             }
         }
         items = out.sorted { $0.date < $1.date }

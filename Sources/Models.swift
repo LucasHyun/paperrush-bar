@@ -190,7 +190,10 @@ struct DeadlineItem: Identifiable, Hashable {
     let deadline: Deadline
     let date: Date
 
-    var id: String { "\(conference.id)|\(deadline.type)|\(deadline.date)" }
+    /// Must be unique: SwiftUI draws a blank or repeated row for every id it sees twice.
+    /// Type and date alone were not -- upstream lists several milestones of one type on
+    /// one day (ICLR's "Initial Reviews Released" and "Author Rebuttal Period Start").
+    var id: String { "\(conference.id)|\(deadline.type)|\(deadline.date)|\(deadline.label)" }
 
     /// Deadlines that matter for "when do I have to submit".
     var isSubmission: Bool {

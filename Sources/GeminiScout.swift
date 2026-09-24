@@ -611,6 +611,15 @@ enum GeminiScout {
         return [dayFirst, monthFirst].contains { haystack.range(of: $0, options: .regularExpression) != nil }
     }
 
+    private static let ordinalWords: Set<String> = ["first", "second", "third", "fourth", "fifth",
+                                                    "1st", "2nd", "3rd", "4th", "5th"]
+
+    /// Round and cycle numbers, not years: "AAMAS 2027 Early Registration" is still
+    /// "Early Registration".
+    private static func markers(in words: Set<String>) -> Set<String> {
+        words.filter { ordinalWords.contains($0) || ($0.count <= 2 && $0.allSatisfy(\.isNumber)) }
+    }
+
     private static let labelNoise: Set<String> = ["the", "of", "and", "for", "a", "an", "deadline", "date", "dates", "due"]
 
     /// Labels made of mostly the same words: the model rewording a milestone from one
@@ -627,6 +636,9 @@ enum GeminiScout {
         }
         let (wa, wb) = (words(a), words(b))
         guard !wa.isEmpty, !wb.isEmpty else { return false }
+        // "Round 1" and "Round 2", "First Cycle" and "Second Cycle" are different
+        // milestones however much else their labels share.
+        guard markers(in: wa) == markers(in: wb) else { return false }
         return Double(wa.intersection(wb).count) / Double(wa.union(wb).count) >= 0.6
     }
 

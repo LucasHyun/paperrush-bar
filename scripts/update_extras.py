@@ -419,6 +419,13 @@ def _label_words(label: str) -> set[str]:
     return {_singular(w) for w in re.findall(r"[a-z0-9]+", label.lower()) if w not in _LABEL_NOISE}
 
 
+_ORDINALS = {"first", "second", "third", "fourth", "fifth", "1st", "2nd", "3rd", "4th", "5th"}
+
+
+def _markers(words: set[str]) -> set[str]:
+    return {w for w in words if w in _ORDINALS or (len(w) <= 2 and w.isdigit())}
+
+
 def same_milestone(a: dict, b: dict) -> bool:
     """Same type, same day, and labels made of mostly the same words.
 
@@ -430,6 +437,11 @@ def same_milestone(a: dict, b: dict) -> bool:
     if a["type"] != b["type"] or a["date"][:10] != b["date"][:10]:
         return False
     wa, wb = _label_words(a["label"]), _label_words(b["label"])
+    # "Round 1" and "Round 2", "First Cycle" and "Second Cycle" stay apart however much
+    # else they share. Years are not markers: "AAMAS 2027 Early Registration" is still
+    # "Early Registration".
+    if _markers(wa) != _markers(wb):
+        return False
     return bool(wa and wb) and len(wa & wb) / len(wa | wb) >= 0.6
 
 
