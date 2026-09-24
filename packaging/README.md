@@ -18,15 +18,28 @@ Create the repository once — the name must start with `homebrew-`:
 gh repo create homebrew-tap --public --description "Homebrew tap for LucasHyun's tools"
 ```
 
+## Cutting a release
+
+```bash
+./packaging/release.sh v1.5.1
+```
+
+That is the whole release: it refuses to start with uncommitted changes, builds, pushes `main`, tags
+the pushed commit, waits for the release workflow and then updates the tap. Each step waits for the one
+before it, because the easy mistake -- tagging before the commit is pushed -- puts the tag on the
+previous commit and ships the old code under the new number.
+
+## The tap on its own
+
 The release workflow renders `paperrush-bar.rb` with the tag's version and SHA-256 and attaches it to
-the release. Pointing the tap at it is one command, run after a release:
+the release. `release.sh` points the tap at it for you; to do only that step:
 
 ```bash
 ./packaging/update-tap.sh            # the latest release
 ./packaging/update-tap.sh v1.2.0     # a specific tag
 ```
 
-It downloads that release's cask, commits it to the tap and pushes, using your own `gh` and `git`
+It renders the cask from the template with that release's checksum, commits it to the tap and pushes, using your own `gh` and `git`
 credentials. Re-running it for a release the tap already has does nothing.
 
 This deliberately stays out of CI. Automating it would mean a personal access token living as a
