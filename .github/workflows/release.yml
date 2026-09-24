@@ -17,7 +17,7 @@ jobs:
     name: Build and publish .zip
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Refresh bundled snapshot
         run: |
@@ -65,7 +65,7 @@ jobs:
           head -4 "build/paperrush-bar.rb"
 
       - name: Publish release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.package.outputs.tag }}
           generate_release_notes: true
