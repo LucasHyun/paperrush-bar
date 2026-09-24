@@ -225,7 +225,10 @@ struct MenuView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 0) {
+                    // A plain VStack, not LazyVStack: in a menu bar panel the lazy one
+                    // mis-measures rows it realises late and leaves blank gaps mid-list
+                    // after the data updates. A few hundred rows cost nothing to lay out.
+                    VStack(spacing: 0) {
                         ForEach(rows) { item in
                             DeadlineRow(item: item)
                             Divider().opacity(0.4)

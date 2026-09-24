@@ -374,6 +374,12 @@ final class Store: ObservableObject {
         return Array(byId.values)
     }
 
+    static func chronological(_ a: DeadlineItem, _ b: DeadlineItem) -> Bool {
+        if a.date != b.date { return a.date < b.date }
+        if a.conference.name != b.conference.name { return a.conference.name < b.conference.name }
+        return a.id < b.id
+    }
+
     private func rebuild() {
         var out: [DeadlineItem] = []
         var seen = Set<String>()
@@ -404,7 +410,9 @@ final class Store: ObservableObject {
                 out.append(item)
             }
         }
-        items = out.sorted { $0.date < $1.date }
+        // A total order. Two deadlines at the same minute (every date-only one falls on
+        // 23:59) used to swap places between rebuilds, and each swap moved rows in the list.
+        items = out.sorted(by: Store.chronological)
         updateIcon()
         scheduleUrgencyTrickle()
         scheduleRotation()
@@ -699,7 +707,7 @@ final class Store: ObservableObject {
             let fa = favorites.contains(a.conference.seriesKey)
             let fb = favorites.contains(b.conference.seriesKey)
             if fa != fb { return fa }
-            return a.date < b.date
+            return Store.chronological(a, b)
         }
     }
 
