@@ -34,7 +34,8 @@ enum ScoutError: LocalizedError {
     /// Google's message rides along: "rejected the key" alone does not say whether the
     /// key is wrong, the API is off for the project, or something else entirely.
     case unauthorized(String)
-    case rateLimited
+    /// Seconds Google asked us to wait, when it said.
+    case rateLimited(TimeInterval?)
     /// The model answered 404 -- retired, or not offered to this key. Never shown: it
     /// moves the scan on to the next model.
     case modelUnavailable
@@ -65,6 +66,16 @@ enum ScoutError: LocalizedError {
         }
     }
 
+    private static func retryDelay(in raw: String) -> TimeInterval? {
+        for pattern in [#"retry in ([0-9.]+)s"#, #""retryDelay"\s*:\s*"([0-9.]+)s""#] {
+            guard let regex = try? NSRegularExpression(pattern: pattern),
+                  let match = regex.firstMatch(in: raw, range: NSRange(raw.startIndex..., in: raw)),
+                  let range = Range(match.range(at: 1), in: raw) else { continue }
+            return TimeInterval(raw[range])
+        }
+        return nil
+    }
+
     /// Google's error body says what went wrong far better than the status code does.
     init(status: Int, body: Data) {
         let raw = String(data: body, encoding: .utf8) ?? ""
@@ -73,7 +84,10 @@ enum ScoutError: LocalizedError {
         switch status {
         case 404: self = .modelUnavailable
         case 401, 403: self = .unauthorized(message)
-        case 429: self = .rateLimited
+        case 429:
+            // Each model has its own daily quota, so a spent day moves on to the next
+            // model; a spent minute is waited out.
+            self = raw.contains("PerDay") ? .modelUnavailable : .rateLimited(ScoutError.retryDelay(in: raw))
         case 400 where raw.contains("API_KEY_INVALID"): self = .unauthorized(message)
         default: self = .api(status, message)
         }
@@ -116,6 +130,25 @@ actor ModelPicker {
         tried.insert(model)
         candidates.removeAll { $0 == model }
         if working == model { working = nil }
+    }
+
+    /// The free tier allows 15 requests a minute per model. Slots go out 60/14 s apart
+    /// to every request in flight, so a full scan stays under it instead of running
+    /// into it and stopping halfway.
+    private var nextSlot = Date.distantPast
+    private static let slotInterval: TimeInterval = 60.0 / 14.0
+
+    func waitForSlot() async {
+        let now = Date()
+        let slot = max(now, nextSlot)
+        nextSlot = slot.addingTimeInterval(ModelPicker.slotInterval)
+        let delay = slot.timeIntervalSince(now)
+        if delay > 0 { try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000)) }
+    }
+
+    /// Google said how long to wait; nobody asks again before then.
+    func backOff(_ seconds: TimeInterval) {
+        nextSlot = max(nextSlot, Date().addingTimeInterval(seconds))
     }
 
     func confirm(_ model: String) {
@@ -243,13 +276,19 @@ enum GeminiScout {
         }
         guard !pages.isEmpty else { return .unreadable }
 
+        var waits = 0
         while let model = await models.current() {
+            await models.waitForSlot()
+            if Task.isCancelled { return .cancelled }
             do {
                 let reported = try await ask(model: model, key: key, conference: conference, pages: pages)
                 await models.confirm(model)
                 return .answered(proposals(from: reported, conference: conference, pages: pages))
             } catch ScoutError.modelUnavailable {
                 await models.drop(model)
+            } catch ScoutError.rateLimited(let delay) where waits < 4 {
+                waits += 1
+                await models.backOff(min((delay ?? 30) + 1, 90))
             } catch let error as ScoutError {
                 return .failed(error)
             } catch {
@@ -413,8 +452,10 @@ enum GeminiScout {
                        .replacingOccurrences(of: "```", with: "")
                        .trimmingCharacters(in: .whitespacesAndNewlines)
         }
-        guard let payload = json.data(using: .utf8),
-              let object = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+        // Models sometimes leave a comma before a closing brace, which JSON forbids.
+        let repaired = json.replacingOccurrences(of: #",\s*([}\]])"#, with: "$1", options: .regularExpression)
+        guard let object = (try? JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
+                ?? (try? JSONSerialization.jsonObject(with: Data(repaired.utf8)) as? [String: Any]),
               let deadlines = object["deadlines"] as? [[String: Any]]
         else { return [] }
         return deadlines
@@ -445,6 +486,7 @@ enum GeminiScout {
 
         Rules:
         - Only report a date printed on one of the pages above, and set sourceUrl to that page's URL exactly as given. Never use your own knowledge of this conference.
+        - Report only dates of the \(String(conference.year)) edition. The pages may describe another edition, most often the previous one; if so, report none of that edition's dates.
         - type is one of: abstract, paper, supplementary, rebuttal, notification, camera, conference, workshop, tutorial, event.
         - Anywhere on Earth (AoE) means a -12:00 offset. Use the stated offset when there is one.
         - With no time of day, write "YYYY-MM-DD" and set timeUnknown to true.
@@ -484,6 +526,9 @@ enum GeminiScout {
                     return abs(a.timeIntervalSince(b)) < 45 * 86_400
                 }
 
+            // Printed on the page is not enough: the page may be another edition's.
+            guard fitsEdition(date, type: type, year: conference.year, replacing: existing?.date) else { continue }
+
             if let existing {
                 guard existing.date != date else { continue }
                 out.append(DeadlineProposal(conferenceId: conference.id, conferenceName: conference.displayName,
@@ -496,6 +541,29 @@ enum GeminiScout {
             }
         }
         return out
+    }
+
+    /// Whether `date` can belong to the `year` edition.
+    ///
+    /// An entry for next year's edition cites last year's pages until the new site
+    /// exists, and a date read from those is real, legible and wrong -- how 3DV 2028 and
+    /// AAAI 2028 once took their 2027 dates as "confirmed". A `year` edition's dates fall
+    /// between January of `year - 1` and the January after it; the conference itself is
+    /// in `year`; and a real schedule change never moves a date by half a year. (Dates
+    /// already in the past are dropped before this, which covers moving one backwards.)
+    static func fitsEdition(_ date: String, type: String, year: Int, replacing old: String?) -> Bool {
+        guard year > 0 else { return true }
+        let day = String(date.prefix(10))
+        if type == "conference" {
+            guard day.hasPrefix(String(year)) else { return false }
+        } else {
+            guard day >= "\(String(year - 1))-01-01", day <= "\(String(year + 1))-01-31" else { return false }
+        }
+        if let old, let a = DateHelper.parse(old), let b = DateHelper.parse(date),
+           abs(a.timeIntervalSince(b)) > 180 * 86_400 {
+            return false
+        }
+        return true
     }
 
     static func isWellFormed(_ date: String) -> Bool {

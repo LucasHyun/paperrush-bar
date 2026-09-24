@@ -39,6 +39,9 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
+          # Without this the pipe into tee reports tee's success, and a script that
+          # failed -- no model answering, say -- still shows as a green run.
+          set -o pipefail
           if [ -z "${GEMINI_API_KEY}" ]; then
             echo "::error::GEMINI_API_KEY secret is not set (Settings > Secrets and variables > Actions)."
             exit 1
@@ -50,7 +53,7 @@ jobs:
           if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
-          python scripts/update_extras.py $ARGS | tee /tmp/update.log
+          python scripts/update_extras.py $ARGS --changelog /tmp/changes.txt | tee /tmp/update.log
 
       - name: Validate the result
         run: |
@@ -97,7 +100,8 @@ jobs:
           git config user.name  'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add Resources/extras.json
-          git commit -m "chore: refresh extras deadlines [automated]" -m "$(grep -E '^  (new:|rejected|location:|[A-Z].*->)' /tmp/update.log | head -40)"
+          # Grouped by conference, so each change says which entry it belongs to.
+          git commit -m "chore: refresh extras deadlines [automated]" -m "$(head -c 60000 /tmp/changes.txt)"
           git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
 

@@ -176,13 +176,44 @@ def valid_deadline(deadline: dict, allowed_urls: set[str]) -> str | None:
     return None
 
 
+MAX_SHIFT_DAYS = 180
+
+
+def edition_problem(candidate: dict, was: dict | None, year: int, today: str) -> str | None:
+    """Why this date cannot belong to the `year` edition, or None when it can.
+
+    Being printed on the page is not enough. An entry for next year's edition cites last
+    year's pages until the new site exists, and a date read from those is real, legible
+    and wrong: that is how 3DV 2028 and AAAI 2028 once took their 2027 dates as
+    "confirmed". Deadlines for a `year` edition fall between January of `year - 1` and
+    the January after it (a late event such as a career site closing); the conference
+    itself in `year`; and a real schedule change never moves a date by half a year.
+    """
+    if not year:
+        return None
+    date = candidate["date"][:10]
+    held = int(date[:4])
+    if candidate["type"] == "conference":
+        if held != year:
+            return f"the {year} edition is not held in {held}"
+    elif not f"{year - 1}-01-01" <= date <= f"{year + 1}-01-31":
+        return f"{date} is outside {year - 1}-01 to {year + 1}-01, where the {year} edition's dates fall"
+    if was:
+        if was["date"][:10] >= today > date:
+            return f"would move {was['date'][:10]} into the past"
+        shift = days_between(was["date"], date)
+        if shift > MAX_SHIFT_DAYS:
+            return f"would move the date by {shift} days"
+    return None
+
+
 # --------------------------------------------------------------------------- model
 
 PROMPT = """You are reading the official pages of one academic conference and extracting its schedule.
 
 Today is {today}.
 
-Here is the entry we currently hold for it:
+This entry is for the {year} edition. Here is what we currently hold for it:
 
 ```json
 {current}
@@ -215,6 +246,8 @@ Return JSON only, shaped exactly like this:
 Rules:
 - Only report a date that is printed on one of the pages above, and set `sourceUrl` to that page's
   URL exactly as given. Never carry a date over from your own knowledge.
+- Report only dates of the {year} edition. The pages may describe another edition, most often the
+  previous one; if so, report none of that edition's dates, and not its location either.
 - Anywhere on Earth (AoE) means a -12:00 offset. Use the real offset when one is stated.
 - When a date has no time of day, write it as "YYYY-MM-DD" and set "timeUnknown": true.
 - Set "estimated": false for a date printed on the page. If a date in the current entry is marked
@@ -228,6 +261,41 @@ Rules:
 
 _models = list(MODELS)
 _discovered = False
+
+# The free tier allows 15 requests a minute per model. Staying under it costs a few
+# minutes a week; running into it cost whole conferences, because the old retry waited
+# two to six seconds when Google had asked for forty.
+MIN_REQUEST_INTERVAL = 60 / 14
+_last_request = 0.0
+
+
+def _pace() -> None:
+    global _last_request
+    wait = _last_request + MIN_REQUEST_INTERVAL - time.monotonic()
+    if wait > 0:
+        time.sleep(wait)
+    _last_request = time.monotonic()
+
+
+def _rate_limit(error: Exception) -> tuple[str, float] | None:
+    """("minute", seconds to wait) or ("day", 0) for a 429; None for anything else."""
+    text = str(error)
+    if getattr(error, "code", None) != 429 and "RESOURCE_EXHAUSTED" not in text:
+        return None
+    if "PerDay" in text:
+        return ("day", 0.0)
+    found = re.search(r"retry in ([\d.]+)s", text) or re.search(r"retryDelay'?: '(\d+)s", text)
+    return ("minute", float(found.group(1)) if found else 30.0)
+
+
+def _parse_json(text: str):
+    """Models sometimes leave a comma before a closing brace, which JSON does not allow."""
+    text = re.sub(r"^```json?\s*\n?", "", text.strip())
+    text = re.sub(r"\n?```\s*$", "", text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return json.loads(re.sub(r",\s*([}\]])", r"\1", text))
 
 
 def _not_found(error: Exception) -> bool:
@@ -273,34 +341,44 @@ def ask_gemini(client, conference: dict, pages: dict[str, str], today: str) -> d
         {k: conference[k] for k in ("id", "name", "year", "website", "location", "deadlines") if k in conference},
         ensure_ascii=False, indent=1,
     )
-    prompt = PROMPT.format(today=today, current=current, pages="\n\n".join(rendered))
+    prompt = PROMPT.format(today=today, year=conference.get("year") or "current", current=current,
+                           pages="\n\n".join(rendered))
 
     # No temperature and no output cap: Google advises leaving temperature alone on the
     # 3.x models, and a cap can be spent on thinking before any JSON is written.
     config = types.GenerateContentConfig(response_mime_type="application/json")
-    failures = 0
+    failures = waits = 0
     while failures < 3:
         model = _next_model(client)
         if model is None:
             print("    no Gemini model answered for this key")
             return None
+        _pace()
         try:
             response = client.models.generate_content(
                 model=model,
                 contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
                 config=config,
             )
-            text = (response.text or "").strip()
-            text = re.sub(r"^```json?\s*\n?", "", text)
-            text = re.sub(r"\n?```\s*$", "", text)
-            return json.loads(text)
+            return _parse_json(response.text or "")
         except Exception as error:  # transient API or JSON trouble
             if _not_found(error):
                 print(f"    {model} is not available to this key, moving on")
                 _models.remove(model)
                 continue
+            limit = _rate_limit(error)
+            if limit and limit[0] == "day":
+                # Each model has its own daily quota, so the next one can carry on.
+                print(f"    {model}: today's free quota is used up, moving on")
+                _models.remove(model)
+                continue
+            if limit and waits < 4:
+                waits += 1
+                print(f"    {model}: rate limited, waiting {limit[1]:.0f}s as asked")
+                time.sleep(min(limit[1] + 1, 90))
+                continue
             failures += 1
-            print(f"    {model} attempt {failures} failed: {error}")
+            print(f"    {model} attempt {failures} failed: {str(error)[:300]}")
             time.sleep(2 * failures)
     return None
 
@@ -318,8 +396,12 @@ def supersedes(confirmed: list[dict], estimate: dict) -> bool:
                for d in confirmed)
 
 
-def merge_conference(conference: dict, proposal: dict, pages: dict[str, str]) -> tuple[dict, list[str]]:
+def merge_conference(conference: dict, proposal: dict, pages: dict[str, str],
+                     today: str | None = None) -> tuple[dict, list[str]]:
     """Apply a proposal on top of the current entry, keeping anything unverified."""
+    today = today or time.strftime("%Y-%m-%d")
+    year = conference.get("year") or 0
+    verified = 0
     log: list[str] = []
     allowed = set(pages)
     existing = {(d["type"], d["label"]): d for d in conference["deadlines"]}
@@ -338,6 +420,11 @@ def merge_conference(conference: dict, proposal: dict, pages: dict[str, str]) ->
             if not date_is_on_page(candidate["date"], pages[candidate["sourceUrl"]]):
                 log.append(f"rejected '{candidate['label']}' {candidate['date'][:10]}: not printed on {candidate['sourceUrl']}")
                 continue
+            problem = edition_problem(candidate, was, year, today)
+            if problem:
+                log.append(f"rejected '{candidate['label']}' {candidate['date'][:10]}: {problem}")
+                continue
+            verified += 1
         elif was:
             # An estimate can only restate what we already had.
             candidate = dict(was)
@@ -380,8 +467,10 @@ def merge_conference(conference: dict, proposal: dict, pages: dict[str, str]) ->
     updated["deadlines"] = sorted(accepted.values(), key=lambda d: d["date"])
     updated["isEstimated"] = any(d.get("estimated") for d in updated["deadlines"])
 
-    location = proposal.get("location") or {}
-    if location.get("city") and conference["location"].get("city") in (None, "", "TBD"):
+    # Location and notes carry no date to check, so they are only taken from a proposal
+    # that got at least one date past every guard -- evidence the pages are this edition's.
+    location = (proposal.get("location") or {}) if verified else {}
+    if location.get("city") not in (None, "", "TBD") and conference["location"].get("city") in (None, "", "TBD"):
         updated["location"] = {
             "city": location.get("city") or "TBD",
             "country": location.get("country") or "TBD",
@@ -390,7 +479,7 @@ def merge_conference(conference: dict, proposal: dict, pages: dict[str, str]) ->
         }
         log.append(f"location: {updated['location']['city']}, {updated['location']['country']}")
 
-    notes = proposal.get("notes")
+    notes = proposal.get("notes") if verified else None
     if isinstance(notes, list) and notes and all(isinstance(n, str) for n in notes):
         updated["notes"] = notes[:2]
 
@@ -406,6 +495,7 @@ def main() -> int:
     parser.add_argument("--conferences", "-c", help="comma-separated ids or names; default is all")
     parser.add_argument("--dry-run", "-n", action="store_true", help="report what would change, write nothing")
     parser.add_argument("--extras", default=str(EXTRAS), help="path to extras.json")
+    parser.add_argument("--changelog", help="write what changed, grouped by conference, to this file")
     args = parser.parse_args()
 
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -426,6 +516,8 @@ def main() -> int:
     today = time.strftime("%Y-%m-%d")
     changed_any = False
     asked = answered = 0
+    skipped: list[str] = []
+    changelog: list[str] = []
 
     for index, conference in enumerate(conferences):
         if wanted and conference["id"].lower() not in wanted and conference["name"].lower() not in wanted:
@@ -446,6 +538,8 @@ def main() -> int:
         proposal = ask_gemini(client, conference, pages, today)
         if proposal:
             answered += 1
+        else:
+            skipped.append(conference["id"])
         if not proposal:
             print("  no usable response, left untouched")
             continue
@@ -453,11 +547,19 @@ def main() -> int:
         updated, log = merge_conference(conference, proposal, pages)
         for line in log:
             print(f"  {line}")
+        if log:
+            changelog.append(f"{conference['name']} {conference['year']} ({conference['id']})")
+            changelog.extend(f"  {line}" for line in log)
         if updated != conference:
             conferences[index] = updated
             changed_any = True
         else:
             print("  no change")
+
+    used = _models[0] if _models else "none"
+    tally = f"{answered}/{asked} answered, model {used}" + (f"; skipped {', '.join(skipped)}" if skipped else "")
+    if args.changelog:
+        Path(args.changelog).write_text("\n".join(changelog + ["", tally]) + "\n")
 
     # Silence here would look exactly like a quiet week. Make it a failed run instead.
     if asked and not answered:
@@ -465,7 +567,7 @@ def main() -> int:
         return 1
 
     if not changed_any:
-        print(f"\nNothing changed ({answered}/{asked} answered, model {_models[0] if _models else 'none'}).")
+        print(f"\nNothing changed ({tally}).")
         return 0
 
     if args.dry_run:
@@ -475,7 +577,7 @@ def main() -> int:
     document["lastUpdated"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     document["conferences"] = sorted(conferences, key=lambda c: (c["name"], c["year"]))
     path.write_text(json.dumps(document, ensure_ascii=False, indent=1) + "\n")
-    print(f"\nWrote {path}")
+    print(f"\nWrote {path} ({tally})")
     return 0
 
 
