@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-09-22T05:33:31Z",
+ "lastUpdated": "2026-09-24T04:00:55Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -11,43 +11,53 @@
    "website": "https://3dvconf.github.io/",
    "brandColor": "#0E7490",
    "location": {
-    "city": "TBD",
-    "country": "TBD",
-    "flag": "🌍",
-    "venue": null
+    "city": "Thessaloniki",
+    "country": "Greece",
+    "flag": "🇬🇷",
+    "venue": "Thessaloniki Concert Hall (M2 building)"
    },
    "deadlines": [
     {
      "type": "abstract",
      "label": "Abstract Registration",
-     "date": "2027-08-27T23:59:00-12:00",
+     "date": "2026-08-28T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
     },
     {
      "type": "paper",
      "label": "Paper Submission",
-     "date": "2027-08-27T23:59:00-12:00",
+     "date": "2026-08-28T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
-     "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
-    },
-    {
-     "type": "supplementary",
-     "label": "Supplementary Material",
-     "date": "2027-09-01T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
     },
     {
      "type": "notification",
      "label": "Preliminary Notification",
-     "date": "2027-10-26T11:00:00-07:00",
+     "date": "2026-10-27T11:00:00-07:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-04-06",
+     "endDate": "2027-04-09",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://3dvconf.github.io/2027/"
+    },
+    {
+     "type": "supplementary",
+     "label": "Supplementary Material",
+     "date": "2027-09-01T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
      "estimated": true,
@@ -61,16 +71,6 @@
      "status": "upcoming",
      "estimated": true,
      "sourceUrl": "https://3dvconf.github.io/2027/call-for-papers/"
-    },
-    {
-     "type": "conference",
-     "label": "Main Conference",
-     "date": "2028-04-04",
-     "endDate": "2028-04-07",
-     "status": "upcoming",
-     "estimated": true,
-     "timeUnknown": true,
-     "sourceUrl": "https://3dvconf.github.io/2027/"
     }
    ],
    "links": {
@@ -79,11 +79,10 @@
    },
    "info": {},
    "notes": [
-    "3DV 2028 has not been announced; host city is unknown.",
-    "Dates are inferred from 3DV 2027 shifted 364 days. The conference has been drifting later each year, so April 2028 could just as well be March."
+    "The dates listed correspond to 3DV 2027, as 3DV 2028 information is not yet available on the website."
    ],
    "isEstimated": true,
-   "datesTBD": true
+   "datesTBD": false
   },
   {
    "id": "aaai-2028",
@@ -94,37 +93,87 @@
    "website": "https://aaai.org/conference/aaai/",
    "brandColor": "#00008B",
    "location": {
-    "city": "TBD",
-    "country": "TBD",
-    "flag": "🌍",
+    "city": "Montréal",
+    "country": "Canada",
+    "flag": "🇨🇦",
     "venue": null
    },
    "deadlines": [
     {
      "type": "abstract",
      "label": "Abstract Submission",
-     "date": "2027-07-20T23:59:00-12:00",
+     "date": "2026-07-21T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
     },
     {
      "type": "paper",
      "label": "Paper Submission",
-     "date": "2027-07-27T23:59:00-12:00",
+     "date": "2026-07-28T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
     },
     {
      "type": "supplementary",
      "label": "Supplementary Material and Code",
-     "date": "2027-07-30T23:59:00-12:00",
+     "date": "2026-07-31T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of Phase 1 rejections",
+     "date": "2026-09-24",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "rebuttal",
+     "label": "Author feedback window",
+     "date": "2026-10-19",
+     "endDate": "2026-10-25",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of final acceptance or rejection",
+     "date": "2026-11-30",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "camera",
+     "label": "Submission of camera-ready files",
+     "date": "2026-12-14",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
+    },
+    {
+     "type": "conference",
+     "label": "AAAI-27 Conference",
+     "date": "2027-02-16",
+     "endDate": "2027-02-23",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
      "sourceUrl": "https://aaai.org/conference/aaai/aaai-27/"
     },
     {
@@ -184,11 +233,10 @@
    },
    "info": {},
    "notes": [
-    "AAAI-28 has not been announced; host city and dates are unknown.",
-    "Dates are inferred from AAAI-27 shifted 364 days. AAAI-26's submissions fell a week later in the year, so expect drift of about a week."
+    "The provided pages contain dates and location information for AAAI-27, which corresponds to the year preceding AAAI-2028."
    ],
    "isEstimated": true,
-   "datesTBD": true
+   "datesTBD": false
   },
   {
    "id": "aamas-2027",
@@ -224,6 +272,36 @@
      "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/call-for-main-track/"
     },
     {
+     "type": "workshop",
+     "label": "Workshop Proposal Submission Deadline",
+     "date": "2026-10-29",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
+     "type": "abstract",
+     "label": "Abstract Submission (Blue Sky Ideas)",
+     "date": "2026-11-05",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission (Blue Sky Ideas)",
+     "date": "2026-11-12",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
      "type": "rebuttal",
      "label": "Rebuttal Period",
      "date": "2026-11-20",
@@ -232,6 +310,46 @@
      "estimated": false,
      "timeUnknown": true,
      "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/call-for-main-track/"
+    },
+    {
+     "type": "notification",
+     "label": "Workshop Proposal Decision Notification",
+     "date": "2026-11-28",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
+     "type": "notification",
+     "label": "Phase 1 early notification (Blue Sky Ideas)",
+     "date": "2026-11-30",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
+     "type": "tutorial",
+     "label": "Proposal Submission (Tutorials)",
+     "date": "2026-12-10",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
+     "type": "paper",
+     "label": "Submission Deadline (AAAI Fast Tracks)",
+     "date": "2026-12-11",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
     },
     {
      "type": "notification",
@@ -244,6 +362,16 @@
      "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/call-for-main-track/"
     },
     {
+     "type": "notification",
+     "label": "Phase 2 author notification (Blue Sky Ideas)",
+     "date": "2027-01-21",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
      "type": "camera",
      "label": "Camera-Ready Paper",
      "date": "2027-01-25T23:59:00-12:00",
@@ -251,6 +379,26 @@
      "status": "upcoming",
      "estimated": false,
      "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/call-for-main-track/"
+    },
+    {
+     "type": "camera",
+     "label": "Camera-ready submission (Blue Sky Ideas)",
+     "date": "2027-02-11",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+    },
+    {
+     "type": "event",
+     "label": "AAMAS 2027 Early Registration Deadline",
+     "date": "2027-03-17",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": true,
+     "timeUnknown": true,
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
     },
     {
      "type": "conference",
@@ -269,10 +417,10 @@
    },
    "info": {},
    "notes": [
-    "All deadlines are end of day, Anywhere on Earth (UTC-12), per the official call.",
-    "Submissions go through OpenReview; no separate supplementary deadline is announced."
+    "Sponsorship opportunities are yet to be announced.",
+    "Blue Sky Ideas track and AAAI Fast Track schedules have been added."
    ],
-   "isEstimated": false,
+   "isEstimated": true,
    "datesTBD": false
   },
   {
@@ -309,11 +457,10 @@
    },
    "info": {},
    "notes": [
-    "ARR lists only \"January 2027\" as the last cycle feeding ACL 2027; the day is inferred from ACL 2026's cycle start and is provisional.",
-    "The ACL 2027 commitment, notification and camera-ready dates are not published yet (the CFP says \"Coming soon\"), so they are left out rather than guessed."
+    "Specific deadlines for commitment to ACL 2027, notifications, and camera-ready versions are currently TBA on the conference website."
    ],
    "isEstimated": true,
-   "datesTBD": false
+   "datesTBD": true
   },
   {
    "id": "acm-mm-2027",
@@ -364,8 +511,7 @@
    },
    "info": {},
    "notes": [
-    "Only the host city (Hong Kong) is announced; 2027.acmmm.org is still a placeholder.",
-    "Deadlines are estimated from the ACM MM 2026 schedule and are not confirmed."
+    "Exact conference dates for ACM MM 2027 are yet to be announced."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -430,8 +576,7 @@
    },
    "info": {},
    "notes": [
-    "BMVC 2027 has no announced host or site; these dates are inferred from BMVC 2026 by weekday.",
-    "The submission dates already held for 2027 (22 and 29 May) fall on Saturdays, while BMVC always uses Fridays - 21 and 28 May are the likely real dates."
+    "Exact 2027 dates have not yet been announced on the official pages."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -445,9 +590,9 @@
    "website": "http://www.cikmconference.org/",
    "brandColor": "#3730A3",
    "location": {
-    "city": "TBD",
-    "country": "TBD",
-    "flag": "🌍",
+    "city": "Sydney",
+    "country": "Australia",
+    "flag": "🇦🇺",
     "venue": null
    },
    "deadlines": [
@@ -478,8 +623,7 @@
    },
    "info": {},
    "notes": [
-    "No CIKM 2027 site, host city or dates announced yet; CIKM 2026 (Rome) closed on 23 May 2026.",
-    "Both dates are extrapolated from the CIKM 2026 cycle and are not official."
+    "CIKM 2027 will be held in Sydney, Australia."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -502,6 +646,15 @@
    "deadlines": [
     {
      "type": "paper",
+     "label": "ARR submission deadline (long & short papers)",
+     "date": "2026-10-12T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "paper",
      "label": "COLING Commitment Deadline",
      "date": "2026-12-23T23:59:00-12:00",
      "endDate": null,
@@ -517,6 +670,26 @@
      "status": "upcoming",
      "estimated": false,
      "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "conference",
+     "label": "Virtual Conference",
+     "date": "2027-05-06",
+     "endDate": "2027-05-07",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-05-09",
+     "endDate": "2027-05-14",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
     }
    ],
    "links": {
@@ -525,8 +698,7 @@
    },
    "info": {},
    "notes": [
-    "ARR-only: the October 2026 cycle is the last one that can reach COLING 2027, and commitment closes 2026-12-23.",
-    "A virtual presentation day pair runs 2027-05-06/07 before the in-person conference."
+    "Main conference takes place in Macau from May 9 to 14, 2027."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -540,59 +712,59 @@
    "website": "https://colm.cc/",
    "brandColor": "#7C3AED",
    "location": {
-    "city": "TBD",
-    "country": "TBD",
-    "flag": "🌍",
-    "venue": null
+    "city": "San Francisco",
+    "country": "USA",
+    "flag": "🇺🇸",
+    "venue": "Hilton Union Square"
    },
    "deadlines": [
     {
      "type": "abstract",
      "label": "Abstract Submission",
-     "date": "2027-03-25T23:59:00-12:00",
+     "date": "2026-03-26T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "sourceUrl": "https://colm.cc/Conferences/2026/CallForPapers"
     },
     {
      "type": "paper",
      "label": "Full Paper Submission",
-     "date": "2027-03-30T23:59:00-12:00",
+     "date": "2026-03-31T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "sourceUrl": "https://colm.cc/Conferences/2026/CallForPapers"
     },
     {
      "type": "rebuttal",
      "label": "Author Response Period",
-     "date": "2027-05-21",
-     "endDate": "2027-06-07",
+     "date": "2026-05-22",
+     "endDate": "2026-06-08",
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://colm.cc/Conferences/2026/Dates"
+     "sourceUrl": "https://colm.cc/Conferences/2026/CallForPapers"
     },
     {
      "type": "notification",
      "label": "Author Notification",
-     "date": "2027-07-07",
+     "date": "2026-07-08",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://colm.cc/Conferences/2026/Dates"
+     "sourceUrl": "https://colm.cc/Conferences/2026/CallForPapers"
     },
     {
      "type": "conference",
      "label": "Main Conference",
-     "date": "2027-10-05",
-     "endDate": "2027-10-08",
+     "date": "2026-10-06",
+     "endDate": "2026-10-09",
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://colm.cc/Conferences/2026/Dates"
+     "sourceUrl": "https://colm.cc/"
     }
    ],
    "links": {
@@ -601,10 +773,9 @@
    },
    "info": {},
    "notes": [
-    "No COLM 2027 site or CFP exists yet; dates are inferred from the 2026 cycle (paper 31 Mar 2026, conference 6-9 Oct 2026).",
-    "COLM 2026 in San Francisco closed its submissions on 31 March 2026."
+    "Dates and location updated for COLM 2026 based on official pages."
    ],
-   "isEstimated": true,
+   "isEstimated": false,
    "datesTBD": false
   },
   {
@@ -666,8 +837,8 @@
    },
    "info": {},
    "notes": [
-    "ARR-only, no direct submissions: the August 2026 cycle feeds this edition and commitment closes 2026-10-11.",
-    "All deadlines are 23:59 Anywhere on Earth."
+    "Exact dates for workshops and tutorials are currently to be determined.",
+    "Author response and author-reviewer discussion are held as two separate stages."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -743,8 +914,7 @@
    },
    "info": {},
    "notes": [
-    "30th ECAI; 2026 ran jointly as IJCAI-ECAI, so 2027 is the next standalone edition.",
-    "The main-track call is still \"coming soon\": no abstract deadline or submission time is published."
+    "Pre-conference events are scheduled for October 2-3, 2027 at the School of Science-NKUA."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -811,8 +981,7 @@
    },
    "info": {},
    "notes": [
-    "The 2027 site announces only Eindhoven in September 2027; no deadlines are published yet.",
-    "All dates are estimated from the ECML PKDD 2026 cycle and are not official."
+    "Exact submission dates for the 2027 conference are not yet announced on the 2027 main page."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -890,8 +1059,7 @@
    },
    "info": {},
    "notes": [
-    "Submission closes 23 Sep 2026 at 23:59 AoE; the site's global-times table resolves to 12:00 UTC on 24 Sep.",
-    "The older paper-kit page still shows 16 Sep; the live submission page and IEEE SPS both say 23 Sep."
+    "Special session proposals, published journal papers and letters, show & tell proposals, author registration deadlines, and open preview dates are also listed on the important dates page."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -958,11 +1126,10 @@
    },
    "info": {},
    "notes": [
-    "Host city and conference dates are confirmed on the ICDM series site; the 2027 CFP is not out yet.",
-    "Deadlines are inferred from the ICDM 2026 cycle (paper 6 Jun 2026, no separate abstract deadline)."
+    "Main conference dates are confirmed for November 15-18, 2027."
    ],
    "isEstimated": true,
-   "datesTBD": false
+   "datesTBD": true
   },
   {
    "id": "icra-2028",
@@ -1005,8 +1172,7 @@
    },
    "info": {},
    "notes": [
-    "No edition site yet; the IEEE RAS event record is the only source. The August date is earlier than ICRA's usual mid-September pattern, so treat it as provisional.",
-    "ICRA uses PST rather than AoE for submission cutoffs."
+    "Conference and paper submission dates are confirmed by the official event page."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1176,6 +1342,44 @@
    "deadlines": [
     {
      "type": "abstract",
+     "label": "Abstract Submission (First Cycle)",
+     "date": "2026-07-19T23:59:00-12:00",
+     "endDate": null,
+     "status": "passed",
+     "estimated": false,
+     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission (First Cycle)",
+     "date": "2026-07-26T23:59:00-12:00",
+     "endDate": null,
+     "status": "passed",
+     "estimated": false,
+     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "rebuttal",
+     "label": "Author Rebuttal Period (First Cycle)",
+     "date": "2026-09-29",
+     "endDate": "2026-10-13",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Notification (First Cycle)",
+     "date": "2026-11-14",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "abstract",
      "label": "Abstract Submission (Cycle 2)",
      "date": "2027-02-01T23:59:00-12:00",
      "endDate": null,
@@ -1221,6 +1425,16 @@
      "estimated": true,
      "timeUnknown": true,
      "sourceUrl": "https://kdd2026.kdd.org/research-track-call-for-papers/"
+    },
+    {
+     "type": "conference",
+     "label": "Conference Dates",
+     "date": "2027-08-01",
+     "endDate": "2027-08-05",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://kdd2027.kdd.org"
     }
    ],
    "links": {
@@ -1230,8 +1444,7 @@
    },
    "info": {},
    "notes": [
-    "KDD runs two submission cycles a year; upstream tracks only Cycle 1, so this entry adds Cycle 2 on top of it.",
-    "The KDD 2027 CFP says only \"February 2027\" for Cycle 2, so these dates mirror the KDD 2026 Cycle 2 schedule (abstract Feb 1, paper Feb 8, rebuttal Apr 4-17, notification May 16, camera-ready Jun 1, all AoE)."
+    "Camera-ready deadline for the first cycle is not yet announced."
    ],
    "isEstimated": true,
    "datesTBD": false
@@ -1314,8 +1527,8 @@
    },
    "info": {},
    "notes": [
-    "ARR-only: submit to an ARR cycle, then commit the reviewed paper by 2026-12-23. Earlier cycles are also eligible.",
-    "The ARR cycle table gives the October cycle end as Dec 20 while the NAACL CFP says Dec 23; the CFP date is used."
+    "Conference dates are set for June 1-5, 2027.",
+    "Submission and review deadlines follow the ARR October 2026 cycle schedule."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1372,11 +1585,10 @@
    },
    "info": {},
    "notes": [
-    "Venue and conference dates are official; the call for contributions is not out yet.",
-    "Submission dates are estimated from RecSys 2026 and may shift earlier, since RecSys 2027 starts about five weeks earlier in the year."
+    "Specific 2027 submission deadlines are not yet officially announced on the 2027 conference page."
    ],
    "isEstimated": true,
-   "datesTBD": false
+   "datesTBD": true
   },
   {
    "id": "sigir-2027",
@@ -1434,6 +1646,16 @@
      "sourceUrl": "https://sigir2027.org/"
     },
     {
+     "type": "event",
+     "label": "Author Registration",
+     "date": "2027-04-30",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://sigir2027.org/"
+    },
+    {
      "type": "conference",
      "label": "Main Conference",
      "date": "2027-07-18",
@@ -1449,8 +1671,7 @@
    },
    "info": {},
    "notes": [
-    "Full-paper dates are official, but no time of day or timezone is stated yet (SIGIR normally uses 23:59 AoE).",
-    "Short, demo, resource and reproducibility track deadlines are still TBA."
+    "Deadlines for short, demo, resource, reproducibility, and perspective papers, as well as tutorial and workshop proposals, remain to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1515,11 +1736,10 @@
    },
    "info": {},
    "notes": [
-    "No UAI 2027 site or CFP yet; dates are inferred from the 2026 cycle (submission 25 Feb 2026 AoE, Amsterdam 17-21 Aug 2026).",
-    "UAI timing moves between July and August from year to year, so the conference window is uncertain."
+    "Specific 2027 location and exact dates have not yet been officially announced on the main pages."
    ],
    "isEstimated": true,
-   "datesTBD": false
+   "datesTBD": true
   },
   {
    "id": "wacv-2028",
@@ -1537,6 +1757,60 @@
    },
    "deadlines": [
     {
+     "type": "paper",
+     "label": "Paper Submission (Round 1)",
+     "date": "2026-06-26T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "supplementary",
+     "label": "Supplementary Material (Round 1)",
+     "date": "2026-06-28T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "abstract",
+     "label": "Paper Enrollment (Round 2)",
+     "date": "2026-08-21T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "paper",
+     "label": "Paper Submission (Round 2)",
+     "date": "2026-08-28T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "rebuttal",
+     "label": "Round 1 Rebuttal & Revision",
+     "date": "2026-08-28T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
+     "type": "supplementary",
+     "label": "Supplementary Material (Round 2)",
+     "date": "2026-08-30T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
+    },
+    {
      "type": "abstract",
      "label": "Paper Enrollment (Round 1)",
      "date": "2027-06-18T23:59:00-12:00",
@@ -1546,63 +1820,9 @@
      "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
     },
     {
-     "type": "paper",
-     "label": "Paper Submission (Round 1)",
-     "date": "2027-06-25T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": true,
-     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
-    },
-    {
-     "type": "supplementary",
-     "label": "Supplementary Material (Round 1)",
-     "date": "2027-06-27T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": true,
-     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
-    },
-    {
      "type": "notification",
      "label": "Round 1 Reviews & Decisions",
      "date": "2027-08-08T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": true,
-     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
-    },
-    {
-     "type": "abstract",
-     "label": "Paper Enrollment (Round 2)",
-     "date": "2027-08-20T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": true,
-     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
-    },
-    {
-     "type": "paper",
-     "label": "Paper Submission (Round 2)",
-     "date": "2027-08-27T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": true,
-     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
-    },
-    {
-     "type": "rebuttal",
-     "label": "Round 1 Rebuttal & Revision",
-     "date": "2027-08-27T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": true,
-     "sourceUrl": "https://wacv.thecvf.com/Conferences/2027/Dates"
-    },
-    {
-     "type": "supplementary",
-     "label": "Supplementary Material (Round 2)",
-     "date": "2027-08-29T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
      "estimated": true,
@@ -1643,11 +1863,10 @@
    },
    "info": {},
    "notes": [
-    "Waikoloa is confirmed by the CVF and IEEE TC-PAMI conference tables, but no WACV 2028 site or dates exist yet.",
-    "Every date is inferred from WACV 2027 shifted 364 days, which preserves the weekday."
+    "Dates from the official pages for the 2027 event have been extracted."
    ],
    "isEstimated": true,
-   "datesTBD": true
+   "datesTBD": false
   },
   {
    "id": "wsdm-2028",
@@ -1667,20 +1886,20 @@
     {
      "type": "abstract",
      "label": "Abstract Submission",
-     "date": "2027-08-16",
+     "date": "2027-08-17",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "timeUnknown": true,
      "sourceUrl": "https://www.wsdm-conference.org/2027/cffp.html"
     },
     {
      "type": "paper",
      "label": "Paper Submission",
-     "date": "2027-08-23",
+     "date": "2027-08-24",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
      "timeUnknown": true,
      "sourceUrl": "https://www.wsdm-conference.org/2027/cffp.html"
     }
@@ -1691,11 +1910,10 @@
    },
    "info": {},
    "notes": [
-    "WSDM 2027 (Hong Kong, Feb 2027) closed its paper deadline on 24 Aug 2026, so 2028 is the next open edition.",
-    "The 2028 host (announced only as \"in the Americas\") and CFP are not published yet."
+    "The provided pages contain information for WSDM 2027 rather than WSDM 2028."
    ],
-   "isEstimated": true,
-   "datesTBD": true
+   "isEstimated": false,
+   "datesTBD": false
   },
   {
    "id": "www-2027",
@@ -1756,7 +1974,7 @@
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://www2027.thewebconf.org/research-track-papers/"
+     "sourceUrl": "https://www2027.thewebconf.org/important-dates/"
     },
     {
      "type": "rebuttal",
@@ -1766,7 +1984,7 @@
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://www2027.thewebconf.org/research-track-papers/"
+     "sourceUrl": "https://www2027.thewebconf.org/important-dates/"
     },
     {
      "type": "notification",
@@ -1804,8 +2022,7 @@
    },
    "info": {},
    "notes": [
-    "All submission deadlines are 23:59 Anywhere on Earth (AoE).",
-    "The short-paper track runs on a separate, later cycle."
+    "Tutorial proposal submission deadline was extended to October 19, 2026."
    ],
    "isEstimated": false,
    "datesTBD": false
