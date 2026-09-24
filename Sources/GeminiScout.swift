@@ -31,18 +31,95 @@ struct Correction: Codable, Hashable {
 }
 
 enum ScoutError: LocalizedError {
-    case unauthorized
+    /// Google's message rides along: "rejected the key" alone does not say whether the
+    /// key is wrong, the API is off for the project, or something else entirely.
+    case unauthorized(String)
     case rateLimited
-    case http(Int)
+    /// The model answered 404 -- retired, or not offered to this key. Never shown: it
+    /// moves the scan on to the next model.
+    case modelUnavailable
+    /// Every model we know of, and every Flash model the key lists, answered 404.
+    case noModel
+    case api(Int, String)
+    case transport(String)
     case noPages
 
     var errorDescription: String? {
         switch self {
-        case .unauthorized: return L10n.t("scout.error.key")
+        case .unauthorized(let message):
+            return message.isEmpty ? L10n.t("scout.error.key") : L10n.t("scout.error.key") + " (" + message + ")"
         case .rateLimited: return L10n.t("scout.error.rate")
-        case .http(let code): return "HTTP \(String(code))"
+        case .modelUnavailable, .noModel: return L10n.t("scout.error.noModel")
+        case .api(let code, let message):
+            return message.isEmpty ? "Gemini HTTP \(String(code))" : "Gemini \(String(code)): \(message)"
+        case .transport(let message): return message
         case .noPages: return L10n.t("scout.error.noPages")
         }
+    }
+
+    /// Worth stopping the whole scan for: it will go the same way for every conference.
+    var isFatal: Bool {
+        switch self {
+        case .unauthorized, .rateLimited, .noModel: return true
+        default: return false
+        }
+    }
+
+    /// Google's error body says what went wrong far better than the status code does.
+    init(status: Int, body: Data) {
+        let raw = String(data: body, encoding: .utf8) ?? ""
+        let error = (try? JSONSerialization.jsonObject(with: body) as? [String: Any])?["error"] as? [String: Any]
+        let message = String(((error?["message"] as? String) ?? "").prefix(200))
+        switch status {
+        case 404: self = .modelUnavailable
+        case 401, 403: self = .unauthorized(message)
+        case 429: self = .rateLimited
+        case 400 where raw.contains("API_KEY_INVALID"): self = .unauthorized(message)
+        default: self = .api(status, message)
+        }
+    }
+}
+
+/// The model a scan is using, shared by the conferences being read at the same time.
+///
+/// Starts from `GeminiScout.preferredModels`. A 404 drops that name for every request,
+/// so three in flight do not each rediscover it. When the list runs out, the key's own
+/// model list is asked -- once -- for Flash models it can still call.
+actor ModelPicker {
+    private let key: String
+    private var candidates: [String]
+    private var tried: Set<String> = []
+    private var discovery: Task<[String], Never>?
+    private(set) var working: String?
+
+    init(key: String) {
+        self.key = key
+        self.candidates = GeminiScout.preferredModels
+    }
+
+    func current() async -> String? {
+        if let first = candidates.first { return first }
+        let task: Task<[String], Never>
+        if let existing = discovery {
+            task = existing
+        } else {
+            let key = self.key
+            task = Task { await GeminiScout.listFlashModels(key: key) }
+            discovery = task
+        }
+        let listed = await task.value
+        candidates = listed.filter { !tried.contains($0) }
+        return candidates.first
+    }
+
+    func drop(_ model: String) {
+        tried.insert(model)
+        candidates.removeAll { $0 == model }
+        if working == model { working = nil }
+    }
+
+    func confirm(_ model: String) {
+        if working == nil { working = model }
     }
 }
 
@@ -52,7 +129,17 @@ enum ScoutError: LocalizedError {
 /// its `sourceUrl` is a page we actually fetched **and** the date is legible in that
 /// page's text. Everything else is dropped, so the model cannot invent a deadline.
 enum GeminiScout {
-    static let endpoint = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent")!
+    static let apiBase = "https://generativelanguage.googleapis.com/v1beta"
+
+    /// Tried in order until one answers. Flash-Lite first: reading a few pages for dates
+    /// is well within it, and its free-tier limits leave room for fifty conferences in a
+    /// row. The `-latest` aliases follow Google's releases; the pinned names cover a key
+    /// or a moment where an alias is missing. No 2.5 model: Google now serves those only
+    /// to keys that used them before, so a key made today gets a 404 for them.
+    static let preferredModels = [
+        "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite",
+        "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.8-flash",
+    ]
     static let apiKeyAccount = "gemini-api-key"
     static let maxPagesPerConference = 3
     static let pageCharLimit = 14_000
@@ -68,9 +155,28 @@ enum GeminiScout {
 
     // MARK: - Scan
 
+    struct ScanResult {
+        let proposals: [DeadlineProposal]
+        /// The first error, or the one that stopped the scan.
+        let failure: String?
+        /// The model that answered, when one did.
+        let model: String?
+        /// Conferences the model actually answered for.
+        let answered: Int
+        /// Conferences skipped because none of their pages could be read.
+        let unreadable: Int
+    }
+
+    private enum Outcome {
+        case answered([DeadlineProposal])
+        case unreadable
+        case failed(ScoutError)
+        case cancelled
+    }
+
     static func scan(conferences: [Conference],
                      key: String,
-                     progress: (Int, Int) -> Void) async -> ([DeadlineProposal], String?) {
+                     progress: (Int, Int) -> Void) async -> ScanResult {
         let now = Date()
         // A conference whose every deadline has passed cannot tell us anything useful.
         let targets = conferences.filter { conf in
@@ -81,10 +187,11 @@ enum GeminiScout {
         }.sorted { $0.name < $1.name }
 
         let total = targets.count
-        guard total > 0 else { return ([], nil) }
-
+        let models = ModelPicker(key: key)
         var found: [DeadlineProposal] = []
         var failure: String?
+        var answered = 0
+        var unreadable = 0
         var completed = 0
 
         var index = 0
@@ -93,47 +200,64 @@ enum GeminiScout {
             let slice = Array(targets[index..<min(index + concurrency, targets.count)])
             index += slice.count
 
-            let batch: [([DeadlineProposal], String?)] = await withTaskGroup(
-                of: ([DeadlineProposal], String?).self
-            ) { group in
+            let batch: [Outcome] = await withTaskGroup(of: Outcome.self) { group in
                 for conf in slice {
-                    group.addTask { await inspect(conference: conf, key: key) }
+                    group.addTask { await inspect(conference: conf, key: key, models: models) }
                 }
-                var out: [([DeadlineProposal], String?)] = []
-                for await result in group { out.append(result) }
+                var out: [Outcome] = []
+                for await outcome in group { out.append(outcome) }
                 return out
             }
 
-            for (proposals, error) in batch {
-                found.append(contentsOf: proposals)
-                // A key or quota problem will hit every conference; report it once and stop.
-                if let error, failure == nil { failure = error }
+            var fatal = false
+            for outcome in batch {
+                switch outcome {
+                case .answered(let proposals):
+                    answered += 1
+                    found.append(contentsOf: proposals)
+                case .unreadable:
+                    unreadable += 1
+                case .failed(let error):
+                    // Keep the first error, unless a later one is the reason we stop.
+                    if failure == nil || error.isFatal { failure = error.localizedDescription }
+                    fatal = fatal || error.isFatal
+                case .cancelled:
+                    break
+                }
             }
             completed += slice.count
             progress(completed, total)
-
-            if let failure, failure == ScoutError.unauthorized.errorDescription
-                || failure == ScoutError.rateLimited.errorDescription { break }
+            if fatal { break }
         }
 
         let sorted = found.sorted { ($0.conferenceName, $0.date) < ($1.conferenceName, $1.date) }
-        return (sorted, failure)
+        return ScanResult(proposals: sorted, failure: failure, model: await models.working,
+                          answered: answered, unreadable: unreadable)
     }
 
-    private static func inspect(conference: Conference, key: String) async -> ([DeadlineProposal], String?) {
+    private static func inspect(conference: Conference, key: String, models: ModelPicker) async -> Outcome {
         var pages: [String: String] = [:]
         for url in sourceURLs(for: conference).prefix(maxPagesPerConference) {
-            if Task.isCancelled { return ([], nil) }
+            if Task.isCancelled { return .cancelled }
             if let text = await fetch(url) { pages[url.absoluteString] = text }
         }
-        guard !pages.isEmpty else { return ([], nil) }
+        guard !pages.isEmpty else { return .unreadable }
 
-        do {
-            let reported = try await ask(key: key, conference: conference, pages: pages)
-            return (proposals(from: reported, conference: conference, pages: pages), nil)
-        } catch {
-            return ([], error.localizedDescription)
+        while let model = await models.current() {
+            do {
+                let reported = try await ask(model: model, key: key, conference: conference, pages: pages)
+                await models.confirm(model)
+                return .answered(proposals(from: reported, conference: conference, pages: pages))
+            } catch ScoutError.modelUnavailable {
+                await models.drop(model)
+            } catch let error as ScoutError {
+                return .failed(error)
+            } catch {
+                if Task.isCancelled { return .cancelled }
+                return .failed(.transport(error.localizedDescription))
+            }
         }
+        return .failed(.noModel)
     }
 
     /// Pages that might state this conference's dates, best first.
@@ -150,6 +274,36 @@ enum GeminiScout {
         for k in ["official", "dates", "submission", "authorGuide"] { add(conference.links[k]) }
         add(conference.website)
         return out
+    }
+
+    /// The Flash models this key can call, Lite first and newest first within each --
+    /// the fallback for the day every name in `preferredModels` has been retired.
+    static func listFlashModels(key: String) async -> [String] {
+        guard let url = URL(string: apiBase + "/models?pageSize=1000") else { return [] }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 20
+        request.setValue(key, forHTTPHeaderField: "x-goog-api-key")
+        guard let (data, response) = try? await URLSession.shared.data(for: request),
+              (response as? HTTPURLResponse)?.statusCode == 200,
+              let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let listed = root["models"] as? [[String: Any]] else { return [] }
+
+        let excluded = ["preview", "exp", "image", "tts", "live", "audio", "embedding", "thinking", "native"]
+        let names: [String] = listed.compactMap { entry in
+            guard let full = entry["name"] as? String,
+                  let methods = entry["supportedGenerationMethods"] as? [String],
+                  methods.contains("generateContent") else { return nil }
+            let name = full.hasPrefix("models/") ? String(full.dropFirst(7)) : full
+            guard name.hasPrefix("gemini-"), name.contains("flash"),
+                  !name.hasPrefix("gemini-1."), !name.hasPrefix("gemini-2."),
+                  !excluded.contains(where: { name.contains($0) }) else { return nil }
+            return name
+        }
+        return names.sorted { a, b in
+            let (liteA, liteB) = (a.contains("lite"), b.contains("lite"))
+            if liteA != liteB { return liteA }
+            return a.compare(b, options: .numeric) == .orderedDescending
+        }
     }
 
     // MARK: - Fetching
@@ -216,39 +370,42 @@ enum GeminiScout {
 
     // MARK: - The model
 
-    private static func ask(key: String, conference: Conference, pages: [String: String]) async throws -> [[String: Any]] {
-        var request = URLRequest(url: endpoint)
+    private static func ask(model: String, key: String, conference: Conference,
+                            pages: [String: String]) async throws -> [[String: Any]] {
+        guard let url = URL(string: "\(apiBase)/models/\(model):generateContent") else {
+            throw ScoutError.modelUnavailable
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = 90
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         // Header rather than a query parameter, so the key stays out of URLs and logs.
         request.setValue(key, forHTTPHeaderField: "x-goog-api-key")
 
+        // No temperature and no output cap. Google advises leaving temperature alone on
+        // the 3.x models, which are tuned for the default, and a cap can be spent on
+        // thinking before any JSON is written. The answer is a few hundred tokens anyway.
         let body: [String: Any] = [
             "contents": [["role": "user", "parts": [["text": prompt(conference: conference, pages: pages)]]]],
-            "generationConfig": [
-                "temperature": 0.1,
-                "maxOutputTokens": 8192,
-                "responseMimeType": "application/json",
-            ],
+            "generationConfig": ["responseMimeType": "application/json"],
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let (data, response) = try await URLSession.shared.data(for: request)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
-            switch http.statusCode {
-            case 400, 401, 403: throw ScoutError.unauthorized
-            case 429: throw ScoutError.rateLimited
-            default: throw ScoutError.http(http.statusCode)
-            }
+            throw ScoutError(status: http.statusCode, body: data)
         }
 
         guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let candidates = root["candidates"] as? [[String: Any]],
               let content = candidates.first?["content"] as? [String: Any],
-              let parts = content["parts"] as? [[String: Any]],
-              let text = parts.compactMap({ $0["text"] as? String }).first
+              let parts = content["parts"] as? [[String: Any]]
         else { return [] }
+        // A thinking model may hand back its reasoning as parts of its own; only the
+        // answer is JSON.
+        let text = parts.filter { ($0["thought"] as? Bool) != true }
+            .compactMap { $0["text"] as? String }
+            .joined()
 
         var json = text.trimmingCharacters(in: .whitespacesAndNewlines)
         if json.hasPrefix("```") {
@@ -367,6 +524,23 @@ enum GeminiScout {
             "\(year)-\(mm)-\(dd)", "\(day).\(month).\(year)", "\(dd).\(mm).\(year)",
         ]
         let haystack = text.lowercased()
-        return spellings.contains { haystack.contains($0.lowercased()) }
+        return spellings.contains { containsStandalone(haystack, $0.lowercased()) }
+    }
+
+    /// True when `needle` occurs with no digit touching either end. A plain substring
+    /// test let "october 1" match inside "october 15" and "1 oct" inside "21 oct",
+    /// which for the first three days of every month quietly disabled the guard.
+    static func containsStandalone(_ haystack: String, _ needle: String) -> Bool {
+        var from = haystack.startIndex
+        while from < haystack.endIndex,
+              let range = haystack.range(of: needle, range: from..<haystack.endIndex) {
+            let before: Character? = range.lowerBound > haystack.startIndex
+                ? haystack[haystack.index(before: range.lowerBound)] : nil
+            let after: Character? = range.upperBound < haystack.endIndex
+                ? haystack[range.upperBound] : nil
+            if !(before?.isNumber ?? false) && !(after?.isNumber ?? false) { return true }
+            from = haystack.index(after: range.lowerBound)
+        }
+        return false
     }
 }

@@ -79,12 +79,12 @@ struct MenuView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: L10n.t("app.name"))
                     .font(.system(size: 13, weight: .semibold))
-                if let item = store.menuBarItem {
+                if let item = store.nextItem {
                     Text(verbatim: L10n.t("app.next", item.conference.displayName, item.ddayText))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 } else {
-                    Text(verbatim: L10n.t("app.noDeadline"))
+                    Text(verbatim: L10n.t(store.favorites.isEmpty ? "app.noDeadline" : "app.noStarred"))
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }

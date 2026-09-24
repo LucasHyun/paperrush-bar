@@ -135,6 +135,19 @@ struct Conference: Identifiable, Hashable {
 
     var displayName: String { "\(name) \(String(year))" }
 
+    /// The conference across editions: `iclr-2027` and `iclr-2028` are both `iclr`.
+    /// Anything meant to outlive one year -- a star, above all -- keys on this, not `id`.
+    var seriesKey: String { Conference.series(of: id) }
+
+    /// Strips a trailing `-YYYY`. Plain character checks rather than a regex: this runs
+    /// for every row on every menu bar frame.
+    static func series(of id: String) -> String {
+        let tail = id.suffix(5)
+        guard tail.count == 5, tail.first == "-",
+              tail.dropFirst().allSatisfy({ $0.isASCII && $0.isNumber }) else { return id }
+        return String(id.dropLast(5))
+    }
+
     var locationText: String {
         let parts = [city, country].filter { !$0.isEmpty && $0 != "TBD" }
         guard !parts.isEmpty else { return "" }

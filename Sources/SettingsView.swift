@@ -10,6 +10,25 @@ struct SettingsView: View {
 
     private var keyURL: URL { URL(string: "https://aistudio.google.com/apikey")! }
 
+    /// "All dates match" only when something was checked and nothing went wrong. It
+    /// used to say so even when every call had failed, which read as a clean bill.
+    private func finishedText(answered: Int) -> String {
+        if !store.proposals.isEmpty { return L10n.t("settings.scan.found", String(store.proposals.count)) }
+        if answered == 0 || store.scanError != nil { return L10n.t("settings.scan.incomplete", String(answered)) }
+        return L10n.t("settings.scan.clean", String(answered))
+    }
+
+    private func detailText(unreadable: Int, model: String?) -> String? {
+        var parts: [String] = []
+        if unreadable > 0 { parts.append(L10n.t("settings.scan.unreadable", String(unreadable))) }
+        if let model { parts.append(model) }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    private func saveKey() {
+        if store.saveGeminiKey(draftKey) { draftKey = "" }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             header
@@ -60,10 +79,9 @@ struct SettingsView: View {
                 SecureField("AIza…", text: $draftKey)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(size: 11, design: .monospaced))
-                Button(L10n.t("settings.key.save")) {
-                    if store.saveGeminiKey(draftKey) { draftKey = "" }
-                }
-                .disabled(draftKey.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .onSubmit(saveKey)
+                Button(L10n.t("settings.key.save"), action: saveKey)
+                    .disabled(draftKey.trimmingCharacters(in: .whitespaces).isEmpty)
             }
 
             HStack(spacing: 8) {
@@ -116,16 +134,21 @@ struct SettingsView: View {
                             .font(.system(size: 11))
                     }
                 }
-            case .finished(let checked):
-                HStack(spacing: 8) {
-                    Text(verbatim: store.proposals.isEmpty
-                         ? L10n.t("settings.scan.clean", String(checked))
-                         : L10n.t("settings.scan.found", String(store.proposals.count)))
-                        .font(.system(size: 11))
-                    Spacer()
-                    Button(L10n.t("settings.scan.again")) { store.startScan() }
-                        .buttonStyle(.borderless)
-                        .font(.system(size: 11))
+            case .finished(let answered, let unreadable, let model):
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 8) {
+                        Text(verbatim: finishedText(answered: answered))
+                            .font(.system(size: 11))
+                        Spacer()
+                        Button(L10n.t("settings.scan.again")) { store.startScan() }
+                            .buttonStyle(.borderless)
+                            .font(.system(size: 11))
+                    }
+                    if let detail = detailText(unreadable: unreadable, model: model) {
+                        Text(verbatim: detail)
+                            .font(.system(size: 10))
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
 

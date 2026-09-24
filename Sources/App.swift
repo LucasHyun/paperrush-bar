@@ -6,15 +6,17 @@ import UserNotifications
 struct PaperRushBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @StateObject private var store = Store.shared
+    /// Observed apart from the store, so glyph frames redraw the label and nothing else.
+    @StateObject private var icon = Store.shared.icon
 
     var body: some Scene {
         MenuBarExtra {
             MenuView().environmentObject(store)
         } label: {
             // Glyph and title are one image, so colour and weight survive the menu bar.
-            Image(nsImage: store.menuBarIcon)
-                .renderingMode(store.iconIsTemplate ? .template : .original)
-                .id(store.iconVersion)
+            Image(nsImage: icon.image)
+                .renderingMode(icon.isTemplate ? .template : .original)
+                .id(icon.version)
         }
         .menuBarExtraStyle(.window)
     }

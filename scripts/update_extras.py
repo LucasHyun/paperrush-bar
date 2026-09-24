@@ -31,7 +31,15 @@ import requests
 ROOT = Path(__file__).resolve().parent.parent
 EXTRAS = ROOT / "Resources" / "extras.json"
 
-MODEL = "gemini-2.5-flash"
+# Tried in order until one answers; GEMINI_MODEL (comma-separated) overrides the list.
+# Flash-Lite first: pulling dates out of a few pages is well within it. No 2.5 model:
+# Google now serves those only to keys that used them before, so a new key gets a 404 --
+# which this script used to swallow as "no usable response" and report as no change.
+MODELS = [m.strip() for m in os.environ.get("GEMINI_MODEL", "").split(",") if m.strip()] or [
+    "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite",
+    "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.8-flash",
+]
+EXCLUDED_MODEL_WORDS = ("preview", "exp", "image", "tts", "live", "audio", "embedding", "thinking", "native")
 USER_AGENT = "PaperRushBar-extras-updater/1.0 (+https://github.com/LucasHyun/paperrush-bar)"
 
 PAGE_CHAR_LIMIT = 18_000
@@ -146,7 +154,10 @@ def date_is_on_page(date: str, text: str) -> bool:
         f"{year}-{month:02d}-{day:02d}", f"{day}.{month}.{year}", f"{day:02d}.{month:02d}.{year}",
     ]
     lowered = text.lower()
-    return any(s.lower() in lowered for s in spellings)
+    # No digit may touch either end: a plain substring test let "october 1" match
+    # inside "october 15" and "1 oct" inside "21 oct".
+    return any(re.search(r"(?<!\d)" + re.escape(s.lower()) + r"(?!\d)", lowered)
+               for s in spellings)
 
 
 def valid_deadline(deadline: dict, allowed_urls: set[str]) -> str | None:
@@ -215,6 +226,37 @@ Rules:
 """
 
 
+_models = list(MODELS)
+_discovered = False
+
+
+def _not_found(error: Exception) -> bool:
+    return getattr(error, "code", None) == 404 or "NOT_FOUND" in str(error)
+
+
+def _next_model(client) -> str | None:
+    """The model to use now. When every listed one has answered 404, ask the key once
+    which Flash models it can call, Lite first and newest first."""
+    global _discovered
+    if not _models and not _discovered:
+        _discovered = True
+        try:
+            names = []
+            for model in client.models.list():
+                name = (model.name or "").removeprefix("models/")
+                actions = getattr(model, "supported_actions", None) or []
+                if ("generateContent" in actions and name.startswith("gemini-") and "flash" in name
+                        and not name.startswith(("gemini-1.", "gemini-2."))
+                        and not any(word in name for word in EXCLUDED_MODEL_WORDS)):
+                    names.append(name)
+            names.sort(key=lambda n: (0 if "lite" in n else 1, [-int(x) for x in re.findall(r"\d+", n)]))
+            _models.extend(names)
+            print(f"    listed models to try: {', '.join(names[:5]) or 'none'}")
+        except Exception as error:
+            print(f"    could not list models: {error}")
+    return _models[0] if _models else None
+
+
 def ask_gemini(client, conference: dict, pages: dict[str, str], today: str) -> dict | None:
     from google.genai import types
 
@@ -233,15 +275,18 @@ def ask_gemini(client, conference: dict, pages: dict[str, str], today: str) -> d
     )
     prompt = PROMPT.format(today=today, current=current, pages="\n\n".join(rendered))
 
-    config = types.GenerateContentConfig(
-        temperature=0.1,
-        max_output_tokens=16384,
-        response_mime_type="application/json",
-    )
-    for attempt in range(3):
+    # No temperature and no output cap: Google advises leaving temperature alone on the
+    # 3.x models, and a cap can be spent on thinking before any JSON is written.
+    config = types.GenerateContentConfig(response_mime_type="application/json")
+    failures = 0
+    while failures < 3:
+        model = _next_model(client)
+        if model is None:
+            print("    no Gemini model answered for this key")
+            return None
         try:
             response = client.models.generate_content(
-                model=MODEL,
+                model=model,
                 contents=[types.Content(role="user", parts=[types.Part.from_text(text=prompt)])],
                 config=config,
             )
@@ -250,8 +295,13 @@ def ask_gemini(client, conference: dict, pages: dict[str, str], today: str) -> d
             text = re.sub(r"\n?```\s*$", "", text)
             return json.loads(text)
         except Exception as error:  # transient API or JSON trouble
-            print(f"    model attempt {attempt + 1} failed: {error}")
-            time.sleep(2 * (attempt + 1))
+            if _not_found(error):
+                print(f"    {model} is not available to this key, moving on")
+                _models.remove(model)
+                continue
+            failures += 1
+            print(f"    {model} attempt {failures} failed: {error}")
+            time.sleep(2 * failures)
     return None
 
 
@@ -375,6 +425,7 @@ def main() -> int:
 
     today = time.strftime("%Y-%m-%d")
     changed_any = False
+    asked = answered = 0
 
     for index, conference in enumerate(conferences):
         if wanted and conference["id"].lower() not in wanted and conference["name"].lower() not in wanted:
@@ -391,7 +442,10 @@ def main() -> int:
             print("  no readable pages, left untouched")
             continue
 
+        asked += 1
         proposal = ask_gemini(client, conference, pages, today)
+        if proposal:
+            answered += 1
         if not proposal:
             print("  no usable response, left untouched")
             continue
@@ -405,8 +459,13 @@ def main() -> int:
         else:
             print("  no change")
 
+    # Silence here would look exactly like a quiet week. Make it a failed run instead.
+    if asked and not answered:
+        print(f"\nGemini answered for none of the {asked} conferences it was asked about.")
+        return 1
+
     if not changed_any:
-        print("\nNothing changed.")
+        print(f"\nNothing changed ({answered}/{asked} answered, model {_models[0] if _models else 'none'}).")
         return 0
 
     if args.dry_run:

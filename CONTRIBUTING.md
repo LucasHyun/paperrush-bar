@@ -69,7 +69,7 @@ An overlay entry does one of two things:
   scraper keeps it current.
 
 **The overlay updates itself.** `scripts/update_extras.py` runs weekly in Actions: it fetches each
-deadline's `sourceUrl`, asks Gemini 2.5 Flash for the current schedule, and accepts a date only when
+deadline's `sourceUrl`, asks a Gemini Flash-Lite model (see `MODELS`) for the current schedule, and accepts a date only when
 its `sourceUrl` is one of the pages actually fetched and the date is legible in that page's text.
 Anything unverified leaves the existing entry alone, and an estimate can never be promoted to
 confirmed by the model. Run it yourself with `GEMINI_API_KEY` set:

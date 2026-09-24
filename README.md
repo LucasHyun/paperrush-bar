@@ -32,7 +32,7 @@ its dataset through GitHub Actions — so this app follows upstream automaticall
 | **Daily auto-update** | Checks every 30 min, re-downloads when the data is older than 6 h, and refreshes on wake |
 | **Offline-friendly** | Last payload cached in Application Support; a snapshot ships inside the app for first launch |
 | **D-7 / D-3 / D-1 alerts** | Native notifications at 09:00 — off / favorites / all |
-| **Favorites** | Star the conferences you are actually targeting and the menu bar follows your stars; alerts can too |
+| **Favorites** | Star the conferences you are actually targeting and the menu bar follows your stars; alerts can too. A star belongs to the conference, not the year, so it carries over to the next edition |
 | **Click to open** | Any row opens the conference's official site |
 | **Extra conferences** | 18 venues upstream doesn't cover plus 7 it covers only partly, re-read from their own CFPs weekly — and your own, in a file you can edit |
 | **Verify a date yourself** | Your own Gemini API key, in the gear menu: it reads each conference's own site and proposes only dates legible on the page it cites. Nothing changes until you apply one |
@@ -122,7 +122,7 @@ COLING, which is the date those venues actually gate on. Dates the next edition'
 yet are inferred from the previous cycle and carry an `Est.` badge — never presented as confirmed.
 
 It keeps itself current. `scripts/update_extras.py` runs weekly in Actions (Mondays 06:30 UTC, just
-after upstream's own job): it re-reads each deadline's `sourceUrl`, asks **Gemini 2.5 Flash** to
+after upstream's own job): it re-reads each deadline's `sourceUrl`, asks **Gemini** (a Flash-Lite model, falling back through newer ones if Google retires it) to
 extract the schedule, and commits what it can verify. Estimates become confirmed dates on their own
 as CFPs appear. The app reads the published `Resources/extras.json` over the network, so those
 updates land without a rebuild; the copy inside the app is only the offline fallback.

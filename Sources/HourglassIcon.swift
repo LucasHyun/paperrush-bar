@@ -1,4 +1,17 @@
 import AppKit
+import Combine
+
+/// What the menu bar label draws. Separate from `Store` so the panel does not
+/// re-render twenty-odd times a second while sand is falling. Only ever written
+/// from `Store`, which is main-actor isolated.
+final class MenuBarIconModel: ObservableObject {
+    @Published var image: NSImage = HourglassIcon.image(fill: nil, grain: nil)
+    /// Bumped on every redraw; the label uses it as an identity so SwiftUI cannot
+    /// decide two NSImages are "the same" and skip the frame.
+    @Published var version = 0
+    /// False once the sand has a colour; the label must then stop forcing template rendering.
+    @Published var isTemplate = true
+}
 
 /// The menu bar hourglass, drawn at runtime so the sand can show how much time is left.
 ///

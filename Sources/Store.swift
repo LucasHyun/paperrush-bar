@@ -37,14 +37,9 @@ final class Store: ObservableObject {
     @Published private(set) var errorMessage: String?
     @Published var now = Date()
 
-    /// The menu bar glyph. Redrawn whenever the nearest deadline or the clock moves,
-    /// so the sand level tracks how much time is left.
-    @Published private(set) var menuBarIcon: NSImage = HourglassIcon.image(fill: nil, grain: nil)
-    /// Bumped on every redraw; the label uses it as an identity so SwiftUI cannot
-    /// decide two NSImages are "the same" and skip the frame.
-    @Published private(set) var iconVersion = 0
-    /// False once the sand has a colour; the label must then stop forcing template rendering.
-    @Published private(set) var iconIsTemplate = true
+    /// The menu bar glyph, kept in its own object: it changes at animation rate, and
+    /// anything published here makes the whole panel re-render with it.
+    let icon = MenuBarIconModel()
     private var grainProgress: Double?
     private var grainStep = 0
     private var grainTimer: Timer?
@@ -140,14 +135,23 @@ final class Store: ObservableObject {
     enum ScanState: Equatable {
         case idle
         case running(done: Int, total: Int)
-        case finished(checked: Int)
+        /// `answered`: conferences the model actually replied for. `unreadable`: skipped
+        /// because no page of theirs could be read. `model`: which one answered.
+        case finished(answered: Int, unreadable: Int, model: String?)
     }
 
-    @Published private(set) var hasGeminiKey = Keychain.get(account: GeminiScout.apiKeyAccount) != nil
+    /// Checked without reading the key. The app is ad-hoc signed, so after every update
+    /// the keychain treats it as a stranger and asks before handing the key over; doing
+    /// that at login, for nothing, is what `exists` avoids.
+    @Published private(set) var hasGeminiKey = Keychain.exists(account: GeminiScout.apiKeyAccount)
     @Published private(set) var scanState: ScanState = .idle
     @Published private(set) var proposals: [DeadlineProposal] = []
     @Published private(set) var scanError: String?
     private var scanTask: Task<Void, Never>?
+    /// Bumped by every start and cancel. A scan may write state only while its number
+    /// is current, so one that was cancelled -- but is still waiting on Gemini -- cannot
+    /// finish later and mark its successor idle.
+    private var scanGeneration = 0
 
     private enum Keys {
         static let favorites = "favorites"
@@ -160,10 +164,15 @@ final class Store: ObservableObject {
         static let menuBarRotate = "menuBarRotate"
         static let notifyUpdates = "notifyUpdates"
         static let notifiedUpdateVersion = "notifiedUpdateVersion"
+        static let latestReleaseVersion = "latestReleaseVersion"
+        static let latestReleasePage = "latestReleasePage"
     }
 
     private init() {
-        favorites = Set(defaults.stringArray(forKey: Keys.favorites) ?? [])
+        // Stars used to be stored by edition id (`iclr-2027`), so every one of them
+        // silently vanished when the data moved on to the next year. Folding to the
+        // series key is idempotent, so this doubles as the one-time migration.
+        favorites = Set((defaults.stringArray(forKey: Keys.favorites) ?? []).map(Conference.series(of:)))
         menuBarSubmissionOnly = defaults.object(forKey: Keys.menuBarSubmissionOnly) as? Bool ?? true
         notifyMode = NotifyMode(rawValue: defaults.string(forKey: Keys.notifyMode) ?? "all") ?? .all
         language = AppLanguage(rawValue: defaults.string(forKey: Keys.language) ?? "system") ?? .system
@@ -171,6 +180,14 @@ final class Store: ObservableObject {
         menuBarRotate = defaults.object(forKey: Keys.menuBarRotate) as? Bool ?? true
         notifyUpdates = defaults.object(forKey: Keys.notifyUpdates) as? Bool ?? true
         if let t = defaults.object(forKey: Keys.lastFetch) as? Date { lastFetch = t }
+        defaults.set(Array(favorites), forKey: Keys.favorites)   // persist the migration
+        // The last release check's answer. The check itself runs at most daily, so
+        // without this a relaunch would hide a known update for up to a day.
+        if let latest = defaults.string(forKey: Keys.latestReleaseVersion),
+           let page = defaults.string(forKey: Keys.latestReleasePage).flatMap(URL.init(string:)),
+           Store.isNewer(latest, than: Store.currentVersion) {
+            availableUpdate = UpdateInfo(version: latest, url: page)
+        }
         L10n.apply(language)
         loadFromDisk()
     }
@@ -418,10 +435,10 @@ final class Store: ObservableObject {
     private func updateIcon() {
         let hoursLeft = menuBarItem.map { $0.date.timeIntervalSince(now) / 3600 }
         let fill = hoursLeft.map { HourglassIcon.fill(daysRemaining: $0 / 24) }
-        menuBarIcon = HourglassIcon.label(fill: fill, grain: grainProgress, tilt: tilt,
-                                          hoursLeft: hoursLeft, title: menuBarTitle)
-        iconIsTemplate = (hoursLeft.map(HourglassIcon.urgencyTier) ?? 0) == 0
-        iconVersion &+= 1
+        icon.image = HourglassIcon.label(fill: fill, grain: grainProgress, tilt: tilt,
+                                         hoursLeft: hoursLeft, title: menuBarTitle)
+        icon.isTemplate = (hoursLeft.map(HourglassIcon.urgencyTier) ?? 0) == 0
+        icon.version &+= 1
     }
 
     /// ~0.55 s of damped side-to-side tilt. Fired every few grains once the trickle is
@@ -545,6 +562,8 @@ final class Store: ObservableObject {
               let page = (json["html_url"] as? String).flatMap(URL.init(string:)) else { return }
         defaults.set(Date(), forKey: Keys.lastUpdateCheck)
         let latest = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
+        defaults.set(latest, forKey: Keys.latestReleaseVersion)
+        defaults.set(page.absoluteString, forKey: Keys.latestReleasePage)
         availableUpdate = Store.isNewer(latest, than: Store.currentVersion)
             ? UpdateInfo(version: latest, url: page) : nil
         if let update = availableUpdate { announce(update) }
@@ -642,7 +661,7 @@ final class Store: ObservableObject {
     func visibleItems(query: String, category: String, favoritesOnly: Bool, submissionOnly: Bool) -> [DeadlineItem] {
         let q = query.trimmingCharacters(in: .whitespaces).lowercased()
         let filtered = upcoming.filter { item in
-            if favoritesOnly && !favorites.contains(item.conference.id) { return false }
+            if favoritesOnly && !favorites.contains(item.conference.seriesKey) { return false }
             if category != "all" && item.conference.category != category { return false }
             if submissionOnly && !item.isSubmission { return false }
             if !q.isEmpty {
@@ -655,8 +674,8 @@ final class Store: ObservableObject {
         }
         // Favorites float to the top, everything else stays in date order.
         return filtered.sorted { a, b in
-            let fa = favorites.contains(a.conference.id)
-            let fb = favorites.contains(b.conference.id)
+            let fa = favorites.contains(a.conference.seriesKey)
+            let fb = favorites.contains(b.conference.seriesKey)
             if fa != fb { return fa }
             return a.date < b.date
         }
@@ -666,12 +685,18 @@ final class Store: ObservableObject {
     ///
     /// Starring a conference is already the person saying "this one is mine", so the
     /// menu bar follows the stars rather than a separate setting to find and switch on.
-    /// With nothing starred there is nothing to narrow by, so it shows the field.
+    ///
+    /// With nothing starred there is nothing to narrow by, so it shows the field. With
+    /// stars whose deadlines have all passed it shows nothing: falling back to someone
+    /// else's conference there is exactly what starring was meant to stop.
     var menuBarCandidates: [DeadlineItem] {
         let eligible = upcoming.filter { !menuBarSubmissionOnly || $0.isSubmission }
-        let starred = eligible.filter { favorites.contains($0.conference.id) }
-        return starred.isEmpty ? eligible : starred
+        guard !favorites.isEmpty else { return eligible }
+        return eligible.filter { favorites.contains($0.conference.seriesKey) }
     }
+
+    /// The nearest deadline being watched, whichever one the menu bar is showing.
+    var nextItem: DeadlineItem? { menuBarCandidates.first }
 
     /// What the menu bar is showing right now.
     ///
@@ -719,17 +744,19 @@ final class Store: ObservableObject {
     }
 
     var menuBarTitle: String {
-        guard let item = menuBarItem else { return "—" }
+        // "★ —" rather than a bare dash: starred, and nothing coming up among them.
+        guard let item = menuBarItem else { return favorites.isEmpty ? "—" : "★ —" }
         return "\(item.conference.name) \(item.ddayText)"
     }
 
     // MARK: - Actions
 
     func toggleFavorite(_ id: String) {
-        if favorites.contains(id) { favorites.remove(id) } else { favorites.insert(id) }
+        let key = Conference.series(of: id)
+        if favorites.contains(key) { favorites.remove(key) } else { favorites.insert(key) }
     }
 
-    func isFavorite(_ id: String) -> Bool { favorites.contains(id) }
+    func isFavorite(_ id: String) -> Bool { favorites.contains(Conference.series(of: id)) }
 
     func open(_ conference: Conference) {
         if let url = conference.url { NSWorkspace.shared.open(url) }
@@ -792,7 +819,7 @@ final class Store: ObservableObject {
 
         let targets = upcoming
             .filter { $0.isSubmission }
-            .filter { notifyMode == .all || favorites.contains($0.conference.id) }
+            .filter { notifyMode == .all || favorites.contains($0.conference.seriesKey) }
             .prefix(20)
 
         let calendar = Calendar.current
@@ -832,6 +859,7 @@ final class Store: ObservableObject {
     }
 
     func removeGeminiKey() {
+        cancelScan()
         Keychain.remove(account: GeminiScout.apiKeyAccount)
         hasGeminiKey = false
         proposals = []
@@ -848,34 +876,42 @@ final class Store: ObservableObject {
     /// Nothing is applied here — the person decides, because a wrong deadline is
     /// worse than a missing one.
     func startScan() {
-        guard !isScanning, let key = Keychain.get(account: GeminiScout.apiKeyAccount) else { return }
+        guard !isScanning else { return }
+        // The one place the key is read -- and so the one place macOS may ask for
+        // permission, which is fine now: the person has just asked for a scan.
+        guard let key = Keychain.get(account: GeminiScout.apiKeyAccount) else {
+            hasGeminiKey = Keychain.exists(account: GeminiScout.apiKeyAccount)
+            scanError = L10n.t("scout.error.keychain")
+            return
+        }
         proposals = []
         scanError = nil
+        scanGeneration &+= 1
+        let generation = scanGeneration
         scanState = .running(done: 0, total: conferences.count)
 
         let snapshot = conferences
         scanTask = Task { [weak self] in
-            let (found, failure) = await GeminiScout.scan(conferences: snapshot, key: key) { done, total in
+            let result = await GeminiScout.scan(conferences: snapshot, key: key) { done, total in
                 Task { @MainActor in
-                    guard let self, self.isScanning else { return }
+                    guard let self, self.scanGeneration == generation else { return }
                     self.scanState = .running(done: done, total: total)
                 }
             }
             await MainActor.run {
-                guard let self else { return }
+                // Cancelled, or overtaken by a newer scan: leave no trace.
+                guard let self, self.scanGeneration == generation else { return }
                 self.scanTask = nil
-                if Task.isCancelled {
-                    self.scanState = .idle
-                    return
-                }
-                self.proposals = found
-                self.scanError = failure
-                self.scanState = .finished(checked: snapshot.count)
+                self.proposals = result.proposals
+                self.scanError = result.failure
+                self.scanState = .finished(answered: result.answered, unreadable: result.unreadable,
+                                           model: result.model)
             }
         }
     }
 
     func cancelScan() {
+        scanGeneration &+= 1
         scanTask?.cancel()
         scanTask = nil
         scanState = .idle
