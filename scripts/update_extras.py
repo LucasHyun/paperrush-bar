@@ -410,8 +410,13 @@ def supersedes(confirmed: list[dict], estimate: dict) -> bool:
 _LABEL_NOISE = {"the", "of", "and", "for", "a", "an", "deadline", "date", "dates", "due"}
 
 
+def _singular(word: str) -> str:
+    # "Tutorials Proposal Deadline" and "Tutorial Proposal Deadline" are one milestone.
+    return word[:-1] if len(word) > 3 and word.endswith("s") and not word.endswith("ss") else word
+
+
 def _label_words(label: str) -> set[str]:
-    return {w for w in re.findall(r"[a-z0-9]+", label.lower()) if w not in _LABEL_NOISE}
+    return {_singular(w) for w in re.findall(r"[a-z0-9]+", label.lower()) if w not in _LABEL_NOISE}
 
 
 def same_milestone(a: dict, b: dict) -> bool:
@@ -531,39 +536,167 @@ def merge_conference(conference: dict, proposal: dict, pages: dict[str, str],
     return updated, log
 
 
+# --------------------------------------------------------------------------- upstream
+
+UPSTREAM_URL = "https://raw.githubusercontent.com/awsaf49/paperrush/main/js/data.js"
+UPSTREAM_SNAPSHOT = ROOT / "Resources" / "conferences.json"
+
+
+def _extract_object(js: str, marker: str) -> str | None:
+    """The one balanced {...} after `marker`, string literals included -- data.js holds
+    `const CONFERENCES_DATA = {...};` followed by other declarations."""
+    at = js.find(marker)
+    start = js.find("{", at) if at >= 0 else -1
+    if start < 0:
+        return None
+    depth, in_string, escaped = 0, False, False
+    for i in range(start, len(js)):
+        ch = js[i]
+        if in_string:
+            if escaped:
+                escaped = False
+            elif ch == "\\":
+                escaped = True
+            elif ch == '"':
+                in_string = False
+        elif ch == '"':
+            in_string = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return js[start:i + 1]
+    return None
+
+
+def load_upstream() -> dict[str, dict]:
+    """paperrush's own conferences by id: live when reachable, else the bundled snapshot."""
+    try:
+        response = requests.get(UPSTREAM_URL, timeout=FETCH_TIMEOUT, headers={"User-Agent": USER_AGENT})
+        response.raise_for_status()
+        raw = _extract_object(response.text, "CONFERENCES_DATA")
+        conferences = json.loads(raw)["conferences"] if raw else []
+        if conferences:
+            print(f"upstream: {len(conferences)} conferences, live")
+            return {c["id"]: c for c in conferences}
+        print("upstream: live data had no conferences, using the bundled snapshot")
+    except Exception as error:
+        print(f"upstream: live fetch failed ({type(error).__name__}), using the bundled snapshot")
+    return {c["id"]: c for c in json.loads(UPSTREAM_SNAPSHOT.read_text())["conferences"]}
+
+
+def upstream_covers(upstream: dict, deadline: dict) -> bool:
+    """The app's own rule (Conference.covers): upstream lists this milestone -- same type
+    and day, or, for a date we only estimated, a confirmed one within 45 days."""
+    for d in upstream.get("deadlines", []):
+        if d.get("type") != deadline["type"]:
+            continue
+        if d["date"][:10] == deadline["date"][:10]:
+            return True
+        if deadline.get("estimated") and not d.get("estimated") and days_between(d["date"], deadline["date"]) < 45:
+            return True
+    return False
+
+
+def dedupe(deadlines: list[dict]) -> tuple[list[dict], list[str]]:
+    """One row per milestone; a confirmed twin wins over an estimated one."""
+    kept: list[dict] = []
+    log: list[str] = []
+    for d in deadlines:
+        index = next((i for i, k in enumerate(kept) if same_milestone(k, d)), None)
+        if index is None:
+            kept.append(d)
+            continue
+        twin = kept[index]
+        if twin.get("estimated") and not d.get("estimated"):
+            kept[index], d, twin = d, twin, d
+        log.append(f"dropped duplicate '{d['label']}' {d['date'][:10]}: same as '{twin['label']}'")
+    return kept, log
+
+
+def reconcile(conference: dict, upstream: dict[str, dict]) -> tuple[dict | None, list[str]]:
+    """Step back wherever upstream has caught up. Returns the entry to keep, or None
+    to drop it, and the reasons.
+
+    A patch that keeps copies of upstream's dates is harmless only until upstream
+    corrects one: the app hides a copy while its day matches, so the moment upstream
+    moves 14 November to the 16th, the stale 14th reappears as a second deadline.
+    """
+    cid = conference["id"]
+    up = upstream.get(cid)
+    patch = conference.get("mode") == "patch"
+    if up and not patch:
+        return None, ["retired: upstream now publishes this conference itself"]
+    if patch and not up:
+        return None, ["retired: upstream no longer lists the conference this patch completed"]
+
+    deadlines, log = dedupe(conference.get("deadlines", []))
+    if patch:
+        kept = []
+        for d in deadlines:
+            if upstream_covers(up, d):
+                log.append(f"dropped '{d['label']}' {d['date'][:10]}: upstream has it")
+            else:
+                kept.append(d)
+        deadlines = kept
+        if not deadlines:
+            return None, log + ["retired: upstream now has every date this patch added"]
+    if not log:
+        return conference, []
+    updated = dict(conference, deadlines=deadlines)
+    updated["isEstimated"] = any(d.get("estimated") for d in deadlines)
+    updated["datesTBD"] = not any(d["type"] in ("abstract", "paper") and not d.get("estimated") for d in deadlines)
+    return updated, log
+
+
 # --------------------------------------------------------------------------- main
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Refresh extras.json from the conferences' own pages.")
     parser.add_argument("--conferences", "-c", help="comma-separated ids or names; default is all")
     parser.add_argument("--dry-run", "-n", action="store_true", help="report what would change, write nothing")
+    parser.add_argument("--prune-only", action="store_true",
+                        help="only step back where upstream has caught up; no pages, no model, no key")
     parser.add_argument("--extras", default=str(EXTRAS), help="path to extras.json")
     parser.add_argument("--changelog", help="write what changed, grouped by conference, to this file")
     args = parser.parse_args()
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("GEMINI_API_KEY is not set.")
-        return 2
-    from google import genai
-    client = genai.Client(api_key=api_key)
+    client = None
+    if not args.prune_only:
+        api_key = os.environ.get("GEMINI_API_KEY")
+        if not api_key:
+            print("GEMINI_API_KEY is not set.")
+            return 2
+        from google import genai
+        client = genai.Client(api_key=api_key)
 
     path = Path(args.extras)
     document = json.loads(path.read_text())
     conferences = document["conferences"]
+    upstream = load_upstream()
 
     wanted = None
     if args.conferences:
         wanted = {w.strip().lower() for w in args.conferences.split(",") if w.strip()}
 
+    def is_wanted(conference: dict) -> bool:
+        return not wanted or conference["id"].lower() in wanted or conference["name"].lower() in wanted
+
     today = time.strftime("%Y-%m-%d")
     changed_any = False
     asked = answered = 0
     skipped: list[str] = []
-    changelog: list[str] = []
+    changes: dict[str, list[str]] = {}
+    headers: dict[str, str] = {}
+
+    def note(conference: dict, lines: list[str]) -> None:
+        if lines:
+            headers.setdefault(conference["id"], f"{conference['name']} {conference['year']} ({conference['id']})")
+            changes.setdefault(conference["id"], []).extend(lines)
 
     for index, conference in enumerate(conferences):
-        if wanted and conference["id"].lower() not in wanted and conference["name"].lower() not in wanted:
+        if args.prune_only or not is_wanted(conference):
             continue
 
         print(f"\n{conference['name']} {conference['year']} ({conference['id']})")
@@ -579,30 +712,48 @@ def main() -> int:
 
         asked += 1
         proposal = ask_gemini(client, conference, pages, today)
-        if proposal:
-            answered += 1
-        else:
-            skipped.append(conference["id"])
         if not proposal:
+            skipped.append(conference["id"])
             print("  no usable response, left untouched")
             continue
+        answered += 1
 
         updated, log = merge_conference(conference, proposal, pages)
         for line in log:
             print(f"  {line}")
-        if log:
-            changelog.append(f"{conference['name']} {conference['year']} ({conference['id']})")
-            changelog.extend(f"  {line}" for line in log)
+        note(conference, log)
         if updated != conference:
             conferences[index] = updated
             changed_any = True
         else:
             print("  no change")
 
-    used = _models[0] if _models else "none"
-    tally = f"{answered}/{asked} answered, model {used}" + (f"; skipped {', '.join(skipped)}" if skipped else "")
+    # Whatever the model said, step back wherever upstream has caught up.
+    kept = []
+    for conference in conferences:
+        if not is_wanted(conference):
+            kept.append(conference)
+            continue
+        result, lines = reconcile(conference, upstream)
+        if lines:
+            print(f"\n{conference['name']} {conference['year']} ({conference['id']}), against upstream")
+            for line in lines:
+                print(f"  {line}")
+            note(conference, lines)
+            changed_any = True
+        if result is not None:
+            kept.append(result)
+    conferences = kept
+
+    used = "none" if args.prune_only else (_models[0] if _models else "none")
+    tally = ("pruned against upstream only" if args.prune_only
+             else f"{answered}/{asked} answered, model {used}" + (f"; skipped {', '.join(skipped)}" if skipped else ""))
     if args.changelog:
-        Path(args.changelog).write_text("\n".join(changelog + ["", tally]) + "\n")
+        body = []
+        for cid, lines in changes.items():
+            body.append(headers[cid])
+            body.extend(f"  {line}" for line in lines)
+        Path(args.changelog).write_text("\n".join(body + ["", tally]) + "\n")
 
     # Silence here would look exactly like a quiet week. Make it a failed run instead.
     if asked and not answered:

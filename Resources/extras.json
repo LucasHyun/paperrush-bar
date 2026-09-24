@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-09-24T04:29:49Z",
+ "lastUpdated": "2026-09-24T04:34:20Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -542,15 +542,6 @@
    "deadlines": [
     {
      "type": "paper",
-     "label": "ARR submission deadline (long & short papers)",
-     "date": "2026-10-12T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
-    },
-    {
-     "type": "paper",
      "label": "COLING Commitment Deadline",
      "date": "2026-12-23T23:59:00-12:00",
      "endDate": null,
@@ -572,16 +563,6 @@
      "label": "Virtual Conference",
      "date": "2027-05-06",
      "endDate": "2027-05-07",
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://2027.coling-iccl.org/calls/main_conference_papers/"
-    },
-    {
-     "type": "conference",
-     "label": "Main Conference",
-     "date": "2027-05-09",
-     "endDate": "2027-05-14",
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
@@ -725,16 +706,6 @@
      "endDate": null,
      "status": "upcoming",
      "estimated": false,
-     "sourceUrl": "https://2027.eacl.org/calls/papers/"
-    },
-    {
-     "type": "conference",
-     "label": "Main Conference",
-     "date": "2027-03-09",
-     "endDate": "2027-03-14",
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
      "sourceUrl": "https://2027.eacl.org/calls/papers/"
     }
    ],
@@ -894,94 +865,6 @@
    ],
    "isEstimated": true,
    "datesTBD": true
-  },
-  {
-   "id": "icassp-2027",
-   "name": "ICASSP",
-   "fullName": "IEEE International Conference on Acoustics, Speech and Signal Processing",
-   "year": 2027,
-   "category": "speech",
-   "mode": "patch",
-   "website": "https://2027.ieeeicassp.org",
-   "brandColor": "#DC143C",
-   "location": {
-    "city": "Toronto",
-    "country": "Canada",
-    "flag": "🇨🇦",
-    "venue": "Metro Toronto Convention Centre"
-   },
-   "deadlines": [
-    {
-     "type": "paper",
-     "label": "Full Paper Submission",
-     "date": "2026-09-23T23:59:00-12:00",
-     "endDate": null,
-     "status": "passed",
-     "estimated": false,
-     "sourceUrl": "https://cmsworkshops.com/ICASSP2027/papers.php"
-    },
-    {
-     "type": "tutorial",
-     "label": "Tutorials Proposal Deadline",
-     "date": "2026-11-02",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://2027.ieeeicassp.org/important-dates/"
-    },
-    {
-     "type": "tutorial",
-     "label": "Tutorial Proposal Deadline",
-     "date": "2026-11-02",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://2027.ieeeicassp.org/important-dates/"
-    },
-    {
-     "type": "notification",
-     "label": "Paper Acceptance Notification",
-     "date": "2027-01-13",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://2027.ieeeicassp.org/important-dates/"
-    },
-    {
-     "type": "camera",
-     "label": "Final Paper Submission",
-     "date": "2027-01-27",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://2027.ieeeicassp.org/important-dates/"
-    },
-    {
-     "type": "conference",
-     "label": "Main Conference",
-     "date": "2027-05-16",
-     "endDate": "2027-05-21",
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://2027.ieeeicassp.org/"
-    }
-   ],
-   "links": {
-    "official": "https://2027.ieeeicassp.org",
-    "submission": "https://cmsworkshops.com/ICASSP2027/papers.php",
-    "dates": "https://2027.ieeeicassp.org/important-dates/"
-   },
-   "info": {},
-   "notes": [
-    "Full paper submission status has passed."
-   ],
-   "isEstimated": false,
-   "datesTBD": false
   },
   {
    "id": "icdm-2027",
@@ -1262,44 +1145,6 @@
    "deadlines": [
     {
      "type": "abstract",
-     "label": "Abstract Submission (Cycle 1)",
-     "date": "2026-07-19T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
-    },
-    {
-     "type": "paper",
-     "label": "Paper Submission (Cycle 1)",
-     "date": "2026-07-26T23:59:00-12:00",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
-    },
-    {
-     "type": "rebuttal",
-     "label": "Rebuttal Period (Cycle 1)",
-     "date": "2026-09-29",
-     "endDate": "2026-10-13",
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
-    },
-    {
-     "type": "notification",
-     "label": "Author Notification (Cycle 1)",
-     "date": "2026-11-14",
-     "endDate": null,
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://kdd2027.kdd.org/research-track-call-for-papers/"
-    },
-    {
-     "type": "abstract",
      "label": "Abstract Submission (Cycle 2)",
      "date": "2027-02-01T23:59:00-12:00",
      "endDate": null,
@@ -1358,7 +1203,7 @@
     "Cycle 1 dates for KDD 2027 have been announced."
    ],
    "isEstimated": true,
-   "datesTBD": false
+   "datesTBD": true
   },
   {
    "id": "naacl-2027",

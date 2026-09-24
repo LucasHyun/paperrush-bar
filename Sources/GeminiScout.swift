@@ -617,8 +617,13 @@ enum GeminiScout {
     /// scan to the next ("Abstract Submission (Blue Sky Ideas)", "Blue Sky Ideas
     /// Abstract Submission"), which should not come back as a new deadline.
     static func sameWords(_ a: String, _ b: String) -> Bool {
+        // Plural-blind too: "Tutorials Proposal Deadline" is "Tutorial Proposal Deadline".
+        func singular(_ word: String) -> String {
+            word.count > 3 && word.hasSuffix("s") && !word.hasSuffix("ss") ? String(word.dropLast()) : word
+        }
         func words(_ label: String) -> Set<String> {
-            Set(label.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init)).subtracting(labelNoise)
+            let raw = label.lowercased().split { !$0.isLetter && !$0.isNumber }.map(String.init)
+            return Set(raw.filter { !labelNoise.contains($0) }.map(singular))
         }
         let (wa, wb) = (words(a), words(b))
         guard !wa.isEmpty, !wb.isEmpty else { return false }
