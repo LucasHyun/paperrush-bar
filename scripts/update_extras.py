@@ -674,6 +674,7 @@ def main() -> int:
     path = Path(args.extras)
     document = json.loads(path.read_text())
     conferences = document["conferences"]
+    original = json.loads(json.dumps(conferences))   # what "changed" is measured against
     upstream = load_upstream()
 
     wanted = None
@@ -718,6 +719,18 @@ def main() -> int:
             continue
         answered += 1
 
+        # A patch only carries what upstream lacks. The model cannot know what that is and
+        # reports upstream's dates too; adding them here only for the reconciliation below
+        # to drop them again would make every run a change.
+        up = upstream.get(conference["id"])
+        if conference.get("mode") == "patch" and up:
+            reported = proposal.get("deadlines") or []
+            proposal = dict(proposal, deadlines=[
+                d for d in reported
+                if not (isinstance(d, dict) and d.get("type") and isinstance(d.get("date"), str)
+                        and upstream_covers(up, d))
+            ])
+
         updated, log = merge_conference(conference, proposal, pages)
         for line in log:
             print(f"  {line}")
@@ -744,6 +757,9 @@ def main() -> int:
         if result is not None:
             kept.append(result)
     conferences = kept
+    # Changed means the data differs, not that something was logged: a run that only
+    # rejects dates, or re-derives what we already had, commits nothing.
+    changed_any = sorted(conferences, key=lambda c: c["id"]) != sorted(original, key=lambda c: c["id"])
 
     used = "none" if args.prune_only else (_models[0] if _models else "none")
     tally = ("pruned against upstream only" if args.prune_only
