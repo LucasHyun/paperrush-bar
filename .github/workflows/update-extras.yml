@@ -25,6 +25,9 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
+    # The script budgets 25 minutes of model work. Anything past this is a hang,
+    # and GitHub's default would let it run for six hours.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v7
 

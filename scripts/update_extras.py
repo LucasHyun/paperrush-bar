@@ -22,6 +22,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 from html.parser import HTMLParser
 from pathlib import Path
@@ -45,6 +46,8 @@ USER_AGENT = "PaperRushBar-extras-updater/1.0 (+https://github.com/LucasHyun/pap
 PAGE_CHAR_LIMIT = 18_000
 TOTAL_CHAR_LIMIT = 60_000
 FETCH_TIMEOUT = 20
+MODEL_TIMEOUT_MS = 120_000   # per Gemini request
+RUN_BUDGET = 25 * 60         # seconds of model work per run; the rest waits for next week
 
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(Z|[+-]\d{2}:\d{2}))?$")
 TYPES = {"abstract", "paper", "supplementary", "rebuttal", "notification",
@@ -91,24 +94,72 @@ BINARY_HINTS = ("pdf", "image/", "octet-stream", "zip", "font")
 MIN_USEFUL_CHARS = 200
 
 
+FETCH_DEADLINE = 45          # seconds for a whole page, however slowly it trickles in
+FETCH_MAX_BYTES = 3_000_000
+
+
+def _download(url: str) -> tuple[int, str, str]:
+    """(status, content type, body), bounded in time and size.
+
+    requests' timeout only bounds the gap between bytes, and a streamed read blocks
+    until its chunk fills, so neither stops a server that keeps trickling. The request
+    runs in a daemon thread instead, and a page that is not complete within
+    FETCH_DEADLINE is given up on -- the thread is left to die with the process.
+    """
+    result: dict = {}
+
+    def work() -> None:
+        try:
+            with requests.get(url, timeout=(10, FETCH_TIMEOUT), stream=True,
+                              headers={"User-Agent": USER_AGENT}) as response:
+                content_type = response.headers.get("content-type", "").lower()
+                if response.status_code != 200 or any(h in content_type for h in BINARY_HINTS):
+                    result["value"] = (response.status_code, content_type, "")
+                    return
+                chunks, size = [], 0
+                for chunk in response.iter_content(chunk_size=65536):
+                    chunks.append(chunk)
+                    size += len(chunk)
+                    if size > FETCH_MAX_BYTES:
+                        break
+                raw = b"".join(chunks)
+                # Not apparent_encoding: it re-reads a body that streaming has consumed.
+                try:
+                    body = raw.decode("utf-8")
+                except UnicodeDecodeError:
+                    body = raw.decode(response.encoding or "latin-1", errors="replace")
+                result["value"] = (200, content_type, body)
+        except Exception as error:  # handed back to the caller below
+            result["error"] = error
+
+    worker = threading.Thread(target=work, daemon=True)
+    worker.start()
+    worker.join(FETCH_DEADLINE)
+    if worker.is_alive():
+        raise requests.Timeout(f"page not complete within {FETCH_DEADLINE}s")
+    if "error" in result:
+        raise result["error"]
+    return result["value"]
+
+
 def fetch(url: str) -> str | None:
     """Page text, or None with a reason printed. Never raises."""
     try:
-        response = requests.get(url, timeout=FETCH_TIMEOUT, headers={"User-Agent": USER_AGENT})
-    except requests.RequestException as error:
+        result = _download(url)
+    except (requests.RequestException, LookupError) as error:
         print(f"  unreachable {url}  ({type(error).__name__})")
         return None
+    status, content_type, body = result
 
-    if response.status_code != 200:
-        print(f"  HTTP {response.status_code} {url}")
+    if status != 200:
+        print(f"  HTTP {status} {url}")
         return None
 
-    content_type = response.headers.get("content-type", "").lower()
     if any(hint in content_type for hint in BINARY_HINTS):
         print(f"  skipped {url}  ({content_type.split(';')[0]})")
         return None
 
-    text = page_text(response.text)[:PAGE_CHAR_LIMIT]
+    text = page_text(body)[:PAGE_CHAR_LIMIT]
     if len(text) < MIN_USEFUL_CHARS:
         # Usually a client-rendered page: the dates exist, but only after JS runs.
         print(f"  too little text at {url}  ({len(text)} chars, likely JS-rendered)")
@@ -681,7 +732,14 @@ def main() -> int:
             print("GEMINI_API_KEY is not set.")
             return 2
         from google import genai
-        client = genai.Client(api_key=api_key)
+        # Without a timeout one unanswered request waits forever; on 28 September one
+        # did, and the job sat for the six hours GitHub allows before it was killed.
+        try:
+            from google.genai import types as genai_types
+            client = genai.Client(api_key=api_key,
+                                  http_options=genai_types.HttpOptions(timeout=MODEL_TIMEOUT_MS))
+        except (TypeError, AttributeError):   # an SDK without HttpOptions(timeout=)
+            client = genai.Client(api_key=api_key)
 
     path = Path(args.extras)
     document = json.loads(path.read_text())
@@ -708,8 +766,14 @@ def main() -> int:
             headers.setdefault(conference["id"], f"{conference['name']} {conference['year']} ({conference['id']})")
             changes.setdefault(conference["id"], []).extend(lines)
 
+    started = time.monotonic()
     for index, conference in enumerate(conferences):
         if args.prune_only or not is_wanted(conference):
+            continue
+        if time.monotonic() - started > RUN_BUDGET:
+            # Better a run that finishes with some conferences left for next week than
+            # one that never finishes and writes nothing.
+            skipped.append(conference["id"])
             continue
 
         print(f"\n{conference['name']} {conference['year']} ({conference['id']})")
