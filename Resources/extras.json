@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-09-24T04:34:20Z",
+ "lastUpdated": "2026-10-01T18:24:36Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -334,12 +334,41 @@
     {
      "type": "paper",
      "label": "ARR Submission (January 2027 Cycle)",
-     "date": "2027-01-04",
+     "date": "2027-01-04T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
-     "estimated": true,
+     "estimated": false,
+     "sourceUrl": "https://2027.aclweb.org"
+    },
+    {
+     "type": "tutorial",
+     "label": "Tutorials",
+     "date": "2027-08-17",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://aclrollingreview.org/dates"
+     "sourceUrl": "https://2027.aclweb.org"
+    },
+    {
+     "type": "workshop",
+     "label": "Workshops",
+     "date": "2027-08-18",
+     "endDate": "2027-08-19",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.aclweb.org"
+    },
+    {
+     "type": "conference",
+     "label": "Main Conference",
+     "date": "2027-08-20",
+     "endDate": "2027-08-22",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://2027.aclweb.org"
     }
    ],
    "links": {
@@ -349,11 +378,10 @@
    },
    "info": {},
    "notes": [
-    "ARR lists only \"January 2027\" as the last cycle feeding ACL 2027; the day is inferred from ACL 2026's cycle start and is provisional.",
-    "The ACL 2027 commitment, notification and camera-ready dates are not published yet (the CFP says \"Coming soon\"), so they are left out rather than guessed."
+    "Notification of acceptance, camera-ready deadline, and commitment deadline are currently TBA."
    ],
-   "isEstimated": true,
-   "datesTBD": true
+   "isEstimated": false,
+   "datesTBD": false
   },
   {
    "id": "acm-mm-2027",
@@ -792,8 +820,7 @@
    },
    "info": {},
    "notes": [
-    "Pre-conference events including workshops, tutorials, and the Doctoral Consortium take place on October 2-3, 2027.",
-    "Registration details and conference program are yet to be announced."
+    "Pre-conference events including workshops, tutorials, and the Doctoral Consortium take place on October 2-3, 2027."
    ],
    "isEstimated": false,
    "datesTBD": false
