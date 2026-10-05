@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-10-01T18:24:36Z",
+ "lastUpdated": "2026-10-05T15:13:11Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -309,8 +309,7 @@
    },
    "info": {},
    "notes": [
-    "Sponsorship opportunities are yet to be announced.",
-    "Author registration deadline for Blue Sky Ideas track is currently TBD."
+    "Sponsorship opportunities are yet to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -378,7 +377,7 @@
    },
    "info": {},
    "notes": [
-    "Notification of acceptance, camera-ready deadline, and commitment deadline are currently TBA."
+    "Commitment deadline, notification of acceptance, and camera-ready deadline are currently TBA."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -603,7 +602,7 @@
    },
    "info": {},
    "notes": [
-    "Conference dates for both virtual and main events have been announced."
+    "The main conference dates for May 9–14, 2027 have been added."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -743,8 +742,8 @@
    },
    "info": {},
    "notes": [
-    "Exact dates for workshops and tutorials are currently TBD.",
-    "Author response and author-reviewer discussion are conducted as two separate stages."
+    "Specific dates for workshops and tutorials are still TBD.",
+    "Author response and author-reviewer discussion are now two separate stages."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -879,6 +878,16 @@
      "estimated": true,
      "timeUnknown": true,
      "sourceUrl": "https://ecmlpkdd.org/2026/submissions-research-track/"
+    },
+    {
+     "type": "conference",
+     "label": "Conference Dates",
+     "date": "2027-08-30",
+     "endDate": "2027-09-03",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://ecmlpkdd.org/2027/"
     }
    ],
    "links": {
@@ -887,8 +896,7 @@
    },
    "info": {},
    "notes": [
-    "The 2027 site announces only Eindhoven in September 2027; no deadlines are published yet.",
-    "All dates are estimated from the ECML PKDD 2026 cycle and are not official."
+    "Conference dates for 2027 have been announced."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1149,7 +1157,7 @@
    },
    "info": {},
    "notes": [
-    "Paper submission and other specific deadlines are not yet announced on the official website."
+    "Specific submission deadlines are not yet announced on the official website."
    ],
    "isEstimated": false,
    "datesTBD": true
@@ -1248,6 +1256,33 @@
    },
    "deadlines": [
     {
+     "type": "workshop",
+     "label": "Workshop proposal deadline",
+     "date": "2026-09-04T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
+    },
+    {
+     "type": "notification",
+     "label": "Workshop notification of acceptance",
+     "date": "2026-10-02T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
+    },
+    {
+     "type": "tutorial",
+     "label": "Tutorial proposal deadline",
+     "date": "2026-10-02T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
+    },
+    {
      "type": "paper",
      "label": "ARR Submission (October 2026 Cycle)",
      "date": "2026-10-12T23:59:00-12:00",
@@ -1255,6 +1290,33 @@
      "status": "upcoming",
      "estimated": false,
      "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+    },
+    {
+     "type": "paper",
+     "label": "Industry track submission deadline",
+     "date": "2026-10-31T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of acceptance (tutorials)",
+     "date": "2026-11-25T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
+    },
+    {
+     "type": "paper",
+     "label": "System demo submission deadline",
+     "date": "2026-12-04T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
     },
     {
      "type": "notification",
@@ -1284,13 +1346,31 @@
      "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
     },
     {
+     "type": "notification",
+     "label": "Notification of acceptance (system demos)",
+     "date": "2027-02-10T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of acceptance (industry track)",
+     "date": "2027-02-24T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.naacl.org"
+    },
+    {
      "type": "camera",
      "label": "Camera-Ready Papers Due",
      "date": "2027-03-03T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
      "estimated": false,
-     "sourceUrl": "https://2027.naacl.org/calls/main_conference_papers/"
+     "sourceUrl": "https://2027.naacl.org"
     },
     {
      "type": "conference",
@@ -1310,7 +1390,7 @@
    },
    "info": {},
    "notes": [
-    "Calls for workshop proposals, tutorial proposals, industry track, and system demonstrations have been released."
+    "Additional deadlines for industry track, system demos, tutorials, and workshops are specified."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1367,7 +1447,7 @@
    },
    "info": {},
    "notes": [
-    "Main track submission dates for 2027 are still pending official confirmation from the organizers."
+    "Main track submission deadlines for 2027 are not yet officially announced on the site."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1443,8 +1523,8 @@
    },
    "info": {},
    "notes": [
-    "Deadlines for short, demo, resource, reproducibility, and perspective papers are yet to be announced.",
-    "Tutorial and workshop proposal deadlines as well as registration milestones remain TBA."
+    "Deadlines for short, demo, resource, reproducibility, and perspective papers are still TBA.",
+    "Tutorial, workshop proposals, and registration milestones are yet to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1745,7 +1825,7 @@
     {
      "type": "event",
      "label": "Reviews Released",
-     "date": "2026-12-21",
+     "date": "2026-12-15",
      "endDate": null,
      "status": "upcoming",
      "estimated": false,
@@ -1755,8 +1835,8 @@
     {
      "type": "rebuttal",
      "label": "Rebuttal Period",
-     "date": "2026-12-21",
-     "endDate": "2026-12-31",
+     "date": "2026-12-15",
+     "endDate": "2026-12-20",
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
@@ -1798,7 +1878,7 @@
    },
    "info": {},
    "notes": [
-    "Tutorial proposal submission deadline was extended to October 19, 2026."
+    "Result release and rebuttal dates updated for research and industry track papers."
    ],
    "isEstimated": false,
    "datesTBD": false
