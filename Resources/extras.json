@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-10-05T15:13:11Z",
+ "lastUpdated": "2026-10-12T15:48:58Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -309,7 +309,8 @@
    },
    "info": {},
    "notes": [
-    "Sponsorship opportunities are yet to be announced."
+    "Sponsorship opportunities are yet to be announced.",
+    "Author registration deadline for Blue Sky Ideas is currently TBD."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -602,7 +603,8 @@
    },
    "info": {},
    "notes": [
-    "The main conference dates for May 9–14, 2027 have been added."
+    "The ARR submission deadline has been added to the schedule.",
+    "The main conference in-person dates (May 9-14, 2027) are confirmed."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -742,8 +744,7 @@
    },
    "info": {},
    "notes": [
-    "Specific dates for workshops and tutorials are still TBD.",
-    "Author response and author-reviewer discussion are now two separate stages."
+    "Dates for workshops and tutorials are still to be determined."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -806,7 +807,7 @@
     {
      "type": "conference",
      "label": "Main Conference",
-     "date": "2027-10-04",
+     "date": "2027-10-02",
      "endDate": "2027-10-07",
      "status": "upcoming",
      "estimated": false,
@@ -819,7 +820,8 @@
    },
    "info": {},
    "notes": [
-    "Pre-conference events including workshops, tutorials, and the Doctoral Consortium take place on October 2-3, 2027."
+    "Main conference dates updated to October 2-7, 2027.",
+    "Registration and detailed program are still unannounced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -896,7 +898,7 @@
    },
    "info": {},
    "notes": [
-    "Conference dates for 2027 have been announced."
+    "Specific 2027 research track and journal track specific date announcements are pending confirmation on the 2027 pages."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1144,7 +1146,7 @@
     {
      "type": "conference",
      "label": "Main Conference",
-     "date": "2027-09-26",
+     "date": "2027-09-27",
      "endDate": "2027-10-01",
      "status": "upcoming",
      "estimated": false,
@@ -1157,7 +1159,8 @@
    },
    "info": {},
    "notes": [
-    "Specific submission deadlines are not yet announced on the official website."
+    "The conference dates are updated to September 27 – October 1, 2027.",
+    "Specific submission and notification deadlines are not yet announced on the website."
    ],
    "isEstimated": false,
    "datesTBD": true
@@ -1390,7 +1393,8 @@
    },
    "info": {},
    "notes": [
-    "Additional deadlines for industry track, system demos, tutorials, and workshops are specified."
+    "Main conference dates confirmed for June 1-5, 2027.",
+    "ARR submission deadline confirmed for October 12, 2026."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1447,7 +1451,8 @@
    },
    "info": {},
    "notes": [
-    "Main track submission deadlines for 2027 are not yet officially announced on the site."
+    "Main track deadlines are currently estimated based on previous year patterns.",
+    "Conference dates and venue for 2027 are officially confirmed."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1489,6 +1494,16 @@
     },
     {
      "type": "notification",
+     "label": "Notification",
+     "date": "2027-04-05",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://sigir2027.org/"
+    },
+    {
+     "type": "notification",
      "label": "Author Notification",
      "date": "2027-04-05",
      "endDate": null,
@@ -1500,6 +1515,16 @@
     {
      "type": "camera",
      "label": "Camera-Ready Submission",
+     "date": "2027-04-30",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://sigir2027.org/"
+    },
+    {
+     "type": "event",
+     "label": "Author registration",
      "date": "2027-04-30",
      "endDate": null,
      "status": "upcoming",
@@ -1523,8 +1548,8 @@
    },
    "info": {},
    "notes": [
-    "Deadlines for short, demo, resource, reproducibility, and perspective papers are still TBA.",
-    "Tutorial, workshop proposals, and registration milestones are yet to be announced."
+    "Deadlines for short, demo, resource, reproducibility, perspective papers, tutorial, and workshop proposals are still TBA.",
+    "Registration milestones such as early, regular, and late registration dates are yet to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1878,7 +1903,8 @@
    },
    "info": {},
    "notes": [
-    "Result release and rebuttal dates updated for research and industry track papers."
+    "Web4All submissions are currently listed as TBA.",
+    "Resource submissions camera-ready deadline was extended to February 17, 2027."
    ],
    "isEstimated": false,
    "datesTBD": false
