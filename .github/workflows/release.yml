@@ -78,7 +78,7 @@ jobs:
 
             1. Download and unzip `PaperRushBar-${{ steps.package.outputs.tag }}.zip`
             2. Move `PaperRushBar.app` to `/Applications`
-            3. First launch: right-click → **Open** (the build is ad-hoc signed, not notarized)
+            3. Before the first launch: `xattr -dr com.apple.quarantine /Applications/PaperRushBar.app` (the build is ad-hoc signed, not notarized; without this macOS offers **Move to Trash**, which deletes it)
 
             Or build from source:
 

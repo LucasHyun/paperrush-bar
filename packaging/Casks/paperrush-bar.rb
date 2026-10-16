@@ -16,6 +16,15 @@ cask "paperrush-bar" do
 
   app "PaperRushBar.app"
 
+  # The build is ad-hoc signed, not notarized. A freshly downloaded copy is quarantined,
+  # and its first launch then offers "Move to Trash" -- one click that deletes the app
+  # brew just installed, which is how it kept vanishing from /Applications. The tap is
+  # this project's own, so it clears the quarantine on its own app instead.
+  postflight do
+    system_command "/usr/bin/xattr",
+                   args: ["-dr", "com.apple.quarantine", "#{appdir}/PaperRushBar.app"]
+  end
+
   uninstall quit: "com.lucashyun.paperrushbar"
 
   zap trash: [

@@ -53,7 +53,9 @@ it - that is the middle line, and it is asked once per tap.
 
 `brew upgrade --cask paperrush-bar` later — though the app also tells you itself when a new release
 is out. Or download `PaperRushBar-vX.zip` from [Releases](https://github.com/LucasHyun/paperrush-bar/releases)
-and drop the app into `/Applications` (right-click → Open the first time; the build is not notarized).
+and drop the app into `/Applications`. The build is not notarized, so before the first launch run
+`xattr -dr com.apple.quarantine /Applications/PaperRushBar.app` — otherwise macOS offers to
+**Move to Trash**, and that button deletes the app. (Homebrew does this for you.)
 
 From source, with Xcode Command Line Tools (`xcode-select --install`):
 

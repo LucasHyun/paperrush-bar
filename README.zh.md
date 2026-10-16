@@ -52,7 +52,9 @@ brew install --cask paperrush-bar
 
 之后用 `brew upgrade --cask paperrush-bar` 升级 —— 有新版本时应用自己也会提示。
 或者从 [Releases](https://github.com/LucasHyun/paperrush-bar/releases) 下载 `PaperRushBar-vX.zip`
-放入 `/Applications`（该构建未经 notarize，首次启动请右键 → 打开）。
+放入 `/Applications`。该构建未经 notarize，首次打开前请先运行
+`xattr -dr com.apple.quarantine /Applications/PaperRushBar.app`，否则 macOS 会提示**移到废纸篓**，
+点了这个按钮应用就会被删除。（用 Homebrew 安装会自动处理。）
 
 从源码构建，需要 Xcode 命令行工具（`xcode-select --install`）：
 

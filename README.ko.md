@@ -52,7 +52,9 @@ brew install --cask paperrush-bar
 
 이후엔 `brew upgrade --cask paperrush-bar` — 새 릴리즈가 나오면 앱이 직접 알려주기도 합니다.
 또는 [Releases](https://github.com/LucasHyun/paperrush-bar/releases)에서 `PaperRushBar-vX.zip`을 받아
-`/Applications`에 넣으세요 (notarize된 빌드가 아니라 첫 실행은 우클릭 → 열기).
+`/Applications`에 넣으세요. notarize된 빌드가 아니라서 처음 열기 전에
+`xattr -dr com.apple.quarantine /Applications/PaperRushBar.app` 을 실행해야 합니다. 그러지 않으면 macOS가
+**휴지통으로 이동**을 권하는데, 이 버튼을 누르면 앱이 삭제됩니다. (Homebrew로 설치하면 자동으로 처리됩니다.)
 
 소스에서 빌드하려면 Xcode Command Line Tools(`xcode-select --install`)를 준비하고:
 
