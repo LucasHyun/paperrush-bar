@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-10-12T15:48:58Z",
+ "lastUpdated": "2026-10-16T17:00:45Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -359,16 +359,6 @@
      "estimated": false,
      "timeUnknown": true,
      "sourceUrl": "https://2027.aclweb.org"
-    },
-    {
-     "type": "conference",
-     "label": "Main Conference",
-     "date": "2027-08-20",
-     "endDate": "2027-08-22",
-     "status": "upcoming",
-     "estimated": false,
-     "timeUnknown": true,
-     "sourceUrl": "https://2027.aclweb.org"
     }
    ],
    "links": {
@@ -603,8 +593,7 @@
    },
    "info": {},
    "notes": [
-    "The ARR submission deadline has been added to the schedule.",
-    "The main conference in-person dates (May 9-14, 2027) are confirmed."
+    "Main Conference dates for May 9–14, 2027 added."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -744,7 +733,8 @@
    },
    "info": {},
    "notes": [
-    "Dates for workshops and tutorials are still to be determined."
+    "Specific dates for workshops and tutorials are currently to be determined.",
+    "Author response and author-reviewer discussion are now two separate stages."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -820,8 +810,8 @@
    },
    "info": {},
    "notes": [
-    "Main conference dates updated to October 2-7, 2027.",
-    "Registration and detailed program are still unannounced."
+    "Pre-conference events are scheduled for October 2-3 at the School of Science-NKUA.",
+    "Detailed registration and conference program schedules remain unannounced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1012,8 +1002,7 @@
    },
    "info": {},
    "notes": [
-    "No edition site yet; the IEEE RAS event record is the only source. The August date is earlier than ICRA's usual mid-September pattern, so treat it as provisional.",
-    "ICRA uses PST rather than AoE for submission cutoffs."
+    "Main conference and paper submission dates are confirmed."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1159,8 +1148,7 @@
    },
    "info": {},
    "notes": [
-    "The conference dates are updated to September 27 – October 1, 2027.",
-    "Specific submission and notification deadlines are not yet announced on the website."
+    "Conference dates and venue are confirmed."
    ],
    "isEstimated": false,
    "datesTBD": true
@@ -1393,8 +1381,7 @@
    },
    "info": {},
    "notes": [
-    "Main conference dates confirmed for June 1-5, 2027.",
-    "ARR submission deadline confirmed for October 12, 2026."
+    "Main conference dates confirmed for June 1-5, 2027."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1451,8 +1438,8 @@
    },
    "info": {},
    "notes": [
-    "Main track deadlines are currently estimated based on previous year patterns.",
-    "Conference dates and venue for 2027 are officially confirmed."
+    "Main conference dates and venue are confirmed.",
+    "Specific 2027 submission deadlines are not yet officially announced."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1548,8 +1535,8 @@
    },
    "info": {},
    "notes": [
-    "Deadlines for short, demo, resource, reproducibility, perspective papers, tutorial, and workshop proposals are still TBA.",
-    "Registration milestones such as early, regular, and late registration dates are yet to be announced."
+    "Deadlines for short, demo, resource, reproducibility, and perspective papers are currently TBA.",
+    "Tutorial, workshop proposals, and registration milestones are yet to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1903,8 +1890,8 @@
    },
    "info": {},
    "notes": [
-    "Web4All submissions are currently listed as TBA.",
-    "Resource submissions camera-ready deadline was extended to February 17, 2027."
+    "Web4All track dates are currently to be announced.",
+    "Main conference and research track submission schedules are fully detailed."
    ],
    "isEstimated": false,
    "datesTBD": false
