@@ -662,6 +662,21 @@ def upstream_covers(upstream: dict, deadline: dict) -> bool:
     return False
 
 
+def upstream_row(upstream: dict, deadline: dict) -> dict | None:
+    """Upstream's own row for this milestone -- same type and name -- on whatever day.
+
+    A patch adds what upstream lacks; it does not overrule what upstream has. When the
+    two disagree on a date, adding ours put both in the list: ACL 2027 showed "Main
+    Conference" twice, 17 August from upstream and 20 August from the overlay.
+    """
+    for u in upstream.get("deadlines", []):
+        if u.get("type") != deadline["type"] or not isinstance(u.get("date"), str):
+            continue
+        if u.get("label") == deadline["label"] or same_milestone(dict(u, date=deadline["date"]), deadline):
+            return u
+    return None
+
+
 def dedupe(deadlines: list[dict]) -> tuple[list[dict], list[str]]:
     """One row per milestone; a confirmed twin wins over an estimated one."""
     kept: list[dict] = []
@@ -698,8 +713,12 @@ def reconcile(conference: dict, upstream: dict[str, dict]) -> tuple[dict | None,
     if patch:
         kept = []
         for d in deadlines:
+            theirs = None if upstream_covers(up, d) else upstream_row(up, d)
             if upstream_covers(up, d):
                 log.append(f"dropped '{d['label']}' {d['date'][:10]}: upstream has it")
+            elif theirs:
+                log.append(f"dropped '{d['label']}' {d['date'][:10]}: upstream has it on "
+                           f"{theirs['date'][:10]} and upstream's stands")
             else:
                 kept.append(d)
         deadlines = kept
@@ -804,7 +823,8 @@ def main() -> int:
             proposal = dict(proposal, deadlines=[
                 d for d in reported
                 if not (isinstance(d, dict) and d.get("type") and isinstance(d.get("date"), str)
-                        and upstream_covers(up, d))
+                        and isinstance(d.get("label"), str)
+                        and (upstream_covers(up, d) or upstream_row(up, d)))
             ])
 
         updated, log = merge_conference(conference, proposal, pages)

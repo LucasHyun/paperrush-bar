@@ -29,6 +29,17 @@ the pushed commit, waits for the release workflow and then updates the tap. Each
 before it, because the easy mistake -- tagging before the commit is pushed -- puts the tag on the
 previous commit and ships the old code under the new number.
 
+## Is it still updating?
+
+```bash
+./scripts/health_check.sh
+```
+
+One command that checks the weekly refresh job (did it succeed, how many conferences Gemini
+answered for), how fresh the published overlay and upstream's dataset are, and whether the app
+on this Mac is current, running and recently synced. Each problem prints a WARN line with the
+command that fixes or explains it.
+
 ## The tap on its own
 
 The release workflow renders `paperrush-bar.rb` with the tag's version and SHA-256 and attaches it to
