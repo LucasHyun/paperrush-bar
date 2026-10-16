@@ -68,9 +68,9 @@ else
 			REST="${TALLY#*/}"
 			ASKED="${REST%% *}"
 			if [ "${ASKED}" -gt 0 ] && [ $((ANSWERED * 2)) -lt "${ASKED}" ]; then
-				warn "Gemini answered for only ${TALLY}"
+				warn "Gemini: only ${TALLY}"
 			else
-				ok "Gemini answered for ${TALLY}"
+				ok "Gemini: ${TALLY}"
 			fi
 		fi
 	fi
@@ -115,8 +115,18 @@ else
 	warn "${APP} not found"
 fi
 
-if pgrep -x PaperRushBar >/dev/null 2>&1; then
-	ok "running"
+PID="$(pgrep -x PaperRushBar | head -1)"
+if [ -n "${PID}" ]; then
+	RUNNING="$(ps -o command= -p "${PID}" | sed -E 's#(\.app)/Contents/MacOS/.*#\1#')"
+	if [ "${RUNNING}" = "${APP}" ]; then
+		ok "running"
+	else
+		# Usually the copy release.sh builds in the repo: brew cannot update it, and
+		# the next build overwrites it while it runs.
+		warn "running, but from ${RUNNING}"
+		info "fix: osascript -e 'quit app \"PaperRushBar\"'; brew reinstall --cask paperrush-bar;"
+		info "     open ${APP}; then switch 'Launch at login' off and on in its gear menu"
+	fi
 else
 	warn "not running: open -a PaperRushBar  (and turn on 'Launch at login' in its gear menu)"
 fi
