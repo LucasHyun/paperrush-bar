@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-10-16T17:00:45Z",
+ "lastUpdated": "2026-10-19T13:44:02Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -593,7 +593,7 @@
    },
    "info": {},
    "notes": [
-    "Main Conference dates for May 9–14, 2027 added."
+    "The ARR submission deadline has been added to the schedule."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -733,7 +733,7 @@
    },
    "info": {},
    "notes": [
-    "Specific dates for workshops and tutorials are currently to be determined.",
+    "Specific dates for workshops and tutorials are currently TBD.",
     "Author response and author-reviewer discussion are now two separate stages."
    ],
    "isEstimated": false,
@@ -810,8 +810,8 @@
    },
    "info": {},
    "notes": [
-    "Pre-conference events are scheduled for October 2-3 at the School of Science-NKUA.",
-    "Detailed registration and conference program schedules remain unannounced."
+    "Pre-conference events including workshops, tutorials, and the Doctoral Consortium take place on October 2-3 at the School of Science–NKUA.",
+    "Registration and detailed conference program details are yet to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -888,7 +888,7 @@
    },
    "info": {},
    "notes": [
-    "Specific 2027 research track and journal track specific date announcements are pending confirmation on the 2027 pages."
+    "Specific 2027 submission deadline dates are estimated based on previous cycles while conference dates are confirmed."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1002,7 +1002,7 @@
    },
    "info": {},
    "notes": [
-    "Main conference and paper submission dates are confirmed."
+    "Venue details have been verified on the official page."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1148,7 +1148,7 @@
    },
    "info": {},
    "notes": [
-    "Conference dates and venue are confirmed."
+    "Specific paper submission deadlines are not yet announced on the official website."
    ],
    "isEstimated": false,
    "datesTBD": true
@@ -1381,7 +1381,7 @@
    },
    "info": {},
    "notes": [
-    "Main conference dates confirmed for June 1-5, 2027."
+    "All main conference papers use the October 2026 ARR submission cycle and December 2026 commitment."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1438,8 +1438,8 @@
    },
    "info": {},
    "notes": [
-    "Main conference dates and venue are confirmed.",
-    "Specific 2027 submission deadlines are not yet officially announced."
+    "Main track deadlines are currently estimated based on previous schedules.",
+    "Specific submission deadlines for RecSys 2027 have not been announced yet."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1535,8 +1535,8 @@
    },
    "info": {},
    "notes": [
-    "Deadlines for short, demo, resource, reproducibility, and perspective papers are currently TBA.",
-    "Tutorial, workshop proposals, and registration milestones are yet to be announced."
+    "Short, demo, resource, reproducibility, perspective paper deadlines and tutorial/workshop proposals are still TBA.",
+    "Registration milestones such as early, regular, and late registration dates are not yet announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1836,6 +1836,26 @@
     },
     {
      "type": "event",
+     "label": "Result Release",
+     "date": "2026-12-15",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://www2027.thewebconf.org/important-dates/"
+    },
+    {
+     "type": "rebuttal",
+     "label": "Research & Industry Track Paper Rebuttal Period",
+     "date": "2026-12-15",
+     "endDate": "2026-12-20",
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://www2027.thewebconf.org/important-dates/"
+    },
+    {
+     "type": "event",
      "label": "Reviews Released",
      "date": "2026-12-15",
      "endDate": null,
@@ -1856,12 +1876,31 @@
     },
     {
      "type": "notification",
+     "label": "Notification",
+     "date": "2027-01-04",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://www2027.thewebconf.org/important-dates/"
+    },
+    {
+     "type": "notification",
      "label": "Author Notification",
      "date": "2027-01-04",
      "endDate": null,
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
+     "sourceUrl": "https://www2027.thewebconf.org/important-dates/"
+    },
+    {
+     "type": "camera",
+     "label": "Research & Industry Track Paper Final Version Deadline",
+     "date": "2027-01-31T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
      "sourceUrl": "https://www2027.thewebconf.org/important-dates/"
     },
     {
@@ -1890,8 +1929,8 @@
    },
    "info": {},
    "notes": [
-    "Web4All track dates are currently to be announced.",
-    "Main conference and research track submission schedules are fully detailed."
+    "Web4All submissions are TBA.",
+    "Tutorial proposal submission deadline was extended to 19 October 2026."
    ],
    "isEstimated": false,
    "datesTBD": false
