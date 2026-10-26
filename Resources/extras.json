@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-10-19T13:44:02Z",
+ "lastUpdated": "2026-10-26T13:29:05Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -300,7 +300,7 @@
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/"
+     "sourceUrl": "https://warwick.ac.uk/fac/sci/dcs/aamas2027/calls/call-for-main-track/"
     }
    ],
    "links": {
@@ -309,8 +309,7 @@
    },
    "info": {},
    "notes": [
-    "Sponsorship opportunities are yet to be announced.",
-    "Author registration deadline for Blue Sky Ideas is currently TBD."
+    "Sponsorship opportunities are yet to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -593,7 +592,7 @@
    },
    "info": {},
    "notes": [
-    "The ARR submission deadline has been added to the schedule."
+    "The main in-person conference dates are scheduled for May 9-14, 2027."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -692,6 +691,15 @@
    "deadlines": [
     {
      "type": "notification",
+     "label": "Meta Review Released",
+     "date": "2026-10-08T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.eacl.org/calls/papers/"
+    },
+    {
+     "type": "notification",
      "label": "ARR Meta-Reviews Released (August 2026 Cycle)",
      "date": "2026-10-08T23:59:00-12:00",
      "endDate": null,
@@ -703,6 +711,15 @@
      "type": "paper",
      "label": "EACL Commitment Deadline",
      "date": "2026-10-11T23:59:00-12:00",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "sourceUrl": "https://2027.eacl.org/calls/papers/"
+    },
+    {
+     "type": "notification",
+     "label": "Notification of acceptance (long & short papers)",
+     "date": "2026-11-12T23:59:00-12:00",
      "endDate": null,
      "status": "upcoming",
      "estimated": false,
@@ -733,7 +750,7 @@
    },
    "info": {},
    "notes": [
-    "Specific dates for workshops and tutorials are currently TBD.",
+    "Dates for workshops and tutorials are currently TBD.",
     "Author response and author-reviewer discussion are now two separate stages."
    ],
    "isEstimated": false,
@@ -810,8 +827,7 @@
    },
    "info": {},
    "notes": [
-    "Pre-conference events including workshops, tutorials, and the Doctoral Consortium take place on October 2-3 at the School of Science–NKUA.",
-    "Registration and detailed conference program details are yet to be announced."
+    "The official website for ECAI 2027 has launched."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -888,7 +904,7 @@
    },
    "info": {},
    "notes": [
-    "Specific 2027 submission deadline dates are estimated based on previous cycles while conference dates are confirmed."
+    "Specific 2027 research track dates are estimated based on previous cycle patterns pending official publication."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1002,7 +1018,7 @@
    },
    "info": {},
    "notes": [
-    "Venue details have been verified on the official page."
+    "The paper submission and conference dates are confirmed on the official page."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1043,6 +1059,16 @@
      "sourceUrl": "https://interspeech2027.org/"
     },
     {
+     "type": "event",
+     "label": "Call for Satellite Events",
+     "date": "2027-01-08",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/"
+    },
+    {
      "type": "tutorial",
      "label": "Call for Tutorials",
      "date": "2027-02-05",
@@ -1060,7 +1086,7 @@
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://interspeech2027.org/important-dates/"
+     "sourceUrl": "https://interspeech2027.org/"
     },
     {
      "type": "supplementary",
@@ -1070,7 +1096,17 @@
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://interspeech2027.org/important-dates/"
+     "sourceUrl": "https://interspeech2027.org/"
+    },
+    {
+     "type": "event",
+     "label": "Call for Show & Tell",
+     "date": "2027-03-09",
+     "endDate": null,
+     "status": "upcoming",
+     "estimated": false,
+     "timeUnknown": true,
+     "sourceUrl": "https://interspeech2027.org/"
     },
     {
      "type": "notification",
@@ -1080,7 +1116,7 @@
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://interspeech2027.org/important-dates/"
+     "sourceUrl": "https://interspeech2027.org/"
     },
     {
      "type": "camera",
@@ -1090,7 +1126,7 @@
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://interspeech2027.org/important-dates/"
+     "sourceUrl": "https://interspeech2027.org/"
     },
     {
      "type": "conference",
@@ -1110,8 +1146,7 @@
    },
    "info": {},
    "notes": [
-    "Only calendar dates are published; no time or timezone yet, so these are date-only.",
-    "Single full-paper submission with a one-week paper-update window; no rebuttal phase announced."
+    "Call for Satellite Events and Call for Show & Tell deadlines have been added from the website."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1148,7 +1183,7 @@
    },
    "info": {},
    "notes": [
-    "Specific paper submission deadlines are not yet announced on the official website."
+    "Sponsorship and exhibition details will be available from the first week of December."
    ],
    "isEstimated": false,
    "datesTBD": true
@@ -1381,7 +1416,7 @@
    },
    "info": {},
    "notes": [
-    "All main conference papers use the October 2026 ARR submission cycle and December 2026 commitment."
+    "Main conference uses the October 2026 ARR cycle for submissions with a commitment deadline in December 2026."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1438,8 +1473,8 @@
    },
    "info": {},
    "notes": [
-    "Main track deadlines are currently estimated based on previous schedules.",
-    "Specific submission deadlines for RecSys 2027 have not been announced yet."
+    "Main track submission deadlines for 2027 are currently estimated based on previous year schedules.",
+    "Conference dates and venue for 2027 have been confirmed."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1535,8 +1570,7 @@
    },
    "info": {},
    "notes": [
-    "Short, demo, resource, reproducibility, perspective paper deadlines and tutorial/workshop proposals are still TBA.",
-    "Registration milestones such as early, regular, and late registration dates are not yet announced."
+    "Dates for short, demo, resource, reproducibility, perspective papers, tutorial and workshop proposals, and registration milestones are still to be announced."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1915,12 +1949,12 @@
     {
      "type": "conference",
      "label": "Main Conference",
-     "date": "2027-05-10",
+     "date": "2027-05-12",
      "endDate": "2027-05-14",
      "status": "upcoming",
      "estimated": false,
      "timeUnknown": true,
-     "sourceUrl": "https://www2027.thewebconf.org/research-track-papers/"
+     "sourceUrl": "https://www2027.thewebconf.org/"
     }
    ],
    "links": {
@@ -1929,8 +1963,8 @@
    },
    "info": {},
    "notes": [
-    "Web4All submissions are TBA.",
-    "Tutorial proposal submission deadline was extended to 19 October 2026."
+    "Main conference dates updated to May 12-14, 2027.",
+    "Venue details updated to Dublin Royal Convention Centre."
    ],
    "isEstimated": false,
    "datesTBD": false
