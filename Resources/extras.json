@@ -1,5 +1,5 @@
 {
- "lastUpdated": "2026-10-26T13:29:05Z",
+ "lastUpdated": "2026-11-02T16:22:29Z",
  "note": "Conferences the upstream PaperRush dataset does not cover yet, plus deadline patches for conferences it covers only partially. Merged on top of upstream at runtime: a normal entry yields to upstream once it appears there, while an entry with \"mode\": \"patch\" adds its deadlines to the upstream entry.",
  "conferences": [
   {
@@ -309,7 +309,8 @@
    },
    "info": {},
    "notes": [
-    "Sponsorship opportunities are yet to be announced."
+    "Main track submission dates and conference dates are confirmed on the official pages.",
+    "Additional deadlines for workshops, tutorials, and special tracks are available."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -592,7 +593,7 @@
    },
    "info": {},
    "notes": [
-    "The main in-person conference dates are scheduled for May 9-14, 2027."
+    "The ARR submission deadline for main conference papers has been added."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -750,8 +751,8 @@
    },
    "info": {},
    "notes": [
-    "Dates for workshops and tutorials are currently TBD.",
-    "Author response and author-reviewer discussion are now two separate stages."
+    "Dates for Workshops and Tutorials remain to be determined.",
+    "Author response and author-reviewer discussion are now separate stages."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -827,7 +828,8 @@
    },
    "info": {},
    "notes": [
-    "The official website for ECAI 2027 has launched."
+    "Pre-conference events are scheduled for 2–3 October 2027 at the School of Science–NKUA.",
+    "Main conference events take place 4–7 October 2027 at the Megaron Athens International Conference Center."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -904,7 +906,7 @@
    },
    "info": {},
    "notes": [
-    "Specific 2027 research track dates are estimated based on previous cycle patterns pending official publication."
+    "Research track and journal track submission deadlines for 2027 are currently estimated based on previous edition patterns."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1018,7 +1020,7 @@
    },
    "info": {},
    "notes": [
-    "The paper submission and conference dates are confirmed on the official page."
+    "Paper submission deadline and conference dates are confirmed on the official page."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1146,7 +1148,7 @@
    },
    "info": {},
    "notes": [
-    "Call for Satellite Events and Call for Show & Tell deadlines have been added from the website."
+    "All current schedule dates have been verified against the official website."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1183,7 +1185,7 @@
    },
    "info": {},
    "notes": [
-    "Sponsorship and exhibition details will be available from the first week of December."
+    "Sponsorship and exhibition information will be available from the first week of December."
    ],
    "isEstimated": false,
    "datesTBD": true
@@ -1416,7 +1418,7 @@
    },
    "info": {},
    "notes": [
-    "Main conference uses the October 2026 ARR cycle for submissions with a commitment deadline in December 2026."
+    "Main conference dates and deadlines are confirmed via the official pages."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1473,8 +1475,8 @@
    },
    "info": {},
    "notes": [
-    "Main track submission deadlines for 2027 are currently estimated based on previous year schedules.",
-    "Conference dates and venue for 2027 have been confirmed."
+    "Main track deadlines are currently estimated based on previous year schedules.",
+    "Conference dates and venue are officially announced."
    ],
    "isEstimated": true,
    "datesTBD": true
@@ -1557,7 +1559,7 @@
     {
      "type": "conference",
      "label": "Main Conference",
-     "date": "2027-07-18",
+     "date": "2027-07-19",
      "endDate": "2027-07-24",
      "status": "upcoming",
      "estimated": false,
@@ -1570,7 +1572,7 @@
    },
    "info": {},
    "notes": [
-    "Dates for short, demo, resource, reproducibility, perspective papers, tutorial and workshop proposals, and registration milestones are still to be announced."
+    "Dates for short, demo, resource, reproducibility, and perspective papers, as well as tutorial and workshop proposals, are currently TBA."
    ],
    "isEstimated": false,
    "datesTBD": false
@@ -1963,8 +1965,7 @@
    },
    "info": {},
    "notes": [
-    "Main conference dates updated to May 12-14, 2027.",
-    "Venue details updated to Dublin Royal Convention Centre."
+    "Workshops, tutorials, and Web4All events take place on May 10-11, 2027."
    ],
    "isEstimated": false,
    "datesTBD": false
